@@ -1,0 +1,3 @@
+display_name: AgentDeck
+short_description: Wrap or build decks from any source into enhanced single-file HTML presentations.
+default_prompt: Package my deck into an AgentDeck single-file HTML presentation. If you use any third-party PPT skill, clearly state its source and license boundary first.

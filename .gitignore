@@ -1,0 +1,14 @@
+node_modules/
+package-lock.json.bak
+
+packages/*/dist/
+
+examples/**/dist/
+examples/**/dist-creator/
+examples/**/dist-presenter/
+examples/**/export/
+examples/**/export-*/
+examples/**/*.png
+examples/**/*.pdf
+
+.DS_Store

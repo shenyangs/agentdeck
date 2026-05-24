@@ -1,0 +1,32 @@
+{
+  "name": "@agentdeck/runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/static.js",
+  "types": "./dist/static.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/static.d.ts",
+      "import": "./dist/static.js"
+    },
+    "./react": {
+      "types": "./dist/App.d.ts",
+      "import": "./dist/App.js"
+    },
+    "./render": {
+      "types": "./dist/render.d.ts",
+      "import": "./dist/render.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "dependencies": {
+    "@agentdeck/schema": "0.1.0",
+    "@agentdeck/themes": "0.1.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cp src/styles.css dist/styles.css"
+  }
+}

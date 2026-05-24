@@ -1,0 +1,26 @@
+{
+  "name": "agentdeck",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI Agent collaborative HTML slides/deck toolchain.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @agentdeck/schema && npm run build -w @agentdeck/themes && npm run build -w @agentdeck/compat-profiles && npm run build -w @agentdeck/runtime && npm run build -w @agentdeck/cli && npm run build -w @agentdeck/skill",
+    "test": "vitest run",
+    "verify": "npm run build && npm test",
+    "agentdeck": "node packages/cli/dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.0",
+    "playwright": "^1.60.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0",
+    "vitest": "^3.2.4"
+  }
+}

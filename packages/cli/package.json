@@ -1,0 +1,26 @@
+{
+  "name": "@agentdeck/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "agentdeck": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@agentdeck/compat-profiles": "0.1.0",
+    "@agentdeck/runtime": "0.1.0",
+    "@agentdeck/schema": "0.1.0",
+    "@agentdeck/themes": "0.1.0",
+    "vite": "^6.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/index.js"
+  }
+}
