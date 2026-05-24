@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -79,5 +79,34 @@ layout: statement
     expect(html).toContain('data-action="play"');
     expect(html).toContain("External Cover");
     expect(html).toContain("Partner Skill Deck");
+  });
+
+  it("lists, detects, and recommends third-party PPT skills", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-skills-"));
+    const skillsDir = join(dir, "skills");
+    const guizangDir = join(skillsDir, "guizang-ppt-skill");
+    mkdirSync(guizangDir, { recursive: true });
+    writeFileSync(
+      join(guizangDir, "SKILL.md"),
+      `---
+name: guizang-ppt-skill
+---
+
+归藏（@op7418）出品的 HTML PPT skill.
+`,
+      "utf8",
+    );
+
+    const previous = process.env.AGENTDECK_SKILL_DIRS;
+    process.env.AGENTDECK_SKILL_DIRS = skillsDir;
+    try {
+      await expect(runCli(["skills", "list"])).resolves.toMatchObject({ code: 0 });
+      await expect(runCli(["skills", "detect"])).resolves.toMatchObject({ code: 0 });
+      await expect(runCli(["skills", "recommend", "自媒体 小红书 观点卡 deck"])).resolves.toMatchObject({ code: 0 });
+      await expect(runCli(["skills", "install", "guizang-ppt-skill"])).resolves.toMatchObject({ code: 3 });
+    } finally {
+      if (previous === undefined) delete process.env.AGENTDECK_SKILL_DIRS;
+      else process.env.AGENTDECK_SKILL_DIRS = previous;
+    }
   });
 });

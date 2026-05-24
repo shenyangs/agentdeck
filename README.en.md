@@ -24,7 +24,20 @@ External PPT skills own style, aesthetics, templates, and content generation. Ag
 
 ## Third-Party Skills And Attribution
 
-AgentDeck can work with PPT skills written by different authors, including open-source visual skills, futuristic deck skills, internal company template skills, or hand-written HTML decks.
+AgentDeck can work with PPT skills written by different authors. Naming those authors is not only allowed here; it is part of respecting their ownership.
+
+The built-in recommendation directory currently includes:
+
+- Anthropic official PPTX Skill: `anthropics/skills`, `skills/pptx`
+- OpenAI official Slides Skill: `openai/skills`, `skills/.curated/slides`
+- `guizang-ppt-skill`: 归藏 / `@op7418`
+- `html-ppt-skill`: `lewislulu`
+- `frontend-slides`: `zarazhangrui`
+- `open-design`: `nexu-io`
+- `PPTAgent`: `icip-cas`
+- `Office-PowerPoint-MCP-Server`: `GongRzhe`
+- `ppt-image-first`: `NyxTides`
+- `ppt-agent-skills`: `sunbigfly`
 
 Those skills are not part of AgentDeck. When using one, agents should clearly tell users:
 
@@ -36,7 +49,7 @@ Those skills are not part of AgentDeck. When using one, agents should clearly te
 
 This boundary matters. AgentDeck should be infrastructure for the PPT skill ecosystem, not a project that absorbs other people's design work.
 
-## Two Entry Points
+## Three Entry Points
 
 ### 1. Wrap an Existing HTML Deck
 
@@ -49,7 +62,37 @@ open dist/index.html
 
 `wrap-html` tries to detect common slide containers such as `.slide`, `.page`, `.ppt-slide`, `.swiper-slide`, and `section`. If no clear slide containers are found, it wraps the entire `<body>` as one slide.
 
-### 2. Build A Basic Deck From Markdown
+### 2. Recommend A Third-Party PPT Skill For Source Content
+
+Use this when the user has a `.md`, `.txt`, `.pdf`, `.docx`, `.pptx`, source pack, or brief, but does not yet have a satisfying HTML deck.
+
+AgentDeck does not take over the third-party skill's design work. It helps the agent choose:
+
+```bash
+agentdeck skills detect
+agentdeck skills recommend path/to/content.md --agent codex
+agentdeck skills recommend path/to/report.pdf --agent claude
+```
+
+Rules:
+
+- If exactly one known PPT skill is installed locally, tell the user which one was found, who authored it, and what license boundary applies, then use it.
+- If multiple PPT skills are installed locally, ask the user to choose. Do not silently change the visual system.
+- If no PPT skill is installed, recommend one based on input type, content scenario, and target output.
+- Before installing any third-party skill, show its source, author, license, and install command; only install after explicit confirmation.
+- After the third-party skill generates an HTML deck, run `agentdeck wrap-html` to add the AgentDeck enhanced player.
+
+Install examples:
+
+```bash
+agentdeck skills list
+agentdeck skills install guizang-ppt-skill
+agentdeck skills install guizang-ppt-skill --yes
+```
+
+Without `--yes`, AgentDeck only prints the source and install command.
+
+### 3. Build A Basic Deck From Markdown
 
 Use this when there is no external PPT skill and you want a lightweight source file.
 
@@ -59,7 +102,7 @@ agentdeck build my-deck/deck.md --single-html --mode audience --out my-deck/dist
 open my-deck/dist/index.html
 ```
 
-This path is a basic authoring option, not the whole product positioning.
+This path is a basic fallback authoring option, not the whole product positioning.
 
 ## Install
 
@@ -95,6 +138,10 @@ agentdeck build my-deck/deck.md --single-html --mode audience --out my-deck/dist
 agentdeck export my-deck/deck.md --pdf --png --long-image --grid9 --social-pack --out my-deck/export
 agentdeck compat swiss-locked path/to/index.html
 agentdeck import-swiss-locked path/to/index.html --out deck.md
+agentdeck skills list
+agentdeck skills detect
+agentdeck skills recommend path/to/content.md --agent codex
+agentdeck skills install html-ppt-skill
 ```
 
 `classify` and `adapt` still exist, but they are optional structure helpers rather than the main product idea:
@@ -136,13 +183,15 @@ Useful shortcuts:
 
 Treat AgentDeck as the final-mile delivery tool:
 
-1. The user selects or names a PPT skill, or chooses not to use one.
-2. The agent clearly states the source, author, and license boundary of that skill.
-3. The agent creates a deck using the external skill, hand-written HTML, or Markdown.
-4. If HTML already exists, run `agentdeck wrap-html path/to/index.html --out dist`.
-5. If the source is `deck.md`, run `agentdeck lint` and `agentdeck build`.
-6. Open `dist/index.html` and check playback, overview, next-slide preview, blank screen, spotlight, and PDF.
-7. If a third-party deck has compatibility risks, report those risks without presenting the third-party template as AgentDeck's own capability.
+1. If the user already has a satisfying HTML deck, run `agentdeck wrap-html path/to/index.html --out dist`.
+2. If the user provides Markdown, PDF, Office PPT, Word, source material, or a brief, run `agentdeck skills detect`.
+3. If exactly one known PPT skill is installed, tell the user which one was found, who authored it, and what license boundary applies, then use it.
+4. If multiple PPT skills are installed, ask the user to choose. The agent should not silently decide the final visual system.
+5. If no PPT skill is installed, run `agentdeck skills recommend path/to/input --agent codex|claude` and explain the recommendation.
+6. Install or invoke a third-party skill only after the user confirms the source and license boundary.
+7. After the third-party skill generates HTML, run `agentdeck wrap-html path/to/index.html --out dist`.
+8. Open `dist/index.html` and check playback, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and PDF.
+9. If a third-party deck has compatibility risks, report those risks without presenting the third-party template as AgentDeck's own capability.
 
 Agent rules:
 
@@ -169,6 +218,25 @@ agentdeck import-swiss-locked path/to/index.html --out deck.md
 ```
 
 `swiss-locked` is a structural compatibility profile for validating and importing locked HTML decks. It is not an AgentDeck brand and does not imply ownership of any third-party skill's template design.
+
+## Third-Party Skill Recommendation Directory
+
+AgentDeck ships a recommendation directory, not bundled templates. The directory helps agents decide which external skill to use.
+
+| Scenario | Recommended Skill | Author / Source | Notes |
+| --- | --- | --- | --- |
+| Claude Code and editable `.pptx` | Anthropic official PPTX Skill | Anthropic / `anthropics/skills` | Stable PPTX fallback |
+| Codex / OpenAI toolchain and editable `.pptx` | OpenAI official Slides Skill | OpenAI / `openai/skills` | Engineering-oriented PPTX generation |
+| Chinese social media, portfolio, polished HTML deck | `guizang-ppt-skill` | 归藏 / `@op7418` | Self-contained HTML deck style |
+| Live talks, speaker script, timer, next preview | `html-ppt-skill` | `lewislulu` | Rich HTML presenter workflow |
+| Browser-native web slides | `frontend-slides` | `zarazhangrui` | Frontend slides ecosystem |
+| Academic defense and research reports | `PPTAgent` | `icip-cas` | Reflective generation framework |
+| Batch editing PPT templates | `Office-PowerPoint-MCP-Server` | `GongRzhe` | MCP for fine-grained PowerPoint edits |
+| Launch, marketing, visual preview first | `ppt-image-first` | `NyxTides` | Image-first workflow |
+| Training, SOP, reviewable workflow | `ppt-agent-skills` | `sunbigfly` | Staged and reviewable |
+| Design systems and multi-format assets | `open-design` | `nexu-io` | General design harness; may be heavy for PPT-only use |
+
+These entries come from public repositories, public skill indexes, and the PPT skill roundup article provided by the user: [2026 PPT Skill ranking](https://mp.weixin.qq.com/s/--NKyWIKfdmXXR7dSRMzpA). Treat that article as discovery context only; always defer to each upstream project's README and LICENSE before use.
 
 ## Minimal `deck.md`
 

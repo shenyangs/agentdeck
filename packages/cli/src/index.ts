@@ -6,6 +6,13 @@ import { pathToFileURL } from "node:url";
 import { importExternalHtmlDeck, importSwissLockedHtml, inspectSwissLockedHtml } from "@agentdeck/compat-profiles";
 import { renderStandaloneHtml } from "@agentdeck/runtime";
 import {
+  detectInstalledPptSkills,
+  installPptSkill,
+  listPptSkills,
+  recommendPptSkill,
+  shellCommand,
+} from "./pptSkills.js";
+import {
   adaptDeckMarkdownToScenario,
   classifyDeckScenario,
   formatDiagnostics,
@@ -37,6 +44,10 @@ Usage:
   agentdeck build [deck.md] [--out dist] [--single-html] [--mode audience|presenter|creator] [--profile agentdeck|swiss-locked]
   agentdeck export [deck.md] [--pdf] [--png] [--long-image] [--grid9] [--social-pack] [--out dist]
   agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"]
+  agentdeck skills list
+  agentdeck skills detect
+  agentdeck skills recommend <file|brief> [--agent codex|claude|any]
+  agentdeck skills install <skill-id> [--yes]
   agentdeck classify [deck.md]
   agentdeck adapt [deck.md] --scenario media|pitch|keynote|course|bid|launch-campaign [--out deck.md]
   agentdeck lint [deck.md]
@@ -58,6 +69,7 @@ export async function runCli(argv = process.argv.slice(2)): Promise<CliResult> {
     if (command === "build") return commandBuild(rest);
     if (command === "export") return commandExport(rest);
     if (command === "wrap-html") return commandWrapHtml(rest);
+    if (command === "skills") return commandSkills(rest);
     if (command === "classify") return commandClassify(rest);
     if (command === "adapt") return commandAdapt(rest);
     if (command === "dev") return commandDev(rest);
@@ -105,6 +117,103 @@ function commandWrapHtml(args: string[]): CliResult {
   console.log(`Wrote ${assetReportPath}`);
   if (imported.warnings.length) printDiagnostics(imported.warnings);
   return { code: imported.warnings.some((diagnostic) => diagnostic.level === "error") ? 1 : 0 };
+}
+
+function commandSkills(args: string[]): CliResult {
+  const [subcommand, ...rest] = args;
+  const options = parseArgs(rest);
+  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
+    console.log(`AgentDeck third-party PPT skill helpers
+
+Usage:
+  agentdeck skills list
+  agentdeck skills detect
+  agentdeck skills recommend <file|brief> [--agent codex|claude|any]
+  agentdeck skills install <skill-id> [--yes]
+
+These commands only recommend, detect, or install external skills after user confirmation.
+AgentDeck does not own the third-party skill's visual system, templates, or generation logic.`);
+    return { code: 0 };
+  }
+
+  if (subcommand === "list") {
+    for (const skill of listPptSkills()) {
+      console.log(`${skill.id}`);
+      console.log(`  name: ${skill.name}`);
+      console.log(`  author: ${skill.author}`);
+      console.log(`  repo: ${skill.repo}`);
+      console.log(`  license: ${skill.license}`);
+      console.log(`  output: ${skill.output}`);
+      console.log(`  best for: ${skill.bestFor.join(" / ")}`);
+      console.log(`  install: ${skill.install.map((install) => shellCommand(install.command)).join(" OR ")}`);
+      console.log("");
+    }
+    return { code: 0 };
+  }
+
+  if (subcommand === "detect") {
+    const installed = detectInstalledPptSkills();
+    const known = installed.filter((skill) => skill.registry);
+    if (!known.length) {
+      console.log(`Found ${installed.length} installed skill folder(s), but no known PPT skills.`);
+      console.log("Searched .agents/skills, .claude/skills, ~/.agents/skills, ~/.codex/skills, and ~/.claude/skills.");
+      return { code: 3 };
+    }
+    console.log(`Found ${known.length} known PPT skill(s) out of ${installed.length} installed skill folder(s):`);
+    for (const skill of known) {
+      console.log(`- ${skill.name} (${skill.path}) by ${skill.registry?.author}`);
+    }
+    if (known.length > 1) {
+      console.log("Multiple known PPT skills are installed. Ask the user to choose before generating the deck.");
+      return { code: 3 };
+    }
+    console.log("One known PPT skill is installed. It can be used directly after confirming the source and license boundary.");
+    return { code: 0 };
+  }
+
+  if (subcommand === "recommend") {
+    const input = options.positionals.join(" ") || undefined;
+    const recommendation = recommendPptSkill(input, { agent: stringFlag(options.flags.agent) });
+    console.log(`Route: ${recommendation.route}`);
+    console.log(`Source kind: ${recommendation.sourceKind}`);
+    if (recommendation.installed.length) {
+      console.log("Installed PPT skills:");
+      recommendation.installed.forEach((skill) => console.log(`- ${skill.name} (${skill.path})`));
+    } else {
+      console.log("Installed PPT skills: none detected");
+    }
+    if (recommendation.primary) {
+      console.log(`Recommended: ${recommendation.primary.name}`);
+      console.log(`Author: ${recommendation.primary.author}`);
+      console.log(`Repo: ${recommendation.primary.repo}`);
+      console.log(`License: ${recommendation.primary.license}`);
+      console.log(`Attribution: ${recommendation.primary.attribution}`);
+    }
+    if (recommendation.alternatives.length) {
+      console.log("Alternatives:");
+      recommendation.alternatives.forEach((skill) => console.log(`- ${skill.name} by ${skill.author}`));
+    }
+    console.log("Reasons:");
+    recommendation.reasons.forEach((reason) => console.log(`- ${reason}`));
+    console.log("Next steps:");
+    recommendation.nextSteps.forEach((step) => console.log(`- ${step}`));
+    if (recommendation.needsUserChoice) console.log("User choice required before generation.");
+    return { code: recommendation.needsUserChoice ? 3 : 0 };
+  }
+
+  if (subcommand === "install") {
+    const id = options.positionals[0];
+    if (!id) {
+      console.error("Usage: agentdeck skills install <skill-id> [--yes]");
+      return { code: 2 };
+    }
+    const result = installPptSkill(id, { yes: Boolean(options.flags.yes), method: stringFlag(options.flags.method) });
+    console.log(result.message);
+    return { code: result.code };
+  }
+
+  console.error(`Unknown skills command: ${subcommand}`);
+  return { code: 2 };
 }
 
 function commandInit(args: string[]): CliResult {

@@ -11,17 +11,25 @@ Use it to turn decks from any source into a shareable single-file HTML with enha
 
 ## Workflow
 
-1. Clarify whether the user already has an HTML deck, wants to use a third-party PPT skill, or wants a simple Markdown deck.
-2. If a third-party skill is involved, name its source, author, and license boundary before using it.
-3. If HTML already exists, prefer `agentdeck wrap-html path/to/index.html --out dist`.
-4. If no external deck exists, write or update `deck.md`, then run `agentdeck lint deck.md` and `agentdeck build deck.md --single-html`.
-5. Review the generated `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and print/PDF.
-6. Report compatibility risks as risks in the source deck; do not claim third-party template work as AgentDeck's own design.
+1. If the user already has a satisfying HTML deck, run `agentdeck wrap-html path/to/index.html --out dist`.
+2. If the user provides Markdown, PDF, Office PPT, Word, source materials, or only an idea/brief, run `agentdeck skills detect`.
+3. If exactly one known PPT skill is installed, tell the user which one was found, who authored it, and what license boundary applies; then use it.
+4. If multiple known PPT skills are installed, ask the user to choose before generation. Do not silently pick the visual system.
+5. If no known PPT skill is installed, run `agentdeck skills recommend path/to/input --agent codex|claude` and explain the recommended third-party skill.
+6. Install or invoke a third-party skill only after the user confirms its source and license boundary.
+7. After the third-party skill generates HTML, run `agentdeck wrap-html path/to/index.html --out dist`.
+8. If no external skill is needed, write or update `deck.md`, then run `agentdeck lint deck.md` and `agentdeck build deck.md --single-html`.
+9. Review the generated `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and print/PDF.
+10. Report compatibility risks as risks in the source deck; do not claim third-party template work as AgentDeck's own design.
 
 ## Commands
 
 ```bash
 agentdeck wrap-html path/to/index.html --out dist
+agentdeck skills list
+agentdeck skills detect
+agentdeck skills recommend path/to/content.md --agent codex
+agentdeck skills install guizang-ppt-skill
 agentdeck init my-deck --theme swiss
 agentdeck lint my-deck/deck.md
 agentdeck build my-deck/deck.md --single-html --out my-deck/dist
@@ -35,6 +43,7 @@ agentdeck import-swiss-locked path/to/index.html --out deck.md
 - Read `references/dsl.md` when creating or editing `deck.md`.
 - Read `references/layouts.md` when choosing layouts or fixing overflow.
 - Read `references/external-skills.md` when using third-party PPT skills or wrapping their HTML output.
+- Read `references/ppt-skill-ecosystem.md` when choosing among known third-party PPT skills.
 - Read `references/swiss-locked-compat.md` when the deck is based on Swiss locked HTML output.
 
 ## Hard Rules
