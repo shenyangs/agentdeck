@@ -55,6 +55,27 @@ interface HtmlCompatibilityReport {
   fallbackReason?: string;
 }
 
+type PdfRenderBackend = "pdftoppm" | "pdftocairo" | "pypdfium2" | "pdf2image";
+
+interface RenderedPage {
+  index: number;
+  src: string;
+  bytes: number;
+}
+
+interface PdfRenderResult {
+  backend: PdfRenderBackend;
+  pages: RenderedPage[];
+}
+
+type OfficeConversionBackend = "libreoffice" | "keynote" | "quicklook-preview" | "windows-powerpoint" | "windows-word" | "windows-excel";
+type OfficeBackendPreference = "auto" | OfficeConversionBackend;
+
+interface OfficeConversionResult {
+  pdfPath: string;
+  backend: OfficeConversionBackend;
+}
+
 const help = `AgentDeck
 
 Usage:
@@ -62,7 +83,7 @@ Usage:
   agentdeck dev [deck.md]
   agentdeck build [deck.md] [--out dist] [--single-html] [--mode audience|presenter|creator] [--profile agentdeck|external-html|rendered-file]
   agentdeck export [deck.md] [--pdf] [--png] [--long-image] [--grid9] [--social-pack] [--out dist]
-  agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180] [--html-strategy auto|dom|raster]
+  agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx|deck.doc|deck.docx|deck.xls|deck.xlsx|deck.key> [--out dist] [--title "Deck title"] [--dpi 180] [--html-strategy auto|dom|raster] [--office-backend auto|libreoffice|keynote|quicklook-preview|windows-powerpoint|windows-word|windows-excel]
   agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"] [--html-strategy auto|dom|raster]
   agentdeck lint [deck.md]
   agentdeck doctor
@@ -98,23 +119,24 @@ async function commandWrap(args: string[]): Promise<CliResult> {
   const options = parseArgs(args);
   const file = options.positionals[0];
   if (!file) {
-    console.error('Usage: agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180] [--html-strategy auto|dom|raster]');
+    console.error('Usage: agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx|deck.doc|deck.docx|deck.xls|deck.xlsx|deck.key> [--out dist] [--title "Deck title"] [--dpi 180] [--html-strategy auto|dom|raster] [--office-backend auto|libreoffice|keynote|quicklook-preview|windows-powerpoint|windows-word|windows-excel]');
     return { code: 2 };
   }
   const sourcePath = resolveInputPath(file);
   const ext = extname(sourcePath).toLowerCase();
+  const officeBackend = officeBackendPreference(options.flags["office-backend"]);
   if (ext === ".html" || ext === ".htm") return commandWrapHtml(args);
   if (ext === ".pdf") return commandWrapRenderedFile(sourcePath, options);
-  if (ext === ".ppt" || ext === ".pptx") {
+  if ([".ppt", ".pptx", ".doc", ".docx", ".xls", ".xlsx", ".key"].includes(ext)) {
     const tempDir = mkdtempSync(join(tmpdir(), "agentdeck-office-"));
     try {
-      const pdfPath = convertOfficeToPdf(sourcePath, tempDir);
-      return commandWrapRenderedFile(pdfPath, options, sourcePath);
+      const converted = await convertOfficeToPdf(sourcePath, tempDir, officeBackend);
+      return commandWrapRenderedFile(converted.pdfPath, options, sourcePath, converted.backend);
     } finally {
       if (!options.flags["keep-temp"]) rmSync(tempDir, { recursive: true, force: true });
     }
   }
-  console.error(`Unsupported input for wrap: ${ext || basename(sourcePath)}. Use HTML, PDF, PPT, or PPTX.`);
+  console.error(`Unsupported input for wrap: ${ext || basename(sourcePath)}. Use HTML, PDF, PPT, PPTX, DOC, DOCX, XLS, XLSX, or KEY.`);
   return { code: 2 };
 }
 
@@ -385,12 +407,14 @@ function commandDev(args: string[]): CliResult {
 
 function commandDoctor(): CliResult {
   const office = findCommand(["/Applications/LibreOffice.app/Contents/MacOS/soffice", "soffice", "libreoffice"]);
-  const pdfRenderer = findCommand(["pdftoppm"]);
+  const pdfRenderers = describePdfRenderers();
+  const nativeOffice = describeNativeOfficeFallbacks();
   const checks = [
     ["Node", process.version],
     ["Working directory", process.cwd()],
     ["Office converter", office ? describeOfficeConverter(office) : "not found; PPT/PPTX wrap needs LibreOffice/soffice"],
-    ["PDF renderer", pdfRenderer ? describePdfRenderer(pdfRenderer) : "not found; PDF/PPT wrap needs poppler pdftoppm"],
+    ["Native Office fallbacks", nativeOffice],
+    ["PDF renderers", pdfRenderers],
     ["Playwright", hasNodeModule("playwright") ? "available" : "not installed; export will ask for it"],
   ];
   for (const [name, value] of checks) console.log(`${name}: ${value}`);
@@ -398,17 +422,31 @@ function commandDoctor(): CliResult {
 }
 
 function describeOfficeConverter(commandPath: string): string {
+  const installationIssue = inspectOfficeInstallation(commandPath);
+  if (installationIssue) return `${commandPath} (${installationIssue})`;
   const probe = spawnSync(commandPath, ["--version"], { encoding: "utf8", timeout: 5_000 });
   if (probe.error) return `${commandPath} (${probe.error.message.includes("ETIMEDOUT") ? "version check timed out" : `version check failed: ${probe.error.message}`})`;
   const output = `${probe.stdout || ""}${probe.stderr || ""}`.trim();
   return output ? `${commandPath} (${output.split(/\r?\n/)[0]})` : `${commandPath} (found; version output unavailable)`;
 }
 
-function describePdfRenderer(commandPath: string): string {
-  const probe = spawnSync(commandPath, ["-v"], { encoding: "utf8", timeout: 5_000 });
-  if (probe.error) return `${commandPath} (${probe.error.message.includes("ETIMEDOUT") ? "version check timed out" : `version check failed: ${probe.error.message}`})`;
+function describePdfRenderers(): string {
+  const backends: string[] = [];
+  const pdftoppm = findCommand(["pdftoppm"]);
+  if (pdftoppm) backends.push(`pdftoppm (${describeCommandVersion(pdftoppm, ["-v"])})`);
+  const pdftocairo = findCommand(["pdftocairo"]);
+  if (pdftocairo) backends.push(`pdftocairo (${describeCommandVersion(pdftocairo, ["-v"])})`);
+  const python = findCommand(["python3"]);
+  if (python && pythonModuleAvailable(python, "pypdfium2")) backends.push(`pypdfium2 via ${python}`);
+  if (python && pythonModuleAvailable(python, "pdf2image")) backends.push(`pdf2image via ${python}`);
+  return backends.length ? backends.join("; ") : "none found; PDF wrapping needs poppler or Python PDF fallback";
+}
+
+function describeCommandVersion(commandPath: string, args: string[]): string {
+  const probe = spawnSync(commandPath, args, { encoding: "utf8", timeout: 5_000 });
+  if (probe.error) return probe.error.message.includes("ETIMEDOUT") ? "version check timed out" : "version check failed";
   const output = `${probe.stdout || ""}${probe.stderr || ""}`.trim();
-  return output ? `${commandPath} (${output.split(/\r?\n/)[0]})` : `${commandPath} (found; version output unavailable)`;
+  return output ? output.split(/\r?\n/)[0] : "version output unavailable";
 }
 
 function buildDeck(deckPathInput: string, outDir: string, singleHtml: boolean, renderOptions: { mode?: string; profile?: string }): BuildResult {
@@ -455,14 +493,19 @@ function buildDeck(deckPathInput: string, outDir: string, singleHtml: boolean, r
   return { deck, htmlPath, assetReportPath };
 }
 
-function commandWrapRenderedFile(pdfPath: string, options: { positionals: string[]; flags: Record<string, string | boolean> }, originalSourcePath = pdfPath): CliResult {
+function commandWrapRenderedFile(
+  pdfPath: string,
+  options: { positionals: string[]; flags: Record<string, string | boolean> },
+  originalSourcePath = pdfPath,
+  officeBackend?: OfficeConversionBackend,
+): CliResult {
   const outDir = resolve(String(options.flags.out ?? "dist"));
   const title = stringFlag(options.flags.title) ?? parse(originalSourcePath).name;
   const dpi = Number(options.flags.dpi ?? 180);
   const tempDir = mkdtempSync(join(tmpdir(), "agentdeck-pages-"));
   try {
-    const pages = renderPdfToPngPages(pdfPath, tempDir, dpi);
-    const deck = renderedFileDeck(title, originalSourcePath, pages, "rendered-file");
+    const rendered = renderPdfToPngPages(pdfPath, tempDir, dpi);
+    const deck = renderedFileDeck(title, originalSourcePath, rendered.pages, "rendered-file");
     mkdirSync(outDir, { recursive: true });
     const outputHtml = renderStandaloneHtml(deck, {
       includeSourceJson: false,
@@ -479,15 +522,18 @@ function commandWrapRenderedFile(pdfPath: string, options: { positionals: string
           source: originalSourcePath,
           renderedFrom: pdfPath,
           fidelity: "raster",
+          officeConverterBackend: officeBackend,
           dpi,
-          pages: pages.map((page) => ({ index: page.index, bytes: page.bytes })),
+          rendererBackend: rendered.backend,
+          pages: rendered.pages.map((page) => ({ index: page.index, bytes: page.bytes })),
         },
         null,
         2,
       ),
       "utf8",
     );
-    console.log(`Wrapped ${pages.length} rendered page(s) into ${outputPath}`);
+    console.log(`Wrapped ${rendered.pages.length} rendered page(s) into ${outputPath}`);
+    console.log(`Rendered PDF pages with ${rendered.backend}`);
     console.log(`Wrote ${assetReportPath}`);
     return { code: 0 };
   } finally {
@@ -495,9 +541,99 @@ function commandWrapRenderedFile(pdfPath: string, options: { positionals: string
   }
 }
 
-function convertOfficeToPdf(sourcePath: string, outDir: string): string {
+async function convertOfficeToPdf(sourcePath: string, outDir: string, preferredBackend: OfficeBackendPreference = "auto"): Promise<OfficeConversionResult> {
+  const ext = extname(sourcePath).toLowerCase();
+  const failures: string[] = [];
   const converter = findCommand(["/Applications/LibreOffice.app/Contents/MacOS/soffice", "soffice", "libreoffice"]);
-  if (!converter) throw new Error("PPT/PPTX wrapping requires LibreOffice/soffice. Install LibreOffice and retry.");
+  if (preferredBackend === "auto" || preferredBackend === "libreoffice") {
+    if (converter) {
+      const installationIssue = inspectOfficeInstallation(converter);
+      if (!installationIssue) {
+        try {
+          return {
+            pdfPath: convertOfficeToPdfWithLibreOffice(sourcePath, outDir, converter),
+            backend: "libreoffice",
+          };
+        } catch (error) {
+          failures.push(`libreoffice: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      } else {
+        failures.push(`libreoffice: ${installationIssue}`);
+      }
+    } else {
+      failures.push("libreoffice: not installed");
+    }
+  }
+
+  if (preferredBackend === "auto" || preferredBackend === "keynote") {
+    if (process.platform === "darwin" && [".ppt", ".pptx", ".key"].includes(ext) && keynoteAvailable()) {
+      try {
+        return {
+          pdfPath: convertPresentationToPdfWithKeynote(sourcePath, outDir),
+          backend: "keynote",
+        };
+      } catch (error) {
+        failures.push(`keynote: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    } else if (preferredBackend === "keynote") {
+      failures.push("keynote: not available for this file type or this platform");
+    }
+  }
+
+  if (preferredBackend === "auto" || preferredBackend === "quicklook-preview") {
+    if (process.platform === "darwin" && [".doc", ".docx", ".xls", ".xlsx"].includes(ext) && quickLookPreviewAvailable()) {
+      try {
+        return {
+          pdfPath: await convertOfficeToPdfWithQuickLookPreview(sourcePath, outDir),
+          backend: "quicklook-preview",
+        };
+      } catch (error) {
+        failures.push(`quicklook-preview: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    } else if (preferredBackend === "quicklook-preview") {
+      failures.push("quicklook-preview: not available for this file type or this platform");
+    }
+  }
+
+  if (preferredBackend === "auto" || preferredBackend.startsWith("windows-")) {
+    if (process.platform === "win32") {
+      const windowsBackend = preferredBackend === "auto"
+        ? windowsOfficeBackendForExtension(ext)
+        : preferredBackend as Extract<OfficeConversionBackend, "windows-powerpoint" | "windows-word" | "windows-excel">;
+      if (windowsBackend) {
+        try {
+          return {
+            pdfPath: convertOfficeToPdfWithWindowsOffice(sourcePath, outDir, windowsBackend),
+            backend: windowsBackend,
+          };
+        } catch (error) {
+          failures.push(`${windowsBackend}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    } else if (preferredBackend !== "auto") {
+      failures.push(`${preferredBackend}: not available on this platform`);
+    }
+  }
+
+  if (preferredBackend !== "auto") {
+    throw new Error(
+      [
+        `Office to PDF conversion failed for forced backend '${preferredBackend}'.`,
+        failures.join("\n"),
+      ].join("\n"),
+    );
+  }
+
+  throw new Error(
+    [
+      "Office to PDF conversion failed.",
+      "Tried backends: " + describeTriedOfficeBackends(ext),
+      failures.join("\n"),
+    ].join("\n"),
+  );
+}
+
+function convertOfficeToPdfWithLibreOffice(sourcePath: string, outDir: string, converter: string): string {
   const userProfile = join(outDir, "libreoffice-profile");
   mkdirSync(userProfile, { recursive: true });
   const result = spawnSync(
@@ -515,30 +651,218 @@ function convertOfficeToPdf(sourcePath: string, outDir: string): string {
       outDir,
       sourcePath,
     ],
-    { encoding: "utf8", timeout: 120_000 },
+    { encoding: "utf8", timeout: 120_000, env: officeConverterEnv() },
   );
   if (result.error) {
     const timedOut = result.error.message.includes("ETIMEDOUT") || result.signal === "SIGTERM";
-    throw new Error(timedOut ? "Office to PDF conversion timed out after 120 seconds." : `Office to PDF conversion failed: ${result.error.message}`);
+    const installationHint = inspectOfficeInstallation(converter);
+    const detail = installationHint ? ` ${installationHint}.` : "";
+    throw new Error(timedOut ? `timed out after 120 seconds.${detail}` : `${result.error.message}.${detail}`);
   }
   if (result.status !== 0) {
-    throw new Error(`Office to PDF conversion failed.\n${result.stderr || result.stdout || ""}`.trim());
+    throw new Error((result.stderr || result.stdout || "").trim() || "unknown LibreOffice conversion error");
   }
   const expected = join(outDir, `${parse(sourcePath).name}.pdf`);
   if (existsSync(expected)) return expected;
   const pdf = readdirSync(outDir).find((file) => file.toLowerCase().endsWith(".pdf"));
-  if (!pdf) throw new Error("Office to PDF conversion did not produce a PDF.");
+  if (!pdf) throw new Error("LibreOffice did not produce a PDF");
   return join(outDir, pdf);
 }
 
-function renderPdfToPngPages(pdfPath: string, outDir: string, dpi: number): Array<{ index: number; src: string; bytes: number }> {
-  const renderer = findCommand(["pdftoppm"]);
-  if (!renderer) throw new Error("PDF wrapping requires pdftoppm from poppler. Install poppler and retry.");
-  const prefix = join(outDir, "page");
-  const result = spawnSync(renderer, ["-png", "-r", String(dpi), pdfPath, prefix], { encoding: "utf8" });
-  if (result.status !== 0) {
-    throw new Error(`PDF rendering failed.\n${result.stderr || result.stdout || ""}`.trim());
+function convertPresentationToPdfWithKeynote(sourcePath: string, outDir: string): string {
+  const pdfPath = join(outDir, `${parse(sourcePath).name}.pdf`);
+  if (existsSync(pdfPath)) rmSync(pdfPath, { force: true });
+  const script = [
+    "on run argv",
+    "set inputPath to POSIX file (item 1 of argv)",
+    "set outputPath to POSIX file (item 2 of argv)",
+    'tell application "Keynote"',
+    "set appWasRunning to running",
+    "launch",
+    "set docRef to open inputPath",
+    "delay 3",
+    "export docRef to outputPath as PDF",
+    "close docRef saving no",
+    "if appWasRunning is false then quit",
+    "end tell",
+    "end run",
+  ];
+  const args = script.flatMap((line) => ["-e", line]).concat([sourcePath, pdfPath]);
+  const result = spawnSync("osascript", args, { encoding: "utf8", timeout: 180_000 });
+  if (result.error) {
+    throw new Error(result.error.message);
   }
+  if (result.status !== 0 || !existsSync(pdfPath)) {
+    throw new Error((result.stderr || result.stdout || "").trim() || "Keynote did not produce a PDF");
+  }
+  return pdfPath;
+}
+
+async function convertOfficeToPdfWithQuickLookPreview(sourcePath: string, outDir: string): Promise<string> {
+  const qlmanage = findCommand(["qlmanage"]);
+  if (!qlmanage) throw new Error("qlmanage not found");
+
+  const previewDir = join(outDir, "quicklook-preview");
+  mkdirSync(previewDir, { recursive: true });
+  const result = spawnSync(qlmanage, ["-p", "-o", previewDir, sourcePath], { encoding: "utf8", timeout: 120_000 });
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+  if (result.status !== 0) {
+    throw new Error((result.stderr || result.stdout || "").trim() || "Quick Look did not generate a preview");
+  }
+
+  const previewHtmlPath = findQuickLookPreviewHtml(previewDir);
+  if (!previewHtmlPath) {
+    throw new Error("Quick Look did not produce Preview.html");
+  }
+
+  const playwright = await loadPlaywright();
+  const browser = await playwright.chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  const pdfPath = join(outDir, `${parse(sourcePath).name}.pdf`);
+  try {
+    await page.goto(pathToFileURL(previewHtmlPath).toString(), { waitUntil: "load" });
+    await page.pdf({
+      path: pdfPath,
+      printBackground: true,
+      margin: { top: "0", right: "0", bottom: "0", left: "0" },
+      preferCSSPageSize: true,
+    });
+  } finally {
+    await browser.close();
+  }
+
+  if (!existsSync(pdfPath)) throw new Error("Quick Look preview did not print to PDF");
+  return pdfPath;
+}
+
+function findQuickLookPreviewHtml(rootDir: string): string | undefined {
+  const stack = [rootDir];
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current) continue;
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const nextPath = join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(nextPath);
+        continue;
+      }
+      if (entry.isFile() && entry.name === "Preview.html") {
+        return nextPath;
+      }
+    }
+  }
+  return undefined;
+}
+
+function convertOfficeToPdfWithWindowsOffice(sourcePath: string, outDir: string, backend: Extract<OfficeConversionBackend, "windows-powerpoint" | "windows-word" | "windows-excel">): string {
+  const shell = findCommand(["powershell", "pwsh"]);
+  if (!shell) throw new Error("PowerShell not found");
+  const pdfPath = join(outDir, `${parse(sourcePath).name}.pdf`);
+  const inputLiteral = powershellLiteral(sourcePath);
+  const outputLiteral = powershellLiteral(pdfPath);
+  const scripts = {
+    "windows-powerpoint": [
+      "$app = New-Object -ComObject PowerPoint.Application",
+      "$presentation = $app.Presentations.Open(" + inputLiteral + ", $false, $false, $false)",
+      "$presentation.SaveAs(" + outputLiteral + ", 32)",
+      "$presentation.Close()",
+      "$app.Quit()",
+    ],
+    "windows-word": [
+      "$app = New-Object -ComObject Word.Application",
+      "$app.Visible = $false",
+      "$document = $app.Documents.Open(" + inputLiteral + ", [ref]$false, [ref]$true)",
+      "$document.ExportAsFixedFormat(" + outputLiteral + ", 17)",
+      "$document.Close([ref]$false)",
+      "$app.Quit()",
+    ],
+    "windows-excel": [
+      "$app = New-Object -ComObject Excel.Application",
+      "$app.Visible = $false",
+      "$workbook = $app.Workbooks.Open(" + inputLiteral + ", 0, $true)",
+      "$workbook.ExportAsFixedFormat(0, " + outputLiteral + ")",
+      "$workbook.Close($false)",
+      "$app.Quit()",
+    ],
+  } as const;
+  const command = [
+    "$ErrorActionPreference = 'Stop'",
+    ...scripts[backend],
+  ].join("; ");
+  const result = spawnSync(shell, ["-NoProfile", "-NonInteractive", "-Command", command], { encoding: "utf8", timeout: 180_000 });
+  if (result.error) throw new Error(result.error.message);
+  if (result.status !== 0 || !existsSync(pdfPath)) {
+    throw new Error((result.stderr || result.stdout || "").trim() || "Windows Office COM automation failed");
+  }
+  return pdfPath;
+}
+
+function renderPdfToPngPages(pdfPath: string, outDir: string, dpi: number): PdfRenderResult {
+  const failures: string[] = [];
+
+  const pdftoppm = findCommand(["pdftoppm"]);
+  if (pdftoppm) {
+    try {
+      clearRenderedPageFiles(outDir);
+      const prefix = join(outDir, "page");
+      const result = spawnSync(pdftoppm, ["-png", "-r", String(dpi), pdfPath, prefix], { encoding: "utf8" });
+      if (result.status !== 0) {
+        throw new Error((result.stderr || result.stdout || "").trim() || "unknown pdftoppm error");
+      }
+      return { backend: "pdftoppm", pages: collectRenderedPageFiles(outDir) };
+    } catch (error) {
+      failures.push(`pdftoppm: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  const pdftocairo = findCommand(["pdftocairo"]);
+  if (pdftocairo) {
+    try {
+      clearRenderedPageFiles(outDir);
+      const prefix = join(outDir, "page");
+      const result = spawnSync(pdftocairo, ["-png", "-r", String(dpi), pdfPath, prefix], { encoding: "utf8" });
+      if (result.status !== 0) {
+        throw new Error((result.stderr || result.stdout || "").trim() || "unknown pdftocairo error");
+      }
+      return { backend: "pdftocairo", pages: collectRenderedPageFiles(outDir) };
+    } catch (error) {
+      failures.push(`pdftocairo: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  const python = findCommand(["python3"]);
+  if (python && pythonModuleAvailable(python, "pypdfium2")) {
+    try {
+      clearRenderedPageFiles(outDir);
+      renderPdfWithPythonModule(python, "pypdfium2", pdfPath, outDir, dpi);
+      return { backend: "pypdfium2", pages: collectRenderedPageFiles(outDir) };
+    } catch (error) {
+      failures.push(`pypdfium2: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  if (python && pythonModuleAvailable(python, "pdf2image")) {
+    try {
+      clearRenderedPageFiles(outDir);
+      renderPdfWithPythonModule(python, "pdf2image", pdfPath, outDir, dpi);
+      return { backend: "pdf2image", pages: collectRenderedPageFiles(outDir) };
+    } catch (error) {
+      failures.push(`pdf2image: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  throw new Error(
+    [
+      "PDF rendering failed.",
+      "Tried backends: pdftoppm, pdftocairo, pypdfium2, pdf2image.",
+      failures.length ? failures.join("\n") : "No usable PDF renderer was found.",
+    ].join("\n"),
+  );
+}
+
+function collectRenderedPageFiles(outDir: string): RenderedPage[] {
   const files = readdirSync(outDir)
     .filter((file) => /^page-\d+\.png$/i.test(file))
     .sort((a, b) => pageNumber(a) - pageNumber(b));
@@ -552,6 +876,52 @@ function renderPdfToPngPages(pdfPath: string, outDir: string, dpi: number): Arra
       bytes: data.byteLength,
     };
   });
+}
+
+function clearRenderedPageFiles(outDir: string): void {
+  for (const file of readdirSync(outDir)) {
+    if (/^page-\d+\.png$/i.test(file)) rmSync(join(outDir, file), { force: true });
+  }
+}
+
+function renderPdfWithPythonModule(python: string, moduleName: "pypdfium2" | "pdf2image", pdfPath: string, outDir: string, dpi: number): void {
+  const script = moduleName === "pypdfium2"
+    ? `
+import sys
+from pathlib import Path
+import pypdfium2 as pdfium
+
+pdf_path = Path(sys.argv[1])
+out_dir = Path(sys.argv[2])
+dpi = int(sys.argv[3])
+scale = dpi / 72.0
+pdf = pdfium.PdfDocument(str(pdf_path))
+for index, page in enumerate(pdf, start=1):
+    bitmap = page.render(scale=scale)
+    image = bitmap.to_pil()
+    image.save(out_dir / f"page-{index}.png", "PNG")
+print(len(pdf))
+`
+    : `
+import sys
+from pathlib import Path
+from pdf2image import convert_from_path
+
+pdf_path = Path(sys.argv[1])
+out_dir = Path(sys.argv[2])
+dpi = int(sys.argv[3])
+images = convert_from_path(str(pdf_path), dpi=dpi)
+for index, image in enumerate(images, start=1):
+    image.save(out_dir / f"page-{index}.png", "PNG")
+print(len(images))
+`;
+  const result = spawnSync(python, ["-c", script, pdfPath, outDir, String(dpi)], { encoding: "utf8", timeout: 120_000 });
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+  if (result.status !== 0) {
+    throw new Error((result.stderr || result.stdout || "").trim() || `${moduleName} failed`);
+  }
 }
 
 function renderedFileDeck(title: string, sourcePath: string, pages: Array<{ index: number; src: string }>, origin: "rendered-file" | "html-raster"): DeckDocument {
@@ -587,6 +957,19 @@ function resolveInputPath(input: string): string {
 
 function htmlStrategy(value: string | boolean | undefined): HtmlWrapStrategy {
   if (value === "dom" || value === "raster" || value === "auto") return value;
+  return "auto";
+}
+
+function officeBackendPreference(value: string | boolean | undefined): OfficeBackendPreference {
+  if (
+    value === "auto" ||
+    value === "libreoffice" ||
+    value === "keynote" ||
+    value === "quicklook-preview" ||
+    value === "windows-powerpoint" ||
+    value === "windows-word" ||
+    value === "windows-excel"
+  ) return value;
   return "auto";
 }
 
@@ -704,6 +1087,87 @@ function findCommand(candidates: string[]): string | undefined {
   return undefined;
 }
 
+function pythonModuleAvailable(python: string, moduleName: string): boolean {
+  const result = spawnSync(
+    python,
+    ["-c", `import importlib.util, sys; sys.exit(0 if importlib.util.find_spec(${JSON.stringify(moduleName)}) else 1)`],
+    { encoding: "utf8", timeout: 5_000 },
+  );
+  return result.status === 0;
+}
+
+function officeConverterEnv(): NodeJS.ProcessEnv {
+  return process.platform === "linux"
+    ? { ...process.env, SAL_USE_VCLPLUGIN: "svp" }
+    : { ...process.env };
+}
+
+function describeNativeOfficeFallbacks(): string {
+  const fallbacks: string[] = [];
+  if (process.platform === "darwin" && keynoteAvailable()) fallbacks.push("Keynote.app for .ppt/.pptx/.key -> PDF");
+  if (process.platform === "darwin" && quickLookPreviewAvailable()) fallbacks.push("Quick Look preview for .doc/.docx/.xls/.xlsx -> HTML preview -> PDF");
+  if (process.platform === "win32") fallbacks.push("PowerPoint/Word/Excel COM automation when Microsoft Office is installed");
+  return fallbacks.length ? fallbacks.join("; ") : "none detected";
+}
+
+function inspectOfficeInstallation(commandPath: string): string | undefined {
+  const bundlePath = officeBundlePath(commandPath);
+  if (!bundlePath) return undefined;
+
+  const gatekeeper = spawnSync("spctl", ["--assess", "--type", "execute", "-vv", bundlePath], { encoding: "utf8", timeout: 5_000 });
+  const gatekeeperOutput = `${gatekeeper.stdout || ""}${gatekeeper.stderr || ""}`.trim();
+  if (/sealed resource is missing or invalid/i.test(gatekeeperOutput)) {
+    return "macOS reports the LibreOffice app bundle has missing or invalid sealed resources";
+  }
+
+  const attrs = spawnSync("xattr", ["-l", bundlePath], { encoding: "utf8", timeout: 5_000 });
+  const attrOutput = `${attrs.stdout || ""}${attrs.stderr || ""}`.trim();
+  if (/com\.apple\.quarantine/i.test(attrOutput) && /Homebrew Cask|quarantine/i.test(attrOutput)) {
+    return "macOS quarantine attributes are present on the LibreOffice app bundle";
+  }
+
+  return undefined;
+}
+
+function officeBundlePath(commandPath: string): string | undefined {
+  const marker = "/Contents/MacOS/";
+  const index = commandPath.indexOf(marker);
+  if (index === -1) return undefined;
+  return commandPath.slice(0, index);
+}
+
+function keynoteAvailable(): boolean {
+  return existsSync("/Applications/Keynote.app");
+}
+
+function quickLookPreviewAvailable(): boolean {
+  return process.platform === "darwin" && Boolean(findCommand(["qlmanage"]));
+}
+
+function windowsOfficeBackendForExtension(ext: string): Extract<OfficeConversionBackend, "windows-powerpoint" | "windows-word" | "windows-excel"> | undefined {
+  if (ext === ".ppt" || ext === ".pptx") return "windows-powerpoint";
+  if (ext === ".doc" || ext === ".docx") return "windows-word";
+  if (ext === ".xls" || ext === ".xlsx") return "windows-excel";
+  return undefined;
+}
+
+function describeTriedOfficeBackends(ext: string): string {
+  const backends = ["LibreOffice"];
+  if (process.platform === "darwin" && [".ppt", ".pptx", ".key"].includes(ext)) backends.push("Keynote");
+  if (process.platform === "darwin" && [".doc", ".docx", ".xls", ".xlsx"].includes(ext)) backends.push("Quick Look preview");
+  if (process.platform === "win32") {
+    const backend = windowsOfficeBackendForExtension(ext);
+    if (backend === "windows-powerpoint") backends.push("PowerPoint COM");
+    if (backend === "windows-word") backends.push("Word COM");
+    if (backend === "windows-excel") backends.push("Excel COM");
+  }
+  return backends.join(", ");
+}
+
+function powershellLiteral(value: string): string {
+  return `'${value.replace(/'/g, "''")}'`;
+}
+
 function shellQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
 }
@@ -818,8 +1282,7 @@ async function exportWithPlaywright(
 
 async function loadPlaywright(): Promise<any> {
   try {
-    const importer = new Function("specifier", "return import(specifier)") as (specifier: string) => Promise<any>;
-    return await importer("playwright");
+    return await import("playwright");
   } catch {
     throw new Error("Playwright is required for export. Install it with: npm install -D playwright && npx playwright install chromium");
   }

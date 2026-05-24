@@ -28,6 +28,20 @@ Default stance:
 - Prefer a single self-contained HTML over external assets.
 - Report converter failures as source-file compatibility issues.
 - Do not suggest external PPT skills. AgentDeck is responsible for wrapping and playback, not generating decks.
+- For Office input, AgentDeck still depends on the local Office rendering chain. It improves routing and diagnostics, but it does not replace LibreOffice, PowerPoint, or the native Office layout engine.
+- On macOS, `.ppt` and `.pptx` can fall back to `Keynote.app -> PDF -> page images` when LibreOffice is unavailable.
+- On macOS, `.key` follows the same `Keynote.app -> PDF -> page images` route.
+- On macOS, `.doc`, `.docx`, `.xls`, and `.xlsx` can fall back to `Quick Look Preview.html -> Chromium PDF print -> page images`.
+- On Windows, `.ppt/.pptx`, `.doc/.docx`, and `.xls/.xlsx` can fall back to Microsoft Office COM automation when Office is installed.
+
+PDF render backends:
+
+- Try `pdftoppm` first.
+- Fall back to `pdftocairo` when available.
+- Fall back to `pypdfium2` through local Python when available.
+- Fall back to `pdf2image` through local Python when available.
+
+The agent should read `asset-report.json` to see which backend actually rendered the pages.
 
 Adaptive HTML handling:
 

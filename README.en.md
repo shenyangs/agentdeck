@@ -13,6 +13,7 @@ AgentDeck does not make slides for users, choose third-party PPT skills, imitate
 It does one lower-level job:
 
 - accept existing `.ppt`, `.pptx`, `.pdf`, `.html`, or `.md` files
+- accept existing `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.pdf`, `.html`, or `.md` files
 - preserve the source visuals as much as possible
 - generate one self-contained `index.html`
 - add the AgentDeck presenter controls
@@ -26,6 +27,9 @@ The product focus is compatibility, playback, sharing, and export.
 ```bash
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.ppt --out dist
+agentdeck wrap deck.key --out dist
+agentdeck wrap deck.docx --out dist
+agentdeck wrap deck.xlsx --out dist
 ```
 
 Flow:
@@ -37,6 +41,20 @@ Flow:
 
 This is playback-level compatibility, not Office-editing compatibility. It prioritizes visual fidelity.
 
+One boundary is important here: AgentDeck does not replace the Office rendering engine. For `.ppt` and `.pptx`, the core route is still `LibreOffice -> PDF -> page images -> single HTML`. What AgentDeck improves is compatibility routing, diagnostics, and the playback layer around the result.
+
+There is now one formal macOS fallback for presentation files: if LibreOffice is unavailable but `Keynote.app` is installed, AgentDeck can automatically try `Keynote -> PDF -> page images -> single HTML` for `.ppt` and `.pptx`. This path has been verified locally.
+
+For `.doc`, `.docx`, `.xls`, and `.xlsx`, there is now a second native macOS fallback: `Quick Look Preview.html -> Chromium PDF print -> page images -> single HTML` when LibreOffice is unavailable. This path has been verified locally with a real `.docx` file.
+
+On Windows, the CLI also includes Microsoft Office COM export fallbacks:
+
+- `PowerPoint -> PDF`
+- `Word -> PDF`
+- `Excel -> PDF`
+
+That code path is now wired in, but it has not been runtime-verified on this macOS machine.
+
 ### PDF
 
 ```bash
@@ -45,6 +63,15 @@ agentdeck wrap deck.pdf --out dist --dpi 220
 ```
 
 Each PDF page is rendered to an image and packed into a single HTML file.
+
+PDF rendering now selects the best available backend automatically:
+
+- `pdftoppm`
+- `pdftocairo`
+- `pypdfium2` when available in the local Python environment
+- `pdf2image` when available in the local Python environment
+
+The generated `asset-report.json` records which backend was actually used.
 
 ### HTML
 
@@ -144,7 +171,7 @@ agentdeck doctor
 ```
 
 PPT/PPTX wrapping requires LibreOffice / `soffice`. PDF rendering requires `pdftoppm`.
-`doctor` checks not only whether a converter exists, but also whether it responds. If it reports `version check timed out`, fix LibreOffice before wrapping PPT/PPTX files.
+`doctor` checks not only whether a converter exists, but also whether it responds. It now also tries to identify macOS Gatekeeper and broken app bundle issues. If it reports `missing or invalid sealed resources`, the LibreOffice installation itself is damaged and should be reinstalled.
 
 On macOS:
 
@@ -158,6 +185,9 @@ brew install poppler
 ```bash
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.pdf --out dist
+agentdeck wrap deck.docx --out dist
+agentdeck wrap deck.xlsx --out dist
+agentdeck wrap deck.key --out dist
 agentdeck wrap deck.html --out dist
 agentdeck wrap deck.html --out dist --html-strategy raster
 agentdeck wrap-html deck.html --out dist
