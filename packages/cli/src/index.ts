@@ -3,7 +3,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, parse, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { importExternalHtmlDeck } from "@agentdeck/compat-profiles";
 import { renderStandaloneHtml } from "@agentdeck/runtime";
 import {
@@ -33,8 +33,8 @@ Usage:
   agentdeck dev [deck.md]
   agentdeck build [deck.md] [--out dist] [--single-html] [--mode audience|presenter|creator] [--profile agentdeck|external-html|rendered-file]
   agentdeck export [deck.md] [--pdf] [--png] [--long-image] [--grid9] [--social-pack] [--out dist]
-  agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180]
-  agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"]
+  agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180] [--html-strategy auto|dom|raster]
+  agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"] [--html-strategy auto|dom|raster]
   agentdeck lint [deck.md]
   agentdeck doctor
 `;
@@ -65,14 +65,14 @@ export async function runCli(argv = process.argv.slice(2)): Promise<CliResult> {
   }
 }
 
-function commandWrap(args: string[]): CliResult {
+async function commandWrap(args: string[]): Promise<CliResult> {
   const options = parseArgs(args);
   const file = options.positionals[0];
   if (!file) {
-    console.error('Usage: agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180]');
+    console.error('Usage: agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180] [--html-strategy auto|dom|raster]');
     return { code: 2 };
   }
-  const sourcePath = resolve(file);
+  const sourcePath = resolveInputPath(file);
   const ext = extname(sourcePath).toLowerCase();
   if (ext === ".html" || ext === ".htm") return commandWrapHtml(args);
   if (ext === ".pdf") return commandWrapRenderedFile(sourcePath, options);
@@ -89,18 +89,24 @@ function commandWrap(args: string[]): CliResult {
   return { code: 2 };
 }
 
-function commandWrapHtml(args: string[]): CliResult {
+async function commandWrapHtml(args: string[]): Promise<CliResult> {
   const options = parseArgs(args);
   const file = options.positionals[0];
   if (!file) {
-    console.error('Usage: agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"]');
+    console.error('Usage: agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"] [--html-strategy auto|dom|raster]');
     return { code: 2 };
   }
-  const htmlPath = resolve(file);
+  const htmlPath = resolveInputPath(file);
+  const htmlSource = readFileSync(htmlPath, "utf8");
+  const strategy = htmlStrategy(options.flags["html-strategy"] ?? options.flags.strategy);
+  if (strategy === "raster" || (strategy === "auto" && shouldRasterizeHtml(htmlSource))) {
+    return commandWrapHtmlRaster(htmlPath, htmlSource, options);
+  }
+
   const outDir = resolve(String(options.flags.out ?? "dist"));
   const sourceDir = dirname(htmlPath);
   const assetReport: Array<{ src: string; resolved?: string; bytes?: number; inlined: boolean; warning?: string }> = [];
-  const imported = importExternalHtmlDeck(readFileSync(htmlPath, "utf8"), {
+  const imported = importExternalHtmlDeck(htmlSource, {
     sourceName: file,
     title: stringFlag(options.flags.title),
     assetResolver: (src) => resolveHtmlAsset(src, sourceDir, assetReport),
@@ -120,6 +126,96 @@ function commandWrapHtml(args: string[]): CliResult {
   console.log(`Wrote ${assetReportPath}`);
   if (imported.warnings.length) printDiagnostics(imported.warnings);
   return { code: imported.warnings.some((diagnostic) => diagnostic.level === "error") ? 1 : 0 };
+}
+
+async function commandWrapHtmlRaster(
+  htmlPath: string,
+  htmlSource: string,
+  options: { positionals: string[]; flags: Record<string, string | boolean> },
+): Promise<CliResult> {
+  const outDir = resolve(String(options.flags.out ?? "dist"));
+  const title = stringFlag(options.flags.title) ?? htmlTitle(htmlSource) ?? parse(htmlPath).name;
+  const viewport = viewportFlag(options.flags.viewport);
+  const settleMs = Number(options.flags["settle-ms"] ?? 900);
+  const playwright = await loadPlaywright();
+  const browser = await playwright.chromium.launch();
+  const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
+  const pages: Array<{ index: number; src: string; bytes: number }> = [];
+  const sourceUrl = pathToFileURL(htmlPath).toString();
+
+  try {
+    await page.goto(sourceUrl, { waitUntil: "load" });
+    const count = await page.evaluate(() => {
+      const selectors = ["#deck .slide", ".slide", "[data-slide]", "section"];
+      for (const selector of selectors) {
+        const found = document.querySelectorAll(selector).length;
+        if (found > 1) return found;
+      }
+      return 1;
+    });
+
+    for (let index = 0; index < count; index += 1) {
+      const url = new URL(sourceUrl);
+      url.searchParams.set("slide", String(index + 1));
+      url.searchParams.set("agentdeck-raster", "1");
+      await page.goto(url.toString(), { waitUntil: "load" });
+      await page.addStyleTag({
+        content: `body.agentdeck-raster-capture #nav,
+body.agentdeck-raster-capture #hint,
+body.agentdeck-raster-capture #overview,
+body.agentdeck-raster-capture .deck-controls,
+body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
+      });
+      await page.evaluate((slideIndex: number) => {
+        document.body.classList.add("agentdeck-raster-capture");
+        const deck = document.querySelector<HTMLElement>("#deck");
+        const slides = [...document.querySelectorAll<HTMLElement>("#deck .slide, .slide")];
+        if (deck && slides.length > slideIndex) {
+          deck.style.transition = "none";
+          deck.style.transform = `translateX(${-slideIndex * 100}vw)`;
+          (window as any).__currentSlideIndex = slideIndex;
+          document.querySelectorAll("#nav .dot").forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === slideIndex));
+        }
+      }, index);
+      await page.waitForTimeout(settleMs);
+      const png = await page.screenshot({ type: "png", fullPage: false });
+      pages.push({
+        index: index + 1,
+        src: `data:image/png;base64,${Buffer.from(png).toString("base64")}`,
+        bytes: png.byteLength,
+      });
+    }
+  } finally {
+    await browser.close();
+  }
+
+  const deck = renderedFileDeck(title, htmlPath, pages, "html-raster");
+  mkdirSync(outDir, { recursive: true });
+  const outputHtml = renderStandaloneHtml(deck, {
+    includeSourceJson: false,
+    mode: "audience",
+    profile: "rendered-file",
+  });
+  const outputPath = join(outDir, "index.html");
+  const assetReportPath = join(outDir, "asset-report.json");
+  writeFileSync(outputPath, outputHtml, "utf8");
+  writeFileSync(
+    assetReportPath,
+    JSON.stringify(
+      {
+        source: htmlPath,
+        fidelity: "raster-html",
+        viewport,
+        pages: pages.map((page) => ({ index: page.index, bytes: page.bytes })),
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
+  console.log(`Raster-wrapped ${pages.length} HTML page(s) into ${outputPath}`);
+  console.log(`Wrote ${assetReportPath}`);
+  return { code: 0 };
 }
 
 function commandInit(args: string[]): CliResult {
@@ -281,7 +377,7 @@ function commandWrapRenderedFile(pdfPath: string, options: { positionals: string
   const tempDir = mkdtempSync(join(tmpdir(), "agentdeck-pages-"));
   try {
     const pages = renderPdfToPngPages(pdfPath, tempDir, dpi);
-    const deck = renderedFileDeck(title, originalSourcePath, pages);
+    const deck = renderedFileDeck(title, originalSourcePath, pages, "rendered-file");
     mkdirSync(outDir, { recursive: true });
     const outputHtml = renderStandaloneHtml(deck, {
       includeSourceJson: false,
@@ -373,11 +469,11 @@ function renderPdfToPngPages(pdfPath: string, outDir: string, dpi: number): Arra
   });
 }
 
-function renderedFileDeck(title: string, sourcePath: string, pages: Array<{ index: number; src: string }>): DeckDocument {
+function renderedFileDeck(title: string, sourcePath: string, pages: Array<{ index: number; src: string }>, origin: "rendered-file" | "html-raster"): DeckDocument {
   return {
     meta: {
       title,
-      subtitle: `Rendered from ${basename(sourcePath)}`,
+      subtitle: `${origin === "html-raster" ? "Rasterized HTML" : "Rendered"} from ${basename(sourcePath)}`,
       author: "Source file",
       lang: "zh-CN",
       theme: "swiss",
@@ -397,6 +493,53 @@ function renderedFileDeck(title: string, sourcePath: string, pages: Array<{ inde
       raw: "",
     })),
   };
+}
+
+function resolveInputPath(input: string): string {
+  if (input.startsWith("file://")) return fileURLToPath(input);
+  return resolve(input);
+}
+
+function htmlStrategy(value: string | boolean | undefined): "auto" | "dom" | "raster" {
+  if (value === "dom" || value === "raster" || value === "auto") return value;
+  return "auto";
+}
+
+function shouldRasterizeHtml(html: string): boolean {
+  const styleSignals = [
+    /position\s*:\s*fixed/i,
+    /100vw/i,
+    /100vh/i,
+    /translateX\s*\(/i,
+  ].filter((pattern) => pattern.test(html)).length;
+  const deckSignals = [
+    /id=["']deck["']/i,
+    /querySelectorAll\(["'][^"']*\.slide/i,
+    /class=["'][^"']*\bslide\b/i,
+    /keydown/i,
+    /wheel/i,
+    /touchstart/i,
+  ].filter((pattern) => pattern.test(html)).length;
+  return styleSignals >= 3 && deckSignals >= 2;
+}
+
+function htmlTitle(html: string): string | undefined {
+  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  if (!match) return undefined;
+  return match[1]
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim() || undefined;
+}
+
+function viewportFlag(value: string | boolean | undefined): { width: number; height: number } {
+  if (typeof value === "string") {
+    const match = value.match(/^(\d+)x(\d+)$/i);
+    if (match) return { width: Number(match[1]), height: Number(match[2]) };
+  }
+  return { width: 1920, height: 1080 };
 }
 
 function findCommand(candidates: string[]): string | undefined {

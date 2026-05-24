@@ -53,7 +53,21 @@ agentdeck wrap deck.html --out dist
 agentdeck wrap-html deck.html --out dist
 ```
 
-AgentDeck detects common slide containers such as `.slide`, `.page`, `.ppt-slide`, `.swiper-slide`, and `section`. If no slide containers are found, it wraps the whole `<body>` as one slide.
+HTML supports two compatibility strategies. The default is `auto`:
+
+```bash
+agentdeck wrap deck.html --out dist --html-strategy auto
+agentdeck wrap deck.html --out dist --html-strategy dom
+agentdeck wrap deck.html --out dist --html-strategy raster
+```
+
+- `dom`: detect `.slide`, `.page`, `.ppt-slide`, `.swiper-slide`, or `section`, then place each detected page into the AgentDeck player.
+- `raster`: render the original HTML page by page in a browser, then inline each screenshot into the AgentDeck player.
+- `auto`: use `dom` for ordinary HTML; switch to `raster` for full-viewport player-style HTML with `position: fixed`, `100vw/100vh`, and horizontal deck navigation.
+
+You can also pass a browser-style `file:///.../index.html` URL directly to the CLI.
+
+`raster` is better for HTML decks that already have their own full-screen playback system. It preserves visual size and layout, but turns the source HTML into static page images, so original animations and DOM interactions are not preserved.
 
 ### Markdown
 
@@ -138,6 +152,7 @@ brew install poppler
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.pdf --out dist
 agentdeck wrap deck.html --out dist
+agentdeck wrap deck.html --out dist --html-strategy raster
 agentdeck wrap-html deck.html --out dist
 agentdeck init my-deck --theme swiss
 agentdeck lint my-deck/deck.md

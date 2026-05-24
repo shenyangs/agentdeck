@@ -65,4 +65,15 @@ describe("runCli", () => {
     expect(html).toContain("Generic");
     expect(html).toContain('data-compat-profile="external-html"');
   });
+
+  it("accepts browser file URLs for HTML wrapping", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-wrap-file-url-"));
+    const source = join(dir, "deck.html");
+    writeFileSync(source, `<!doctype html><title>File URL</title><section class="slide"><h1>One</h1></section>`, "utf8");
+
+    await expect(runCli(["wrap", `file://${source}`, "--out", join(dir, "dist"), "--html-strategy", "dom"])).resolves.toMatchObject({ code: 0 });
+    const html = readFileSync(join(dir, "dist", "index.html"), "utf8");
+    expect(html).toContain("File URL");
+    expect(html).toContain('data-compat-profile="external-html"');
+  });
 });

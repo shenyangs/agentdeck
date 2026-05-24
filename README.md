@@ -55,7 +55,21 @@ agentdeck wrap deck.html --out dist
 agentdeck wrap-html deck.html --out dist
 ```
 
-HTML 会尽量识别常见页面容器，例如 `.slide`、`.page`、`.ppt-slide`、`.swiper-slide`、`section`。如果识别不到，就把整个 `<body>` 当作一页封装。
+HTML 有两种兼容策略，默认 `auto`：
+
+```bash
+agentdeck wrap deck.html --out dist --html-strategy auto
+agentdeck wrap deck.html --out dist --html-strategy dom
+agentdeck wrap deck.html --out dist --html-strategy raster
+```
+
+- `dom`：识别 `.slide`、`.page`、`.ppt-slide`、`.swiper-slide`、`section`，把每页 DOM 放进 AgentDeck 播放器。
+- `raster`：用浏览器逐页渲染原 HTML，再把每页截图内联进 AgentDeck 播放器。
+- `auto`：普通 HTML 走 `dom`；检测到 `position: fixed`、`100vw/100vh`、横向全屏翻页这类完整播放器 HTML 时，自动改走 `raster`。
+
+如果你手里是浏览器复制出来的 `file:///.../index.html` 地址，也可以直接传给 CLI。
+
+`raster` 更适合已经有完整播放体系的 HTML deck。它优先保证视觉尺寸和排版不被破坏，但会把原 HTML 变成静态页面图片，不保留原始动效和 DOM 交互。
 
 ### Markdown
 
@@ -140,6 +154,7 @@ brew install poppler
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.pdf --out dist
 agentdeck wrap deck.html --out dist
+agentdeck wrap deck.html --out dist --html-strategy raster
 agentdeck wrap-html deck.html --out dist
 agentdeck init my-deck --theme swiss
 agentdeck lint my-deck/deck.md

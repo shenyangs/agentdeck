@@ -22,6 +22,7 @@ It does not help users choose PPT skills, imitate template systems, or redesign 
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.pdf --out dist
 agentdeck wrap deck.html --out dist
+agentdeck wrap deck.html --out dist --html-strategy raster
 agentdeck wrap-html deck.html --out dist
 agentdeck init my-deck --theme swiss
 agentdeck lint my-deck/deck.md
@@ -40,6 +41,7 @@ agentdeck doctor
 
 - Do not route users to PPT skills. AgentDeck is a wrapper/player, not a PPT generation router.
 - Do not re-layout Office or PDF input. Render it as pages and wrap the pages.
+- For full-screen HTML players, prefer `agentdeck wrap ... --html-strategy raster` when DOM wrapping causes nested scaling or tiny slides.
 - Treat the source file as the source of truth.
 - Prefer raster fidelity for maximum compatibility.
 - Keep the output self-contained whenever possible.
