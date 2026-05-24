@@ -71,6 +71,13 @@ agentdeck wrap deck.html --out dist --html-strategy raster
 
 `raster` 更适合已经有完整播放体系的 HTML deck。它优先保证视觉尺寸和排版不被破坏，但会把原 HTML 变成静态页面图片，不保留原始动效和 DOM 交互。
 
+`auto` 不只是默认值。AgentDeck 会先分析源 HTML，再决定走 DOM 还是截图封装；如果 DOM 抽取后发现只抓到一页、slide 数量不匹配、或源文件明显是自带播放器的全屏 deck，会自动降级到 `raster`。输出目录会写入：
+
+- `asset-report.json`：资源、截图页、DPI 等封装信息
+- `compat-report.json`：HTML 兼容判断、触发信号、推荐策略、实际策略、是否自动降级
+
+这两个报告是给 Agent 看的。Agent 不需要让用户选择内部策略，默认直接运行 `agentdeck wrap input --out dist`，再根据报告和截图结果继续处理。
+
 ### Markdown
 
 ```bash
@@ -169,10 +176,13 @@ agentdeck doctor
 
 1. 用户给 `.ppt` / `.pptx` / `.pdf` / `.html`：直接运行 `agentdeck wrap path/to/file --out dist`。
 2. 用户给 `.md`：运行 `agentdeck lint` 和 `agentdeck build`。
-3. 不要推荐、安装或路由到任何 PPT Skill。
-4. 不要重排 Office/PDF 内容。
-5. 打开 `dist/index.html` 检查播放器、总览、下一页预览、自动播放、Blank、Spotlight、全屏和 PDF。
-6. 如果转换失败，报告转换器问题，而不是改写用户的原稿。
+3. 读取 `dist/asset-report.json` 和 `dist/compat-report.json`，确认实际封装路径。
+4. 不要推荐、安装或路由到任何 PPT Skill。
+5. 不要重排 Office/PDF 内容。
+6. 打开 `dist/index.html` 检查播放器、总览、下一页预览、自动播放、Blank、Spotlight、全屏和 PDF。
+7. 如果转换失败，报告转换器问题，而不是改写用户的原稿。
+
+AgentDeck 对 Agent 的要求是：先自己判断，先自己尝试默认兼容路径，发现页面变小、空白、页数不对、导出错乱时，基于报告自动重跑更保真的路径。只有转换器缺失、源文件损坏、或两种 HTML 策略都失败时，才打断用户。
 
 AgentDeck 的原则：
 

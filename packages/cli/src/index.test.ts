@@ -48,11 +48,15 @@ describe("runCli", () => {
 
     await expect(runCli(["wrap-html", source, "--out", join(dir, "dist")])).resolves.toMatchObject({ code: 0 });
     const html = readFileSync(join(dir, "dist", "index.html"), "utf8");
+    const report = JSON.parse(readFileSync(join(dir, "dist", "compat-report.json"), "utf8"));
     expect(html).toContain('data-compat-profile="external-html"');
     expect(html).toContain('data-action="compare"');
     expect(html).toContain('data-action="play"');
     expect(html).toContain("External Cover");
     expect(html).toContain("Existing Deck");
+    expect(report.requestedStrategy).toBe("auto");
+    expect(report.selectedStrategy).toBe("dom");
+    expect(report.wrappedSlides).toBe(2);
   });
 
   it("supports wrap as the generic compatibility entry for HTML decks", async () => {
@@ -73,7 +77,10 @@ describe("runCli", () => {
 
     await expect(runCli(["wrap", `file://${source}`, "--out", join(dir, "dist"), "--html-strategy", "dom"])).resolves.toMatchObject({ code: 0 });
     const html = readFileSync(join(dir, "dist", "index.html"), "utf8");
+    const report = JSON.parse(readFileSync(join(dir, "dist", "compat-report.json"), "utf8"));
     expect(html).toContain("File URL");
     expect(html).toContain('data-compat-profile="external-html"');
+    expect(report.requestedStrategy).toBe("dom");
+    expect(report.selectedStrategy).toBe("dom");
   });
 });

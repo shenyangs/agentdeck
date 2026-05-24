@@ -13,8 +13,10 @@ It does not help users choose PPT skills, imitate template systems, or redesign 
 
 1. If the user provides `.ppt`, `.pptx`, `.pdf`, `.html`, or `.htm`, run `agentdeck wrap path/to/file --out dist`.
 2. If the user provides a Markdown deck, run `agentdeck lint deck.md`, then `agentdeck build deck.md --single-html --out dist`.
-3. Review `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and print/PDF.
-4. If Office/PDF conversion fails, report the converter issue and the source file path. Do not rewrite the deck as a workaround unless the user asks.
+3. Read `dist/asset-report.json` and, for HTML input, `dist/compat-report.json`.
+4. Review `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and print/PDF.
+5. If pages are tiny, blank, clipped, duplicated, or the page count is wrong, use the reports to retry the higher-fidelity route before asking the user.
+6. If Office/PDF conversion fails, report the converter issue and the source file path. Do not rewrite the deck as a workaround unless the user asks.
 
 ## Commands
 
@@ -22,7 +24,7 @@ It does not help users choose PPT skills, imitate template systems, or redesign 
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.pdf --out dist
 agentdeck wrap deck.html --out dist
-agentdeck wrap deck.html --out dist --html-strategy raster
+agentdeck wrap deck.html --out dist --html-strategy raster # debug/override only
 agentdeck wrap-html deck.html --out dist
 agentdeck init my-deck --theme swiss
 agentdeck lint my-deck/deck.md
@@ -41,7 +43,7 @@ agentdeck doctor
 
 - Do not route users to PPT skills. AgentDeck is a wrapper/player, not a PPT generation router.
 - Do not re-layout Office or PDF input. Render it as pages and wrap the pages.
-- For full-screen HTML players, prefer `agentdeck wrap ... --html-strategy raster` when DOM wrapping causes nested scaling or tiny slides.
+- Let `agentdeck wrap` choose the HTML strategy first. Override with `--html-strategy raster` only after the automatic report or visual review shows DOM wrapping is unsafe.
 - Treat the source file as the source of truth.
 - Prefer raster fidelity for maximum compatibility.
 - Keep the output self-contained whenever possible.

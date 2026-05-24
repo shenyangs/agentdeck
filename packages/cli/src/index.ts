@@ -26,6 +26,35 @@ interface BuildResult {
   assetReportPath: string;
 }
 
+type HtmlWrapStrategy = "auto" | "dom" | "raster";
+
+interface HtmlCompatibilityAnalysis {
+  recommendedStrategy: Exclude<HtmlWrapStrategy, "auto">;
+  confidence: number;
+  reasons: string[];
+  signals: {
+    fixedViewport: boolean;
+    viewportUnits: boolean;
+    horizontalDeck: boolean;
+    ownNavigation: boolean;
+    canvasOrWebgl: boolean;
+    moduleScripts: boolean;
+    externalScripts: boolean;
+    detectedSlideCount: number;
+  };
+}
+
+interface HtmlCompatibilityReport {
+  source: string;
+  sourceKind: "html";
+  requestedStrategy: HtmlWrapStrategy;
+  selectedStrategy: Exclude<HtmlWrapStrategy, "auto">;
+  analysis: HtmlCompatibilityAnalysis;
+  wrappedSlides: number;
+  fallbackUsed: boolean;
+  fallbackReason?: string;
+}
+
 const help = `AgentDeck
 
 Usage:
@@ -98,9 +127,12 @@ async function commandWrapHtml(args: string[]): Promise<CliResult> {
   }
   const htmlPath = resolveInputPath(file);
   const htmlSource = readFileSync(htmlPath, "utf8");
-  const strategy = htmlStrategy(options.flags["html-strategy"] ?? options.flags.strategy);
-  if (strategy === "raster" || (strategy === "auto" && shouldRasterizeHtml(htmlSource))) {
-    return commandWrapHtmlRaster(htmlPath, htmlSource, options);
+  const requestedStrategy = htmlStrategy(options.flags["html-strategy"] ?? options.flags.strategy);
+  const analysis = analyzeHtmlCompatibility(htmlSource);
+  const selectedStrategy: Exclude<HtmlWrapStrategy, "auto"> = requestedStrategy === "auto" ? analysis.recommendedStrategy : requestedStrategy;
+  console.log(formatHtmlStrategyDecision(requestedStrategy, selectedStrategy, analysis));
+  if (selectedStrategy === "raster") {
+    return commandWrapHtmlRaster(htmlPath, htmlSource, options, analysis, requestedStrategy);
   }
 
   const outDir = resolve(String(options.flags.out ?? "dist"));
@@ -112,6 +144,17 @@ async function commandWrapHtml(args: string[]): Promise<CliResult> {
     assetResolver: (src) => resolveHtmlAsset(src, sourceDir, assetReport),
   });
 
+  const fallbackReason = htmlDomFallbackReason(imported, analysis);
+  if (requestedStrategy === "auto" && fallbackReason) {
+    console.log(`DOM wrap looked risky after extraction; switching to raster (${fallbackReason}).`);
+    return commandWrapHtmlRaster(htmlPath, htmlSource, options, {
+      ...analysis,
+      recommendedStrategy: "raster",
+      confidence: Math.max(analysis.confidence, 0.82),
+      reasons: [...analysis.reasons, fallbackReason],
+    }, requestedStrategy, fallbackReason);
+  }
+
   mkdirSync(outDir, { recursive: true });
   const outputHtml = renderStandaloneHtml(imported.deck, {
     includeSourceJson: false,
@@ -122,8 +165,18 @@ async function commandWrapHtml(args: string[]): Promise<CliResult> {
   const assetReportPath = join(outDir, "asset-report.json");
   writeFileSync(outputPath, outputHtml, "utf8");
   writeFileSync(assetReportPath, JSON.stringify(assetReport, null, 2), "utf8");
+  const compatReportPath = writeHtmlCompatibilityReport(outDir, {
+    source: htmlPath,
+    sourceKind: "html",
+    requestedStrategy,
+    selectedStrategy,
+    analysis,
+    wrappedSlides: imported.slideCount,
+    fallbackUsed: imported.warnings.some((diagnostic) => diagnostic.code === "compat.external_html.slides.fallback"),
+  });
   console.log(`Wrapped ${imported.slideCount} slide(s) into ${outputPath}`);
   console.log(`Wrote ${assetReportPath}`);
+  console.log(`Wrote ${compatReportPath}`);
   if (imported.warnings.length) printDiagnostics(imported.warnings);
   return { code: imported.warnings.some((diagnostic) => diagnostic.level === "error") ? 1 : 0 };
 }
@@ -132,6 +185,9 @@ async function commandWrapHtmlRaster(
   htmlPath: string,
   htmlSource: string,
   options: { positionals: string[]; flags: Record<string, string | boolean> },
+  analysis = analyzeHtmlCompatibility(htmlSource),
+  requestedStrategy: HtmlWrapStrategy = "auto",
+  fallbackReason?: string,
 ): Promise<CliResult> {
   const outDir = resolve(String(options.flags.out ?? "dist"));
   const title = stringFlag(options.flags.title) ?? htmlTitle(htmlSource) ?? parse(htmlPath).name;
@@ -145,19 +201,21 @@ async function commandWrapHtmlRaster(
 
   try {
     await page.goto(sourceUrl, { waitUntil: "load" });
-    const count = await page.evaluate(() => {
-      const selectors = ["#deck .slide", ".slide", "[data-slide]", "section"];
+    const browserDetectedCount = await page.evaluate(() => {
+      const selectors = ["#deck .slide", ".slide", ".ppt-slide", ".swiper-slide", "[data-slide]", ".page", "section"];
       for (const selector of selectors) {
         const found = document.querySelectorAll(selector).length;
         if (found > 1) return found;
       }
       return 1;
     });
+    const count = Math.max(browserDetectedCount, analysis.signals.detectedSlideCount);
 
     for (let index = 0; index < count; index += 1) {
       const url = new URL(sourceUrl);
       url.searchParams.set("slide", String(index + 1));
       url.searchParams.set("agentdeck-raster", "1");
+      url.hash = `#/${index + 1}`;
       await page.goto(url.toString(), { waitUntil: "load" });
       await page.addStyleTag({
         content: `body.agentdeck-raster-capture #nav,
@@ -168,13 +226,25 @@ body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
       });
       await page.evaluate((slideIndex: number) => {
         document.body.classList.add("agentdeck-raster-capture");
-        const deck = document.querySelector<HTMLElement>("#deck");
-        const slides = [...document.querySelectorAll<HTMLElement>("#deck .slide, .slide")];
-        if (deck && slides.length > slideIndex) {
-          deck.style.transition = "none";
-          deck.style.transform = `translateX(${-slideIndex * 100}vw)`;
+        const selectors = ["#deck .slide", ".slide", ".ppt-slide", ".swiper-slide", "[data-slide]", ".page", "section"];
+        const slides = selectors
+          .map((selector) => [...document.querySelectorAll<HTMLElement>(selector)])
+          .find((items) => items.length > 1) ?? [];
+        const slide = slides[slideIndex];
+        const deck = document.querySelector<HTMLElement>("#deck") ?? slide?.parentElement;
+        if (deck && slide && slides.length > 1) {
+          const deckRect = deck.getBoundingClientRect();
+          const deckStyle = window.getComputedStyle(deck);
+          const looksHorizontal = deck.id === "deck" || deckRect.width > window.innerWidth * 1.8 || deckStyle.display.includes("flex");
+          if (looksHorizontal) {
+            deck.style.transition = "none";
+            deck.style.transform = `translateX(${-slideIndex * 100}vw)`;
+          }
           (window as any).__currentSlideIndex = slideIndex;
           document.querySelectorAll("#nav .dot").forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === slideIndex));
+          slide.scrollIntoView({ block: "nearest", inline: "nearest" });
+          slide.classList.add("active", "is-active", "current", "is-current");
+          slide.removeAttribute("hidden");
         }
       }, index);
       await page.waitForTimeout(settleMs);
@@ -199,12 +269,26 @@ body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
   const outputPath = join(outDir, "index.html");
   const assetReportPath = join(outDir, "asset-report.json");
   writeFileSync(outputPath, outputHtml, "utf8");
+  const compatReportPath = writeHtmlCompatibilityReport(outDir, {
+    source: htmlPath,
+    sourceKind: "html",
+    requestedStrategy,
+    selectedStrategy: "raster",
+    analysis,
+    wrappedSlides: pages.length,
+    fallbackUsed: Boolean(fallbackReason),
+    fallbackReason,
+  });
   writeFileSync(
     assetReportPath,
     JSON.stringify(
       {
         source: htmlPath,
+        sourceKind: "html",
         fidelity: "raster-html",
+        requestedStrategy,
+        selectedStrategy: "raster",
+        analysis,
         viewport,
         pages: pages.map((page) => ({ index: page.index, bytes: page.bytes })),
       },
@@ -215,6 +299,7 @@ body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
   );
   console.log(`Raster-wrapped ${pages.length} HTML page(s) into ${outputPath}`);
   console.log(`Wrote ${assetReportPath}`);
+  console.log(`Wrote ${compatReportPath}`);
   return { code: 0 };
 }
 
@@ -500,27 +585,94 @@ function resolveInputPath(input: string): string {
   return resolve(input);
 }
 
-function htmlStrategy(value: string | boolean | undefined): "auto" | "dom" | "raster" {
+function htmlStrategy(value: string | boolean | undefined): HtmlWrapStrategy {
   if (value === "dom" || value === "raster" || value === "auto") return value;
   return "auto";
 }
 
-function shouldRasterizeHtml(html: string): boolean {
-  const styleSignals = [
-    /position\s*:\s*fixed/i,
-    /100vw/i,
-    /100vh/i,
-    /translateX\s*\(/i,
-  ].filter((pattern) => pattern.test(html)).length;
-  const deckSignals = [
-    /id=["']deck["']/i,
-    /querySelectorAll\(["'][^"']*\.slide/i,
-    /class=["'][^"']*\bslide\b/i,
-    /keydown/i,
-    /wheel/i,
-    /touchstart/i,
-  ].filter((pattern) => pattern.test(html)).length;
-  return styleSignals >= 3 && deckSignals >= 2;
+function analyzeHtmlCompatibility(html: string): HtmlCompatibilityAnalysis {
+  const detectedSlideCount = detectHtmlSlideCount(html);
+  const signals = {
+    fixedViewport: /position\s*:\s*fixed/i.test(html),
+    viewportUnits: /100vw/i.test(html) && /100vh/i.test(html),
+    horizontalDeck: /translateX\s*\(/i.test(html) || /translate3d\s*\(/i.test(html) || /width\s*:\s*10000vw/i.test(html) || /width\s*=\s*\([^)]*total[^)]*\*\s*100\)/i.test(html),
+    ownNavigation: /keydown/i.test(html) || /wheel/i.test(html) || /touchstart/i.test(html) || /hashchange/i.test(html) || /id=["']nav["']/i.test(html),
+    canvasOrWebgl: /<canvas\b/i.test(html) || /webgl/i.test(html) || /getContext\(["']webgl/i.test(html),
+    moduleScripts: /<script\b[^>]*type=["']module["']/i.test(html),
+    externalScripts: /<script\b[^>]*\bsrc=/i.test(html),
+    detectedSlideCount,
+  };
+  const score = [
+    signals.fixedViewport ? 0.22 : 0,
+    signals.viewportUnits ? 0.22 : 0,
+    signals.horizontalDeck ? 0.2 : 0,
+    signals.ownNavigation ? 0.14 : 0,
+    signals.canvasOrWebgl ? 0.1 : 0,
+    signals.moduleScripts ? 0.06 : 0,
+    signals.externalScripts ? 0.03 : 0,
+    detectedSlideCount > 1 ? 0.03 : 0,
+  ].reduce((sum, value) => sum + value, 0);
+  const reasons: string[] = [];
+  if (signals.fixedViewport) reasons.push("detected fixed-position full-screen layout");
+  if (signals.viewportUnits) reasons.push("detected 100vw/100vh slide sizing");
+  if (signals.horizontalDeck) reasons.push("detected horizontal viewport deck transform");
+  if (signals.ownNavigation) reasons.push("detected source navigation or keyboard handlers");
+  if (signals.canvasOrWebgl) reasons.push("detected canvas/WebGL rendering");
+  if (signals.moduleScripts) reasons.push("detected module scripts that may not survive DOM extraction");
+  if (signals.externalScripts) reasons.push("detected external scripts");
+  if (detectedSlideCount > 1) reasons.push(`detected ${detectedSlideCount} slide-like sections`);
+
+  if (score >= 0.62) {
+    return {
+      recommendedStrategy: "raster",
+      confidence: Math.min(0.98, score),
+      reasons,
+      signals,
+    };
+  }
+  return {
+    recommendedStrategy: "dom",
+    confidence: Math.max(0.58, 1 - score),
+    reasons: reasons.length ? reasons : ["no full-screen player signals detected"],
+    signals,
+  };
+}
+
+function detectHtmlSlideCount(html: string): number {
+  const patterns = [
+    /<section\b(?=[^>]*class=["'][^"']*\bslide\b[^"']*["'])/gi,
+    /<div\b(?=[^>]*class=["'][^"']*\b(?:slide|page|ppt-slide|swiper-slide)\b[^"']*["'])/gi,
+    /<[^>]+\bdata-slide(?:=["'][^"']*["'])?[^>]*>/gi,
+    /<section\b/gi,
+  ];
+  for (const pattern of patterns) {
+    const count = [...html.matchAll(pattern)].length;
+    if (count > 0) return count;
+  }
+  return 1;
+}
+
+function htmlDomFallbackReason(imported: { slideCount: number; warnings: Diagnostic[] }, analysis: HtmlCompatibilityAnalysis): string | undefined {
+  const usedFallback = imported.warnings.some((diagnostic) => diagnostic.code === "compat.external_html.slides.fallback");
+  if (usedFallback && (analysis.signals.fixedViewport || analysis.signals.viewportUnits || analysis.signals.ownNavigation)) {
+    return "DOM importer fell back to one body slide while the source looks like a player";
+  }
+  if (analysis.signals.detectedSlideCount > 1 && imported.slideCount < analysis.signals.detectedSlideCount) {
+    return `DOM importer found ${imported.slideCount} slide(s), but source analysis found ${analysis.signals.detectedSlideCount}`;
+  }
+  return undefined;
+}
+
+function writeHtmlCompatibilityReport(outDir: string, report: HtmlCompatibilityReport): string {
+  const compatReportPath = join(outDir, "compat-report.json");
+  writeFileSync(compatReportPath, JSON.stringify(report, null, 2), "utf8");
+  return compatReportPath;
+}
+
+function formatHtmlStrategyDecision(requested: HtmlWrapStrategy, selected: Exclude<HtmlWrapStrategy, "auto">, analysis: HtmlCompatibilityAnalysis): string {
+  const confidence = Math.round(analysis.confidence * 100);
+  const prefix = requested === "auto" ? "Auto HTML strategy" : "HTML strategy override";
+  return `${prefix}: ${selected} (${confidence}% confidence; ${analysis.reasons.slice(0, 3).join("; ")})`;
 }
 
 function htmlTitle(html: string): string | undefined {

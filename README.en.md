@@ -69,6 +69,13 @@ You can also pass a browser-style `file:///.../index.html` URL directly to the C
 
 `raster` is better for HTML decks that already have their own full-screen playback system. It preserves visual size and layout, but turns the source HTML into static page images, so original animations and DOM interactions are not preserved.
 
+`auto` is more than a default flag. AgentDeck analyzes the source HTML first, chooses DOM or raster wrapping, and falls back to raster if DOM extraction only finds one page, slide counts do not match, or the source clearly behaves like its own full-screen player. The output directory includes:
+
+- `asset-report.json`: assets, screenshots, DPI, and wrapping details
+- `compat-report.json`: HTML compatibility signals, recommended strategy, selected strategy, and fallback status
+
+These reports are meant for agents. An agent should not ask the user to choose internal strategies first. It should run `agentdeck wrap input --out dist`, read the reports, inspect the result, and retry with the higher-fidelity route only when needed.
+
 ### Markdown
 
 ```bash
@@ -167,10 +174,13 @@ Recommended workflow:
 
 1. If the user provides `.ppt`, `.pptx`, `.pdf`, or `.html`, run `agentdeck wrap path/to/file --out dist`.
 2. If the user provides `.md`, run `agentdeck lint` and `agentdeck build`.
-3. Do not recommend, install, or route to PPT skills.
-4. Do not re-layout Office or PDF content.
-5. Open `dist/index.html` and check controls, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and PDF.
-6. If conversion fails, report the converter issue instead of rewriting the user's deck.
+3. Read `dist/asset-report.json` and `dist/compat-report.json` to understand the actual wrapping route.
+4. Do not recommend, install, or route to PPT skills.
+5. Do not re-layout Office or PDF content.
+6. Open `dist/index.html` and check controls, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and PDF.
+7. If conversion fails, report the converter issue instead of rewriting the user's deck.
+
+AgentDeck expects agents to reason and act adaptively: try the default compatibility path first, then use the reports and visual result to retry when pages are tiny, blank, mismatched, or malformed. Interrupt the user only when converters are missing, the source file is broken, or both HTML routes fail.
 
 Principles:
 
