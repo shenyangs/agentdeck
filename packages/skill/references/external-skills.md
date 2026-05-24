@@ -22,7 +22,11 @@ Known examples in the AgentDeck recommendation directory:
 - `PPTAgent` — `icip-cas`, `https://github.com/icip-cas/PPTAgent`
 - `Office-PowerPoint-MCP-Server` — `GongRzhe`, `https://github.com/GongRzhe/Office-PowerPoint-MCP-Server`
 - `ppt-image-first` — `NyxTides`, `https://github.com/NyxTides/ppt-image-first`
+- `gpt_image_2_skill` — `wuyoscar`, `https://github.com/wuyoscar/gpt_image_2_skill`
 - `ppt-agent-skills` — `sunbigfly`, `https://github.com/sunbigfly/ppt-agent-skills`
+- `docsagent` — `docsagent`, `https://github.com/docsagent/docsagent`
+
+Some entries are helpers rather than pure PPT generators. `gpt_image_2_skill` is useful for slide images, cover visuals, and poster-like assets. `docsagent` is useful before deck generation when the source material is a large local document set. Use them as part of a workflow, then hand the deck output to `agentdeck wrap-html`.
 
 Recommended workflow:
 

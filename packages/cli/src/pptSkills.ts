@@ -17,7 +17,7 @@ export interface PptSkillRegistryItem {
   author: string;
   repo: string;
   license: string;
-  output: "html" | "pptx" | "image-first-pptx" | "mcp" | "design-harness";
+  output: "html" | "pptx" | "image-first-pptx" | "image-cli" | "mcp" | "design-harness" | "document-brain";
   bestFor: string[];
   cautions: string[];
   keywords: string[];
@@ -195,6 +195,29 @@ export const pptSkillRegistry: PptSkillRegistryItem[] = [
     attribution: "ppt-image-first is created by NyxTides. AgentDeck does not own its image-first workflow.",
   },
   {
+    id: "gpt-image-2-skill",
+    name: "gpt_image_2_skill",
+    author: "wuyoscar",
+    repo: "https://github.com/wuyoscar/gpt_image_2_skill",
+    license: "See upstream repository",
+    output: "image-cli",
+    bestFor: ["PPT 配图", "先出图再排版", "海报、视觉页、研究图示、封面素材"],
+    cautions: ["非纯 PPT Skill；它主要生成图像素材，不直接生成完整 deck"],
+    keywords: ["配图", "图像", "image", "gpt-image", "gpt image 2", "poster", "封面", "视觉素材"],
+    install: [
+      {
+        label: "AgentSkills installer",
+        command: ["npx", "skills", "add", "https://github.com/wuyoscar/gpt_image_2_skill", "--skill", "gpt-image"],
+        note: "Use as an image-generation helper before a PPT/layout skill, not as the final deck generator.",
+      },
+      {
+        label: "Git clone",
+        command: ["git", "clone", "https://github.com/wuyoscar/gpt_image_2_skill.git"],
+      },
+    ],
+    attribution: "gpt_image_2_skill is created by wuyoscar. AgentDeck only routes to it for visual assets when useful.",
+  },
+  {
     id: "ppt-agent-skills",
     name: "ppt-agent-skills",
     author: "sunbigfly",
@@ -229,6 +252,25 @@ export const pptSkillRegistry: PptSkillRegistryItem[] = [
       },
     ],
     attribution: "open-design is created by nexu-io. AgentDeck does not absorb its design systems.",
+  },
+  {
+    id: "docsagent",
+    name: "docsagent",
+    author: "docsagent",
+    repo: "https://github.com/docsagent/docsagent",
+    license: "See upstream repository",
+    output: "document-brain",
+    bestFor: ["大量本地文档索引", "从多份 PDF / DOCX / PPTX / Markdown 中提炼 PPT 素材", "隐私优先的资料消化"],
+    cautions: ["非纯 PPT Skill；它是文档检索和问答前置大脑，需要再配合 PPT Skill 出 deck"],
+    keywords: ["本地文档", "文档", "资料", "索引", "RAG", "PDF", "DOCX", "PPTX", "knowledge", "docsagent"],
+    install: [
+      {
+        label: "Git clone",
+        command: ["git", "clone", "https://github.com/docsagent/docsagent.git"],
+        note: "Configure it as a document/RAG helper before invoking a PPT generation skill.",
+      },
+    ],
+    attribution: "docsagent is created by docsagent. AgentDeck only routes to it as a document-preparation helper.",
   },
 ];
 
@@ -369,7 +411,7 @@ function sourceKindScore(skill: PptSkillRegistryItem, sourceKind: string): numbe
   if (sourceKind === "markdown" && skill.output === "html") return 2;
   if (sourceKind === "pdf" && ["pptagent", "ppt-agent-skills", "ppt-image-first"].includes(skill.id)) return 3;
   if (sourceKind === "ppt" && ["office-powerpoint-mcp", "anthropic-pptx", "openai-slides"].includes(skill.id)) return 4;
-  if (sourceKind === "document" && ["ppt-agent-skills", "pptagent", "anthropic-pptx", "openai-slides"].includes(skill.id)) return 3;
+  if (sourceKind === "document" && ["docsagent", "ppt-agent-skills", "pptagent", "anthropic-pptx", "openai-slides"].includes(skill.id)) return 3;
   return 0;
 }
 
@@ -388,8 +430,10 @@ function preferredOrder(id: string): number {
     "frontend-slides",
     "pptagent",
     "ppt-image-first",
+    "gpt-image-2-skill",
     "ppt-agent-skills",
     "office-powerpoint-mcp",
+    "docsagent",
     "open-design",
   ].indexOf(id);
 }
@@ -403,6 +447,8 @@ function reasonsFor(primary: PptSkillRegistryItem | undefined, sourceKind: strin
   if (/小红书|公众号|朋友圈|自媒体|作品集/.test(text)) reasons.push("内容命中自媒体/传播场景。");
   if (/演讲|逐字稿|计时|presenter|speaker/i.test(text)) reasons.push("内容命中现场演讲或演讲者辅助场景。");
   if (/学术|科研|论文|答辩/.test(text)) reasons.push("内容命中学术/科研报告场景。");
+  if (/配图|海报|封面|图像|image|视觉素材|gpt-image/i.test(text)) reasons.push("内容命中图像素材或 image-first 辅助场景。");
+  if (/文档|资料|PDF|DOCX|PPTX|索引|RAG|knowledge/i.test(text)) reasons.push("内容命中大量文档消化或资料检索场景。");
   return reasons;
 }
 
@@ -411,7 +457,18 @@ function nextStepsFor(input: string | undefined, sourceKind: string, primary: Pp
   const steps = [];
   if (installedCount === 0) steps.push(`确认第三方来源和许可证后，可运行：agentdeck skills install ${primary.id} --yes`);
   if (installedCount > 1) steps.push("从已安装 Skill 中选择一个；AgentDeck 不自动替你决定最终视觉系统。");
-  steps.push(`用 ${primary.name} 把 ${input ?? "brief"} 生成 HTML deck 或可转换的演示文件。`);
+  if (primary.output === "image-cli") {
+    steps.push(`用 ${primary.name} 为 ${input ?? "brief"} 生成配图、封面或视觉素材。`);
+    steps.push("再选择一个 PPT/layout Skill，把内容和图片素材生成 HTML deck 或可转换的演示文件。");
+  } else if (primary.output === "document-brain") {
+    steps.push(`用 ${primary.name} 索引和提炼 ${input ?? "brief"}，产出大纲、证据、引用和页面素材。`);
+    steps.push("再选择一个 PPT/layout Skill，把整理后的素材生成 HTML deck 或可转换的演示文件。");
+  } else if (primary.output === "design-harness") {
+    steps.push(`用 ${primary.name} 完成设计系统、原型或多格式视觉资产工作。`);
+    steps.push("确认它已经产出 HTML deck 后，再交给 AgentDeck 包装。");
+  } else {
+    steps.push(`用 ${primary.name} 把 ${input ?? "brief"} 生成 HTML deck 或可转换的演示文件。`);
+  }
   steps.push("生成 HTML 后运行：agentdeck wrap-html path/to/index.html --out dist");
   return steps;
 }

@@ -37,7 +37,9 @@ The built-in recommendation directory currently includes:
 - `PPTAgent`: `icip-cas`
 - `Office-PowerPoint-MCP-Server`: `GongRzhe`
 - `ppt-image-first`: `NyxTides`
+- `gpt_image_2_skill`: `wuyoscar`
 - `ppt-agent-skills`: `sunbigfly`
+- `docsagent`: `docsagent`
 
 Those skills are not part of AgentDeck. When using one, agents should clearly tell users:
 
@@ -233,10 +235,14 @@ AgentDeck ships a recommendation directory, not bundled templates. The directory
 | Academic defense and research reports | `PPTAgent` | `icip-cas` | Reflective generation framework |
 | Batch editing PPT templates | `Office-PowerPoint-MCP-Server` | `GongRzhe` | MCP for fine-grained PowerPoint edits |
 | Launch, marketing, visual preview first | `ppt-image-first` | `NyxTides` | Image-first workflow |
+| Slide illustrations, posters, cover visuals | `gpt_image_2_skill` | `wuyoscar` | Not a pure PPT skill; useful as an image helper |
 | Training, SOP, reviewable workflow | `ppt-agent-skills` | `sunbigfly` | Staged and reviewable |
+| Large local document sets before making slides | `docsagent` | `docsagent` | Not a pure PPT skill; useful as a document-prep brain |
 | Design systems and multi-format assets | `open-design` | `nexu-io` | General design harness; may be heavy for PPT-only use |
 
-These entries come from public repositories, public skill indexes, and the PPT skill roundup article provided by the user: [2026 PPT Skill ranking](https://mp.weixin.qq.com/s/--NKyWIKfdmXXR7dSRMzpA). Treat that article as discovery context only; always defer to each upstream project's README and LICENSE before use.
+These entries come from public repositories, public skill indexes, and the PPT skill roundup article provided by the user: [2026 PPT Skill ranking](https://mp.weixin.qq.com/s/--NKyWIKfdmXXR7dSRMzpA). The article cites GitHub stars, the Agent Skills Hub 2026 PPT category ranking, and direct GitHub search checks as of 2026-05-13. Treat that article as discovery context only; always defer to each upstream project's README and LICENSE before use.
+
+Note: `gpt_image_2_skill`, `docsagent`, and `open-design` are not pure PPT skills. AgentDeck can route to them for images, document digestion, or general design work, but it must not present those capabilities as AgentDeck's own PPT generation system.
 
 ## Minimal `deck.md`
 

@@ -2,7 +2,7 @@
 
 AgentDeck is the packaging and playback layer. Third-party PPT skills generate the deck's content and visual system.
 
-The known-skill directory is based on public repositories, public skill indexes, and the user-provided roundup article: https://mp.weixin.qq.com/s/--NKyWIKfdmXXR7dSRMzpA. Treat the article as discovery context only; always defer to upstream README and LICENSE files before installing or using a third-party skill.
+The known-skill directory is based on public repositories, public skill indexes, and the user-provided roundup article: https://mp.weixin.qq.com/s/--NKyWIKfdmXXR7dSRMzpA. The article cites GitHub stars, the Agent Skills Hub 2026 PPT category ranking, and direct GitHub search checks as of 2026-05-13. Treat the article as discovery context only; always defer to upstream README and LICENSE files before installing or using a third-party skill.
 
 ## Input Routing
 
@@ -26,8 +26,12 @@ Use this order:
 | Academic / research PPT | `PPTAgent` | `icip-cas` | Clone upstream and follow README |
 | Batch edit existing PPTX | `Office-PowerPoint-MCP-Server` | `GongRzhe` | Clone upstream and configure as MCP |
 | Image-first visual deck | `ppt-image-first` | `NyxTides` | `npx skills add https://github.com/NyxTides/ppt-image-first` |
+| Slide images / posters / cover assets | `gpt_image_2_skill` | `wuyoscar` | Use as an image helper, then pass assets to a PPT/layout skill |
 | Reviewable enterprise workflow | `ppt-agent-skills` | `sunbigfly` | `npx skills add https://github.com/sunbigfly/ppt-agent-skills` |
+| Large local document sets before slides | `docsagent` | `docsagent` | Use as a document-prep helper before a PPT skill |
 | General design harness | `open-design` | `nexu-io` | Clone upstream and follow README |
+
+`gpt_image_2_skill`, `docsagent`, and `open-design` are not pure PPT skills. Route to them only when their helper role is useful, and say that plainly to the user.
 
 ## Attribution Template
 
