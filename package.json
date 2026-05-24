@@ -11,7 +11,8 @@
     "build": "npm run build -w @agentdeck/schema && npm run build -w @agentdeck/themes && npm run build -w @agentdeck/compat-profiles && npm run build -w @agentdeck/runtime && npm run build -w @agentdeck/cli && npm run build -w @agentdeck/skill",
     "test": "vitest run",
     "verify": "npm run build && npm test",
-    "agentdeck": "node packages/cli/dist/index.js"
+    "agentdeck": "node packages/cli/dist/index.js",
+    "release:patch": "node scripts/release-patch.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

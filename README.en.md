@@ -12,7 +12,6 @@ AgentDeck does not make slides for users, choose third-party PPT skills, imitate
 
 It does one lower-level job:
 
-- accept existing `.ppt`, `.pptx`, `.pdf`, `.html`, or `.md` files
 - accept existing `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.pdf`, `.html`, or `.md` files
 - preserve the source visuals as much as possible
 - generate one self-contained `index.html`
@@ -22,7 +21,7 @@ The product focus is compatibility, playback, sharing, and export.
 
 ## Compatibility Routes
 
-### Office PPT / PPTX
+### Office Files
 
 ```bash
 agentdeck wrap deck.pptx --out dist
@@ -34,7 +33,7 @@ agentdeck wrap deck.xlsx --out dist
 
 Flow:
 
-1. Convert PPT/PPTX to PDF with local LibreOffice / `soffice`.
+1. Convert Office files to PDF with local LibreOffice / `soffice`, macOS Keynote/Quick Look, or Windows Office COM.
 2. Render each PDF page to a high-resolution PNG.
 3. Inline every page into one HTML file.
 4. Add the AgentDeck player.
@@ -60,6 +59,10 @@ That code path is now wired in, but it has not been runtime-verified on this mac
 ```bash
 agentdeck wrap deck.pdf --out dist
 agentdeck wrap deck.pdf --out dist --dpi 220
+agentdeck wrap deck.pdf --out dist --fit contain
+agentdeck wrap deck.pdf --out dist --image-format webp --quality 82 --size-budget 50mb
+agentdeck wrap deck.pdf --out dist --max-pages 100 --max-output-mb 80
+agentdeck wrap deck.pdf --out dist --pack folder
 ```
 
 Each PDF page is rendered to an image and packed into a single HTML file.
@@ -72,6 +75,10 @@ PDF rendering now selects the best available backend automatically:
 - `pdf2image` when available in the local Python environment
 
 The generated `asset-report.json` records which backend was actually used.
+
+The same report also records page dimensions, output dimensions, image format, fit mode, total embedded image bytes, backend attempts in `pipeline[]`, and size-budget warnings. PNG remains the default fidelity path; use `webp/jpeg` when the HTML needs to be easier to share.
+
+Single HTML remains the default. For large decks, use `--pack folder` to write `index.html + assets/`, which is better for CDN, object storage, or internal web hosting.
 
 ### HTML
 
@@ -86,6 +93,7 @@ HTML supports two compatibility strategies. The default is `auto`:
 agentdeck wrap deck.html --out dist --html-strategy auto
 agentdeck wrap deck.html --out dist --html-strategy dom
 agentdeck wrap deck.html --out dist --html-strategy raster
+agentdeck wrap deck.html --out dist --html-strategy raster --allow-network
 ```
 
 - `dom`: detect `.slide`, `.page`, `.ppt-slide`, `.swiper-slide`, or `section`, then place each detected page into the AgentDeck player.
@@ -102,6 +110,33 @@ You can also pass a browser-style `file:///.../index.html` URL directly to the C
 - `compat-report.json`: HTML compatibility signals, recommended strategy, selected strategy, and fallback status
 
 These reports are meant for agents. An agent should not ask the user to choose internal strategies first. It should run `agentdeck wrap input --out dist`, read the reports, inspect the result, and retry with the higher-fidelity route only when needed.
+
+HTML raster capture now tries `hash -> keyboard -> scroll`. If a deck does not navigate with `#/2` but responds to arrow keys or scroll, AgentDeck will try to detect that and record the selected capture strategy in `compat-report.json`.
+
+For safety, HTML raster blocks remote network requests by default. Use `--allow-network` only when the source deck intentionally depends on remote assets.
+
+## Probe And Verify
+
+Probe before wrapping:
+
+```bash
+agentdeck probe input.pptx
+agentdeck probe input.html --json --out probe-report.json
+```
+
+`probe` does not generate HTML. It reports the input kind, recommended route, available backends, missing dependencies, and whether HTML should use `dom` or `raster`.
+
+Verify after wrapping:
+
+```bash
+agentdeck verify dist/index.html
+agentdeck verify dist/index.html --json
+agentdeck verify dist/index.html --out verify-report.json
+```
+
+`verify` opens the single HTML in Chromium and checks slide count, tiny/blank pages, image loading, hash navigation, overview jump, next-slide preview, and bottom dock overlap. It prints `PASS / WARN / FAIL` and writes `verify-report.json`.
+
+`agentdeck wrap` runs a lightweight verification pass by default and writes `dist/verify-report.json`. Use `--no-verify` for batch conversion.
 
 ### Markdown
 
@@ -168,9 +203,11 @@ https://github.com/shenyangs/homebrew-agentdeck
 
 ```bash
 agentdeck doctor
+agentdeck doctor --json
+agentdeck doctor --json --input deck.pptx
 ```
 
-PPT/PPTX wrapping requires LibreOffice / `soffice`. PDF rendering requires `pdftoppm`.
+Office wrapping needs at least one conversion chain: LibreOffice / `soffice`, macOS Keynote/Quick Look, or Windows Microsoft Office COM. PDF rendering needs at least one of `pdftoppm`, `pdftocairo`, `pypdfium2`, or `pdf2image`.
 `doctor` checks not only whether a converter exists, but also whether it responds. It now also tries to identify macOS Gatekeeper and broken app bundle issues. If it reports `missing or invalid sealed resources`, the LibreOffice installation itself is damaged and should be reinstalled.
 
 On macOS:
@@ -185,12 +222,18 @@ brew install poppler
 ```bash
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.pdf --out dist
+agentdeck wrap deck.pdf --out dist --fit contain --image-format webp --quality 82
+agentdeck wrap deck.pdf --out dist --pack folder
+agentdeck wrap deck.pdf --out dist --timeout-ms 120000 --max-pages 100 --max-output-mb 80
 agentdeck wrap deck.docx --out dist
 agentdeck wrap deck.xlsx --out dist
 agentdeck wrap deck.key --out dist
 agentdeck wrap deck.html --out dist
 agentdeck wrap deck.html --out dist --html-strategy raster
 agentdeck wrap-html deck.html --out dist
+agentdeck probe deck.pptx
+agentdeck verify dist/index.html
+agentdeck doctor --json
 agentdeck init my-deck --theme swiss
 agentdeck lint my-deck/deck.md
 agentdeck build my-deck/deck.md --single-html --mode audience --out my-deck/dist
@@ -202,13 +245,14 @@ agentdeck doctor
 
 Recommended workflow:
 
-1. If the user provides `.ppt`, `.pptx`, `.pdf`, or `.html`, run `agentdeck wrap path/to/file --out dist`.
-2. If the user provides `.md`, run `agentdeck lint` and `agentdeck build`.
-3. Read `dist/asset-report.json` and `dist/compat-report.json` to understand the actual wrapping route.
-4. Do not recommend, install, or route to PPT skills.
-5. Do not re-layout Office or PDF content.
-6. Open `dist/index.html` and check controls, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and PDF.
-7. If conversion fails, report the converter issue instead of rewriting the user's deck.
+1. If the user provides `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.pdf`, or `.html`, run `agentdeck probe path/to/file`.
+2. Follow the recommended route with `agentdeck wrap path/to/file --out dist`.
+3. If the user provides `.md`, run `agentdeck lint` and `agentdeck build`.
+4. Read `dist/asset-report.json` and `dist/compat-report.json`.
+5. Run `agentdeck verify dist/index.html` and read `verify-report.json`.
+6. Do not recommend, install, or route to PPT skills.
+7. Do not re-layout Office or PDF content.
+8. If conversion fails, report the converter issue instead of rewriting the user's deck.
 
 AgentDeck expects agents to reason and act adaptively: try the default compatibility path first, then use the reports and visual result to retry when pages are tiny, blank, mismatched, or malformed. Interrupt the user only when converters are missing, the source file is broken, or both HTML routes fail.
 
@@ -229,6 +273,13 @@ Principles:
 - `packages/compat-profiles`: generic external HTML import
 - `packages/skill`: agent instructions
 
+## More Docs
+
+- [Compatibility matrix](./docs/compatibility.md)
+- [Troubleshooting](./docs/troubleshooting.md)
+- [Security model](./docs/security.md)
+- [Agent workflow](./docs/agent-workflow.md)
+
 ## Development
 
 ```bash
@@ -236,4 +287,5 @@ npm install
 npm run build
 npm test
 npm run verify
+npm run release:patch -- --dry-run --skip-verify
 ```

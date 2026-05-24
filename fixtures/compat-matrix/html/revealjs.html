@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reveal Smoke</title>
+  <style>
+    html, body, .reveal, .slides, section { margin: 0; width: 100vw; height: 100vh; }
+    section { display: none; place-items: center; font: 80px system-ui; background: #fff; color: #111; }
+    section.active { display: grid; }
+  </style>
+</head>
+<body>
+  <div class="reveal"><div class="slides">
+    <section class="active">Reveal 1</section>
+    <section>Reveal 2</section>
+  </div></div>
+  <script>
+    window.Reveal = true;
+    let index = 0;
+    const slides = [...document.querySelectorAll("section")];
+    function show(next) {
+      index = Math.max(0, Math.min(slides.length - 1, next));
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
+    }
+    addEventListener("hashchange", () => show(Number(location.hash.replace(/\D/g, "")) - 1 || 0));
+    addEventListener("keydown", (event) => { if (event.key === "ArrowRight") show(index + 1); });
+  </script>
+</body>
+</html>

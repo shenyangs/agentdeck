@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { backendIds, type Backend } from "./converters/backend-registry.js";
 import { runCli } from "./index.js";
 
 describe("runCli", () => {
@@ -83,6 +84,162 @@ describe("runCli", () => {
     expect(html).toContain('data-compat-profile="external-html"');
     expect(report.requestedStrategy).toBe("dom");
     expect(report.selectedStrategy).toBe("dom");
+  });
+
+  it("probes HTML, PDF, and Office inputs without wrapping them", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-probe-"));
+    const htmlSource = join(dir, "deck.html");
+    const pdfSource = join(dir, "deck.pdf");
+    const pptxSource = join(dir, "deck.pptx");
+    writeFileSync(
+      htmlSource,
+      `<!doctype html><style>.slide{position:fixed;width:100vw;height:100vh}</style><section class="slide">A</section><section class="slide">B</section><script>addEventListener("keydown",()=>{})</script>`,
+      "utf8",
+    );
+    writeFileSync(pdfSource, "%PDF-1.4\n", "utf8");
+    writeFileSync(pptxSource, "", "utf8");
+
+    await expect(runCli(["probe", htmlSource, "--json", "--out", join(dir, "html-probe.json")])).resolves.toMatchObject({ code: 0 });
+    await expect(runCli(["probe", pdfSource, "--json", "--out", join(dir, "pdf-probe.json")])).resolves.toMatchObject({ code: 0 });
+    await expect(runCli(["probe", pptxSource, "--json", "--out", join(dir, "pptx-probe.json")])).resolves.toMatchObject({ code: 0 });
+
+    const htmlProbe = JSON.parse(readFileSync(join(dir, "html-probe.json"), "utf8"));
+    const pdfProbe = JSON.parse(readFileSync(join(dir, "pdf-probe.json"), "utf8"));
+    const pptxProbe = JSON.parse(readFileSync(join(dir, "pptx-probe.json"), "utf8"));
+    expect(htmlProbe.schemaVersion).toBe("1.0");
+    expect(htmlProbe.source.extension).toBe(".html");
+    expect(htmlProbe.source.sha256).toHaveLength(64);
+    expect(htmlProbe.environment.os).toBe(process.platform);
+    expect(htmlProbe.inputKind).toBe("html");
+    expect(htmlProbe.html.recommendedStrategy).toBe("raster");
+    expect(pdfProbe.inputKind).toBe("pdf");
+    expect(pdfProbe.recommendedRoute).toContain("pdf->page-images");
+    expect(pptxProbe.inputKind).toBe("office");
+    expect(pptxProbe.office.extension).toBe(".pptx");
+  }, 15_000);
+
+  it("verifies generated decks and reports visual failures", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-verify-"));
+    await runCli(["init", dir, "--theme", "swiss"]);
+    await runCli(["build", join(dir, "deck.md"), "--out", join(dir, "dist"), "--single-html"]);
+
+    await expect(runCli(["verify", join(dir, "dist", "index.html")])).resolves.toMatchObject({ code: 0 });
+    const okReport = JSON.parse(readFileSync(join(dir, "dist", "verify-report.json"), "utf8"));
+    expect(okReport.schemaVersion).toBe("1.0");
+    expect(okReport.pipeline[0].step).toBe("verify-html-player");
+    expect(okReport.status).toBe("pass");
+    expect(okReport.checks.hashJump).toBe(true);
+    expect(okReport.checks.overviewJump).toBe(true);
+    expect(okReport.checks.comparePreview).toBe(true);
+
+    const broken = join(dir, "broken.html");
+    writeFileSync(
+      broken,
+      `<!doctype html><body><main class="ad-stage" style="position:relative;width:1000px;height:800px"><div class="ad-scaled"><section class="ad-slide" data-slide-index="0" style="width:80px;height:40px"><img src="./missing.png"></section></div></main><header class="ad-dock" style="position:absolute;left:0;top:0;width:100px;height:30px"></header></body>`,
+      "utf8",
+    );
+    await expect(runCli(["verify", broken, "--out", join(dir, "broken-report.json")])).resolves.toMatchObject({ code: 1 });
+    const brokenReport = JSON.parse(readFileSync(join(dir, "broken-report.json"), "utf8"));
+    expect(brokenReport.status).toBe("fail");
+    expect(brokenReport.issues.map((issue: { code: string }) => issue.code)).toContain("slide.too_small");
+    expect(brokenReport.issues.map((issue: { code: string }) => issue.code)).toContain("images.failed");
+  });
+
+  it("writes fit and image compression settings into wrapped raster reports", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-wrap-quality-"));
+    const source = join(dir, "deck.html");
+    writeFileSync(source, `<!doctype html><title>Quality</title><section class="slide" style="width:1920px;height:1080px;background:#134cff;color:white">Quality</section>`, "utf8");
+
+    await expect(runCli([
+      "wrap",
+      source,
+      "--out",
+      join(dir, "dist"),
+      "--html-strategy",
+      "raster",
+      "--fit",
+      "cover",
+      "--image-format",
+      "jpeg",
+      "--quality",
+      "70",
+      "--max-width",
+      "640",
+      "--size-budget",
+      "1kb",
+    ])).resolves.toMatchObject({ code: 0 });
+
+    const report = JSON.parse(readFileSync(join(dir, "dist", "asset-report.json"), "utf8"));
+    const compat = JSON.parse(readFileSync(join(dir, "dist", "compat-report.json"), "utf8"));
+    expect(report.schemaVersion).toBe("1.0");
+    expect(report.output.packMode).toBe("single-html");
+    expect(report.pipeline[0].step).toBe("html-to-pages");
+    expect(report.fit).toBe("cover");
+    expect(report.imageFormat).toBe("jpeg");
+    expect(report.quality).toBe(70);
+    expect(report.pages[0].outputWidth).toBeLessThanOrEqual(640);
+    expect(report.pages[0].format).toBe("jpeg");
+    expect(report.warnings.length).toBeGreaterThan(0);
+    expect(compat.captureStrategy).toMatch(/hash|keyboard|scroll/);
+    expect(compat.adapterId).toBe("generic-section");
+  });
+
+  it("supports folder pack output for large rendered decks", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-wrap-folder-"));
+    const source = join(dir, "deck.html");
+    writeFileSync(source, `<!doctype html><title>Folder Pack</title><section class="slide" style="width:1920px;height:1080px;background:#fff;color:#000">Folder</section>`, "utf8");
+
+    await expect(runCli([
+      "wrap",
+      source,
+      "--out",
+      join(dir, "dist"),
+      "--html-strategy",
+      "raster",
+      "--pack",
+      "folder",
+      "--image-format",
+      "webp",
+    ])).resolves.toMatchObject({ code: 0 });
+
+    const report = JSON.parse(readFileSync(join(dir, "dist", "asset-report.json"), "utf8"));
+    expect(report.output.packMode).toBe("folder");
+    expect(report.pages[0].fileName).toMatch(/^page-001\.(webp|png)$/);
+    expect(existsSync(join(dir, "dist", "assets", report.pages[0].fileName))).toBe(true);
+    expect(readFileSync(join(dir, "dist", "index.html"), "utf8")).toContain(`assets/${report.pages[0].fileName}`);
+  });
+
+  it("prints structured doctor JSON", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-doctor-"));
+    const source = join(dir, "deck.pdf");
+    writeFileSync(source, "%PDF-1.4\n", "utf8");
+    await expect(runCli(["doctor", "--json", "--input", source])).resolves.toMatchObject({ code: 0 });
+  });
+
+  it("calculates the next patch release tag without creating it", () => {
+    const tags = spawnSync("git", ["tag", "--list", "v[0-9]*.[0-9]*.[0-9]*", "--sort=-v:refname"], { encoding: "utf8" }).stdout
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const latest = tags[0] ?? "v0.0.0";
+    const match = latest.match(/^v(\d+)\.(\d+)\.(\d+)$/);
+    expect(match).not.toBeNull();
+    const expected = `v${match![1]}.${match![2]}.${Number(match![3]) + 1}`;
+    const result = spawnSync("node", ["scripts/release-patch.mjs", "--dry-run", "--skip-verify"], { cwd: process.cwd(), encoding: "utf8" });
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim()).toBe(expected);
+  });
+});
+
+describe("backend registry", () => {
+  it("orders supported backends by platform and priority", () => {
+    type Input = { ext: string };
+    const backends: Array<Backend<Input, string>> = [
+      { id: "low", platform: "all", supports: () => true, priority: () => 1, run: () => "low" },
+      { id: "darwin-high", platform: "darwin", supports: (input) => input.ext === ".pptx", priority: () => 10, run: () => "high" },
+      { id: "linux-only", platform: "linux", supports: () => true, priority: () => 20, run: () => "linux" },
+    ];
+    expect(backendIds(backends, { ext: ".pptx" }, { platform: "darwin", availableCommands: new Set(), availableModules: new Set() })).toEqual(["darwin-high", "low"]);
   });
 });
 

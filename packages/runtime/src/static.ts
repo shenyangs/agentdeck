@@ -21,6 +21,9 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
   const slides = deck.slides.map((slide, index) => renderSlide(deck, slide, index, deck.slides.length, options)).join("\n");
   const overviewSlides = deck.slides.map((slide, index) => renderOverviewSlide(deck, slide, index, options)).join("\n");
   const deckJson = options.includeSourceJson === false ? "" : `<script type="application/json" id="agentdeck-source">${escapeHtml(JSON.stringify(deck))}</script>`;
+  const printHelpNote = profile === "agentdeck"
+    ? "For pixel-perfect export, prefer CLI: <code>agentdeck export deck.md --pdf</code><br>如果要更稳定的高保真导出，优先使用 CLI。"
+    : "For wrapped files, use browser print or re-run wrap with a higher DPI, such as <code>agentdeck wrap input.pdf --dpi 220</code>.<br>封装已有文件时，可用浏览器打印，或重新 wrap 并提高 DPI。";
   const sourceStyles = typeof deck.meta.sourceStyles === "string" && deck.meta.sourceStyles.trim()
     ? `<style data-agentdeck-source-styles>${escapeStyleContent(deck.meta.sourceStyles)}</style>`
     : "";
@@ -112,7 +115,7 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
           <li>Turn off Headers and footers · 关闭页眉和页脚</li>
           <li>Keep margins at None or Default zero-margin mode · 使用无边距或零边距模式</li>
         </ul>
-        <p class="ad-print-help-note">For pixel-perfect export, prefer CLI: <code>agentdeck export deck.md --pdf</code><br>如果要更稳定的高保真导出，优先使用 CLI。</p>
+        <p class="ad-print-help-note">${printHelpNote}</p>
         <div class="ad-print-help-actions">
           <button type="button" data-action="print-close">Close / 关闭</button>
           <button type="button" data-action="print-confirm">Continue / 继续</button>

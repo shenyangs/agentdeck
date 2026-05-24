@@ -5,19 +5,22 @@ AgentDeck's core route is playback compatibility, not PPT generation.
 Use `agentdeck wrap` whenever the user gives an existing presentation artifact:
 
 ```bash
+agentdeck probe deck.pptx
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.ppt --out dist
 agentdeck wrap deck.pdf --out dist
+agentdeck wrap deck.pdf --out dist --pack folder
 agentdeck wrap deck.html --out dist
 agentdeck wrap deck.html --out dist --html-strategy raster
+agentdeck verify dist/index.html
 ```
 
 Compatibility model:
 
 - HTML input: preserve detected slide containers and add the AgentDeck player.
 - Full-screen HTML player input: rasterize the original pages and add the AgentDeck player.
-- PDF input: render every page to a high-resolution PNG and inline those pages in one HTML file.
-- PPT/PPTX input: convert through LibreOffice/soffice to PDF, then render every page to PNG.
+- PDF input: render every page to a high-resolution image and inline those pages in one HTML file.
+- Office input: convert through LibreOffice/soffice, macOS Keynote/Quick Look, or Windows Office COM to PDF, then render every page to an inline image.
 - No layout rewriting, no content interpretation, no template migration.
 
 This is playback-level compatibility. It does not preserve editable PowerPoint objects, macros, original animation timelines, or Office-only interactive features.
@@ -43,11 +46,41 @@ PDF render backends:
 
 The agent should read `asset-report.json` to see which backend actually rendered the pages.
 
+Probe and verify loop:
+
+- Start with `agentdeck probe input`.
+- If the probe reports usable dependencies, run `agentdeck wrap input --out dist`.
+- `wrap` runs lightweight verification by default; run `agentdeck verify dist/index.html --json` again when you need an explicit report.
+- Read `verify-report.json`; retry only when it reports a concrete failure such as a tiny slide, broken image, or bad navigation.
+- If `verify` passes, do not keep modifying the source presentation.
+
+Reports are schema-versioned. Prefer reading:
+
+- `schemaVersion`
+- `source.extension`
+- `source.sha256`
+- `environment.availableBackends`
+- `pipeline[]`
+- `output`
+- `qualitySignals`
+
+Output quality flags:
+
+- Use `--fit contain` by default.
+- Use `--fit width` for document pages that should fill horizontal space.
+- Use `--image-format webp --quality 82` when the single HTML is too large.
+- Use `--max-width`, `--max-output-mb`, and `--size-budget` when the target is email, chat, or mobile sharing.
+- Use `--pack folder` when a deck is too large for comfortable single-file sharing.
+- Use `--no-verify` only for batch processing where a separate verify pass follows.
+
 Adaptive HTML handling:
 
 - Start with `agentdeck wrap deck.html --out dist`.
 - Read `dist/compat-report.json`.
 - If `selectedStrategy` is `raster`, the CLI already detected a full-screen player or DOM extraction risk.
+- Read `captureStrategy` in `compat-report.json`; it records whether hash, keyboard, or scroll navigation was used for screenshots.
+- Read `adapterId`; first-class adapters include generic section, reveal-style, marp-style, swiper-style, and canvas single-page.
+- Remote network requests are blocked during raster capture unless `--allow-network` is explicitly passed.
 - If `selectedStrategy` is `dom` but the visual result is tiny, blank, clipped, or page counts are wrong, retry with `--html-strategy raster`.
 - If `selectedStrategy` is `raster` but the user needs selectable DOM text more than visual fidelity, retry with `--html-strategy dom` and explain the tradeoff.
 

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Horizontal Transform Smoke</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #deck { width: 300vw; height: 100vh; display: flex; transition: transform .2s ease; }
+    .slide { width: 100vw; height: 100vh; flex: 0 0 100vw; display: grid; place-items: center; font: 72px system-ui; }
+  </style>
+</head>
+<body>
+  <div id="deck">
+    <section class="slide">A</section>
+    <section class="slide">B</section>
+    <section class="slide">C</section>
+  </div>
+  <script>
+    let index = 0;
+    function go(next) {
+      index = Math.max(0, Math.min(2, next));
+      document.querySelector("#deck").style.transform = `translateX(${-index * 100}vw)`;
+    }
+    addEventListener("hashchange", () => go(Number(location.hash.replace(/\D/g, "")) - 1 || 0));
+    addEventListener("keydown", (event) => { if (event.key === "ArrowRight") go(index + 1); });
+  </script>
+</body>
+</html>
