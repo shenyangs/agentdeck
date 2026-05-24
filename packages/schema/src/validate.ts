@@ -20,13 +20,6 @@ export function validateDeck(
       diagnostics.push({ level: "error", code: "meta.outputs", message: `Unsupported output: ${output}.` });
     }
   }
-  if (deck.meta.compatibility === "swiss-locked" && deck.meta.theme !== "swiss") {
-    diagnostics.push({
-      level: "warning",
-      code: "meta.compatibility.theme",
-      message: "swiss-locked compatibility works best with theme: swiss.",
-    });
-  }
   if (deck.meta.mode !== "audience" && !["presenter", "creator"].includes(deck.meta.mode)) {
     diagnostics.push({ level: "error", code: "meta.mode", message: "mode must be audience, presenter, or creator." });
   }

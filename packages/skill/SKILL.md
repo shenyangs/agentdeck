@@ -1,57 +1,46 @@
 ---
 name: agentdeck
-description: Wrap or build presentation decks into enhanced single-file HTML with AgentDeck. Use when the user wants to package output from any PPT skill, existing HTML slides, Markdown decks, or agent-created presentations into one playable/exportable HTML file.
+description: Wrap existing PPT, PPTX, PDF, HTML, or Markdown decks into enhanced single-file HTML with AgentDeck. Use when the user wants maximum playback compatibility and does not want redesign, re-layout, or PPT skill routing.
 ---
 
 # AgentDeck
 
-AgentDeck is a packaging and playback layer, not a replacement for PPT skills or visual template authors.
+AgentDeck is a single-file HTML presentation player and delivery layer.
 
-Use it to turn decks from any source into a shareable single-file HTML with enhanced presentation controls. External PPT skills own their own aesthetics, templates, and generation logic; AgentDeck only wraps, validates, imports, exports, or plays their output.
+It does not help users choose PPT skills, imitate template systems, or redesign slides. Its job is to take an existing presentation artifact and make it playable, shareable, and exportable in one HTML file.
 
 ## Workflow
 
-1. If the user already has a satisfying HTML deck, run `agentdeck wrap-html path/to/index.html --out dist`.
-2. If the user provides Markdown, PDF, Office PPT, Word, source materials, or only an idea/brief, run `agentdeck skills detect`.
-3. If exactly one known PPT skill is installed, tell the user which one was found, who authored it, and what license boundary applies; then use it.
-4. If multiple known PPT skills are installed, ask the user to choose before generation. Do not silently pick the visual system.
-5. If no known PPT skill is installed, run `agentdeck skills recommend path/to/input --agent codex|claude` and explain the recommended third-party skill.
-6. Install or invoke a third-party skill only after the user confirms its source and license boundary.
-7. After the third-party skill generates HTML, run `agentdeck wrap-html path/to/index.html --out dist`.
-8. If no external skill is needed, write or update `deck.md`, then run `agentdeck lint deck.md` and `agentdeck build deck.md --single-html`.
-9. Review the generated `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and print/PDF.
-10. Report compatibility risks as risks in the source deck; do not claim third-party template work as AgentDeck's own design.
+1. If the user provides `.ppt`, `.pptx`, `.pdf`, `.html`, or `.htm`, run `agentdeck wrap path/to/file --out dist`.
+2. If the user provides a Markdown deck, run `agentdeck lint deck.md`, then `agentdeck build deck.md --single-html --out dist`.
+3. Review `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, and print/PDF.
+4. If Office/PDF conversion fails, report the converter issue and the source file path. Do not rewrite the deck as a workaround unless the user asks.
 
 ## Commands
 
 ```bash
-agentdeck wrap-html path/to/index.html --out dist
-agentdeck skills list
-agentdeck skills detect
-agentdeck skills recommend path/to/content.md --agent codex
-agentdeck skills install guizang-ppt-skill
+agentdeck wrap deck.pptx --out dist
+agentdeck wrap deck.pdf --out dist
+agentdeck wrap deck.html --out dist
+agentdeck wrap-html deck.html --out dist
 agentdeck init my-deck --theme swiss
 agentdeck lint my-deck/deck.md
 agentdeck build my-deck/deck.md --single-html --out my-deck/dist
 agentdeck export my-deck/deck.md --pdf --png --long-image --grid9 --out my-deck/dist
-agentdeck compat swiss-locked path/to/index.html
-agentdeck import-swiss-locked path/to/index.html --out deck.md
+agentdeck doctor
 ```
 
 ## References
 
+- Read `references/file-compat.md` when wrapping PPT, PPTX, PDF, or HTML files.
 - Read `references/dsl.md` when creating or editing `deck.md`.
-- Read `references/layouts.md` when choosing layouts or fixing overflow.
-- Read `references/external-skills.md` when using third-party PPT skills or wrapping their HTML output.
-- Read `references/ppt-skill-ecosystem.md` when choosing among known third-party PPT skills.
-- Read `references/swiss-locked-compat.md` when the deck is based on Swiss locked HTML output.
+- Read `references/layouts.md` when choosing layouts or fixing overflow in Markdown decks.
 
 ## Hard Rules
 
-- Treat existing HTML output as a valid source; do not force every workflow through `deck.md`.
-- Use local assets with stable names under `assets/`.
-- Bind image-heavy pages to explicit image slots.
-- Do not put visible text inside SVG diagrams when export fidelity matters.
-- Do not invent Swiss layouts when importing locked Swiss HTML; preserve `data-layout` and map through compatibility rules.
-- Do not copy, rename, or absorb third-party PPT skill templates into AgentDeck unless the license and user request explicitly allow it.
-- Always distinguish "generated by external skill" from "wrapped by AgentDeck".
+- Do not route users to PPT skills. AgentDeck is a wrapper/player, not a PPT generation router.
+- Do not re-layout Office or PDF input. Render it as pages and wrap the pages.
+- Treat the source file as the source of truth.
+- Prefer raster fidelity for maximum compatibility.
+- Keep the output self-contained whenever possible.
+- Always distinguish "source deck" from "wrapped by AgentDeck".

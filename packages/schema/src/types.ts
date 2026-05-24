@@ -1,16 +1,8 @@
 export type ThemeId = "editorial" | "swiss" | "launch" | "course";
 
-export type ScenarioId =
-  | "media"
-  | "pitch"
-  | "keynote"
-  | "course"
-  | "bid"
-  | "launch-campaign";
-
 export type DeckMode = "audience" | "presenter" | "creator";
 
-export type CompatibilityProfile = "agentdeck" | "external-html" | "swiss-locked";
+export type CompatibilityProfile = "agentdeck" | "external-html" | "rendered-file";
 
 export type OutputFormat =
   | "html"
@@ -39,7 +31,6 @@ export interface DeckMeta {
   theme: ThemeId;
   aspect: "16:9";
   outputs: OutputFormat[];
-  scenario?: ScenarioId;
   audience?: string;
   mode: DeckMode;
   variants: string[];
@@ -154,35 +145,6 @@ export interface DeckDocument {
   meta: DeckMeta;
   slides: Slide[];
   sourcePath?: string;
-}
-
-export interface ScenarioDefinition {
-  id: ScenarioId;
-  title: string;
-  purpose: string;
-  keywords: string[];
-  recommendedTheme: ThemeId;
-  recommendedOutputs: OutputFormat[];
-  variants: string[];
-  requiredBeats: string[];
-  layoutBias: string[];
-}
-
-export interface ScenarioScore {
-  id: ScenarioId;
-  title: string;
-  score: number;
-  confidence: number;
-  matched: string[];
-  requiredBeats: string[];
-  variants: string[];
-}
-
-export interface ScenarioClassification {
-  primary: ScenarioScore;
-  alternatives: ScenarioScore[];
-  needsConfirmation: boolean;
-  reason: string;
 }
 
 export interface LayoutSlot {

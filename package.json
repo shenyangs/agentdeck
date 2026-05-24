@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "AI Agent collaborative HTML slides/deck toolchain.",
+  "description": "Wrap PPT, PDF, HTML, or Markdown decks into one enhanced single-file HTML player.",
   "workspaces": [
     "packages/*"
   ],

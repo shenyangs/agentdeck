@@ -130,7 +130,7 @@ function layout(
       singleHtml: true,
     },
     agentHints,
-    compatibleWith: id === "image-hero" ? ["swiss-locked:S22"] : id === "evidence-grid" ? ["swiss-locked:S15", "swiss-locked:S16"] : [],
+    compatibleWith: [],
   };
 }
 

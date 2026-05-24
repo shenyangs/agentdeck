@@ -1,6 +1,4 @@
 import {
-  classifyDeckScenario,
-  getScenarioDefinition,
   type DeckDocument,
   type DeckMode,
   type Slide,
@@ -19,9 +17,6 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
   const theme = resolveTheme(deck.meta.theme);
   const mode = options.mode ?? deck.meta.mode ?? "audience";
   const profile = options.profile ?? deck.meta.compatibility ?? "agentdeck";
-  const scenario = deck.meta.scenario ? getScenarioDefinition(deck.meta.scenario) : undefined;
-  const classification = classifyDeckScenario(deck);
-  const activeScenario = scenario ?? getScenarioDefinition(classification.primary.id);
   const stats = deckStats(deck);
   const slides = deck.slides.map((slide, index) => renderSlide(deck, slide, index, deck.slides.length, options)).join("\n");
   const overviewSlides = deck.slides.map((slide, index) => renderOverviewSlide(deck, slide, index, options)).join("\n");
@@ -182,13 +177,6 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
         <p class="ad-panel-label">Export Pack</p>
         <div class="ad-chip-row">${deck.meta.outputs.map((output) => `<span>${escapeHtml(output)}</span>`).join("")}</div>
         <code class="ad-command">agentdeck export deck.md --pdf --png --long-image --grid9</code>
-      </section>
-      <section>
-        <p class="ad-panel-label">Optional Preset</p>
-        <p>${escapeHtml(activeScenario.title)} · ${Math.round(classification.primary.confidence * 100)}% confidence</p>
-        <div class="ad-chip-row">${(deck.meta.variants.length ? deck.meta.variants : activeScenario.variants).map((variant) => `<span>${escapeHtml(variant)}</span>`).join("")}</div>
-        <code class="ad-command">agentdeck classify deck.md</code>
-        <code class="ad-command">agentdeck adapt deck.md --scenario ${activeScenario.id}</code>
       </section>
     </aside>
   </div>
@@ -492,9 +480,6 @@ body.is-dock-active .ad-dock,.ad-dock:hover,.ad-dock:focus-within{opacity:1;tran
 .ad-shortcut-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .ad-shortcut-grid div{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--ad-surface);font-size:13px}
 .ad-shortcut-grid kbd{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border:1px solid rgba(0,0,0,.16);border-radius:5px;background:var(--ad-paper);font-family:var(--ad-font-mono);font-size:12px}
-.ad-scenario-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.ad-scenario-grid button{min-height:36px;border:1px solid rgba(0,0,0,.12);border-radius:6px;background:var(--ad-surface);color:var(--ad-ink);cursor:pointer}
-.ad-scenario-grid button.is-active{color:#fff;background:var(--ad-accent)}
 .ad-check-list{display:grid;gap:7px;margin:0;padding:0;list-style:none}
 .ad-check-list li{position:relative;padding-left:18px}
 .ad-check-list li::before{content:"";position:absolute;left:0;top:.58em;width:7px;height:7px;border-radius:999px;background:rgba(0,0,0,.2)}
@@ -512,13 +497,7 @@ body.is-dock-active .ad-dock,.ad-dock:hover,.ad-dock:focus-within{opacity:1;tran
 .ad-panel-hint{font-size:13px!important}
 body[data-deck-mode=presenter] .ad-presenter-panel,body[data-deck-mode=creator] .ad-creator-panel{display:grid}
 body[data-deck-mode=presenter] .ad-stage,body[data-deck-mode=creator] .ad-stage{right:420px}
-body[data-compat-profile=swiss-locked] .ad-slide{box-shadow:none}
-body[data-compat-profile=swiss-locked] .layout-cover{background:#0038ff;color:#fff}
-body[data-compat-profile=swiss-locked] .layout-cover::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.32) 1px,transparent 1.4px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:18px 18px,120px 120px,120px 120px;opacity:.42}
-body[data-compat-profile=swiss-locked] .layout-cover .ad-slide-head::before{content:"DESIGNING AGENTIC PRESENTATIONS";display:block;margin:0 0 88px;color:rgba(255,255,255,.72);font-family:var(--ad-font-mono);font-size:19px;letter-spacing:8px}
-body[data-compat-profile=swiss-locked] .layout-cover .ad-slide-head h1{font-size:124px;font-weight:180;line-height:1.05;max-width:1380px}
-body[data-compat-profile=swiss-locked] .layout-cover .ad-lead,body[data-compat-profile=swiss-locked] .layout-cover .ad-paragraph{color:rgba(255,255,255,.78)}
-body[data-compat-profile=swiss-locked] .layout-cover .ad-brand-line{background:#fff}
+body[data-compat-profile=rendered-file] .ad-slide{box-shadow:none;background:#fff}
 @page{size:20in 11.25in;margin:0}
 @media print{
 html,body{width:1920px!important;height:auto!important;margin:0!important;overflow:visible!important;background:var(--ad-paper)!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}

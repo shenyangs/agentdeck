@@ -1,28 +1,18 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { dirname, extname, isAbsolute, join, resolve } from "node:path";
+import { spawn, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { basename, dirname, extname, isAbsolute, join, parse, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { importExternalHtmlDeck, importSwissLockedHtml, inspectSwissLockedHtml } from "@agentdeck/compat-profiles";
+import { importExternalHtmlDeck } from "@agentdeck/compat-profiles";
 import { renderStandaloneHtml } from "@agentdeck/runtime";
 import {
-  detectInstalledPptSkills,
-  installPptSkill,
-  listPptSkills,
-  recommendPptSkill,
-  shellCommand,
-} from "./pptSkills.js";
-import {
-  adaptDeckMarkdownToScenario,
-  classifyDeckScenario,
   formatDiagnostics,
-  getScenarioDefinition,
   hasErrors,
   parseDeckMarkdown,
   validateDeck,
   type DeckDocument,
   type Diagnostic,
-  type ScenarioId,
 } from "@agentdeck/schema";
 import { layoutRegistry } from "@agentdeck/themes";
 
@@ -41,19 +31,12 @@ const help = `AgentDeck
 Usage:
   agentdeck init [dir] [--theme editorial|swiss|launch|course]
   agentdeck dev [deck.md]
-  agentdeck build [deck.md] [--out dist] [--single-html] [--mode audience|presenter|creator] [--profile agentdeck|swiss-locked]
+  agentdeck build [deck.md] [--out dist] [--single-html] [--mode audience|presenter|creator] [--profile agentdeck|external-html|rendered-file]
   agentdeck export [deck.md] [--pdf] [--png] [--long-image] [--grid9] [--social-pack] [--out dist]
+  agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180]
   agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"]
-  agentdeck skills list
-  agentdeck skills detect
-  agentdeck skills recommend <file|brief> [--agent codex|claude|any]
-  agentdeck skills install <skill-id> [--yes]
-  agentdeck classify [deck.md]
-  agentdeck adapt [deck.md] --scenario media|pitch|keynote|course|bid|launch-campaign [--out deck.md]
   agentdeck lint [deck.md]
   agentdeck doctor
-  agentdeck compat swiss-locked <index.html> [--strict] [--visual]
-  agentdeck import-swiss-locked <index.html> [--out deck.md]
 `;
 
 export async function runCli(argv = process.argv.slice(2)): Promise<CliResult> {
@@ -68,14 +51,10 @@ export async function runCli(argv = process.argv.slice(2)): Promise<CliResult> {
     if (command === "lint") return commandLint(rest);
     if (command === "build") return commandBuild(rest);
     if (command === "export") return commandExport(rest);
+    if (command === "wrap") return commandWrap(rest);
     if (command === "wrap-html") return commandWrapHtml(rest);
-    if (command === "skills") return commandSkills(rest);
-    if (command === "classify") return commandClassify(rest);
-    if (command === "adapt") return commandAdapt(rest);
     if (command === "dev") return commandDev(rest);
     if (command === "doctor") return commandDoctor();
-    if (command === "compat") return commandCompat(rest);
-    if (command === "import-swiss-locked") return commandImportSwissLocked(rest);
 
     console.error(`Unknown command: ${command}\n`);
     console.error(help);
@@ -84,6 +63,30 @@ export async function runCli(argv = process.argv.slice(2)): Promise<CliResult> {
     console.error(error instanceof Error ? error.message : String(error));
     return { code: 1 };
   }
+}
+
+function commandWrap(args: string[]): CliResult {
+  const options = parseArgs(args);
+  const file = options.positionals[0];
+  if (!file) {
+    console.error('Usage: agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx> [--out dist] [--title "Deck title"] [--dpi 180]');
+    return { code: 2 };
+  }
+  const sourcePath = resolve(file);
+  const ext = extname(sourcePath).toLowerCase();
+  if (ext === ".html" || ext === ".htm") return commandWrapHtml(args);
+  if (ext === ".pdf") return commandWrapRenderedFile(sourcePath, options);
+  if (ext === ".ppt" || ext === ".pptx") {
+    const tempDir = mkdtempSync(join(tmpdir(), "agentdeck-office-"));
+    try {
+      const pdfPath = convertOfficeToPdf(sourcePath, tempDir);
+      return commandWrapRenderedFile(pdfPath, options, sourcePath);
+    } finally {
+      if (!options.flags["keep-temp"]) rmSync(tempDir, { recursive: true, force: true });
+    }
+  }
+  console.error(`Unsupported input for wrap: ${ext || basename(sourcePath)}. Use HTML, PDF, PPT, or PPTX.`);
+  return { code: 2 };
 }
 
 function commandWrapHtml(args: string[]): CliResult {
@@ -117,103 +120,6 @@ function commandWrapHtml(args: string[]): CliResult {
   console.log(`Wrote ${assetReportPath}`);
   if (imported.warnings.length) printDiagnostics(imported.warnings);
   return { code: imported.warnings.some((diagnostic) => diagnostic.level === "error") ? 1 : 0 };
-}
-
-function commandSkills(args: string[]): CliResult {
-  const [subcommand, ...rest] = args;
-  const options = parseArgs(rest);
-  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-    console.log(`AgentDeck third-party PPT skill helpers
-
-Usage:
-  agentdeck skills list
-  agentdeck skills detect
-  agentdeck skills recommend <file|brief> [--agent codex|claude|any]
-  agentdeck skills install <skill-id> [--yes]
-
-These commands only recommend, detect, or install external skills after user confirmation.
-AgentDeck does not own the third-party skill's visual system, templates, or generation logic.`);
-    return { code: 0 };
-  }
-
-  if (subcommand === "list") {
-    for (const skill of listPptSkills()) {
-      console.log(`${skill.id}`);
-      console.log(`  name: ${skill.name}`);
-      console.log(`  author: ${skill.author}`);
-      console.log(`  repo: ${skill.repo}`);
-      console.log(`  license: ${skill.license}`);
-      console.log(`  output: ${skill.output}`);
-      console.log(`  best for: ${skill.bestFor.join(" / ")}`);
-      console.log(`  install: ${skill.install.map((install) => shellCommand(install.command)).join(" OR ")}`);
-      console.log("");
-    }
-    return { code: 0 };
-  }
-
-  if (subcommand === "detect") {
-    const installed = detectInstalledPptSkills();
-    const known = installed.filter((skill) => skill.registry);
-    if (!known.length) {
-      console.log(`Found ${installed.length} installed skill folder(s), but no known PPT skills.`);
-      console.log("Searched .agents/skills, .claude/skills, ~/.agents/skills, ~/.codex/skills, and ~/.claude/skills.");
-      return { code: 3 };
-    }
-    console.log(`Found ${known.length} known PPT skill(s) out of ${installed.length} installed skill folder(s):`);
-    for (const skill of known) {
-      console.log(`- ${skill.name} (${skill.path}) by ${skill.registry?.author}`);
-    }
-    if (known.length > 1) {
-      console.log("Multiple known PPT skills are installed. Ask the user to choose before generating the deck.");
-      return { code: 3 };
-    }
-    console.log("One known PPT skill is installed. It can be used directly after confirming the source and license boundary.");
-    return { code: 0 };
-  }
-
-  if (subcommand === "recommend") {
-    const input = options.positionals.join(" ") || undefined;
-    const recommendation = recommendPptSkill(input, { agent: stringFlag(options.flags.agent) });
-    console.log(`Route: ${recommendation.route}`);
-    console.log(`Source kind: ${recommendation.sourceKind}`);
-    if (recommendation.installed.length) {
-      console.log("Installed PPT skills:");
-      recommendation.installed.forEach((skill) => console.log(`- ${skill.name} (${skill.path})`));
-    } else {
-      console.log("Installed PPT skills: none detected");
-    }
-    if (recommendation.primary) {
-      console.log(`Recommended: ${recommendation.primary.name}`);
-      console.log(`Author: ${recommendation.primary.author}`);
-      console.log(`Repo: ${recommendation.primary.repo}`);
-      console.log(`License: ${recommendation.primary.license}`);
-      console.log(`Attribution: ${recommendation.primary.attribution}`);
-    }
-    if (recommendation.alternatives.length) {
-      console.log("Alternatives:");
-      recommendation.alternatives.forEach((skill) => console.log(`- ${skill.name} by ${skill.author}`));
-    }
-    console.log("Reasons:");
-    recommendation.reasons.forEach((reason) => console.log(`- ${reason}`));
-    console.log("Next steps:");
-    recommendation.nextSteps.forEach((step) => console.log(`- ${step}`));
-    if (recommendation.needsUserChoice) console.log("User choice required before generation.");
-    return { code: recommendation.needsUserChoice ? 3 : 0 };
-  }
-
-  if (subcommand === "install") {
-    const id = options.positionals[0];
-    if (!id) {
-      console.error("Usage: agentdeck skills install <skill-id> [--yes]");
-      return { code: 2 };
-    }
-    const result = installPptSkill(id, { yes: Boolean(options.flags.yes), method: stringFlag(options.flags.method) });
-    console.log(result.message);
-    return { code: result.code };
-  }
-
-  console.error(`Unknown skills command: ${subcommand}`);
-  return { code: 2 };
 }
 
 function commandInit(args: string[]): CliResult {
@@ -272,31 +178,6 @@ async function commandExport(args: string[]): Promise<CliResult> {
   return { code: 0 };
 }
 
-function commandClassify(args: string[]): CliResult {
-  const deck = loadDeck(args[0] ?? "deck.md");
-  const result = classifyDeckScenario(deck);
-  console.log(JSON.stringify(result, null, 2));
-  return { code: result.needsConfirmation ? 3 : 0 };
-}
-
-function commandAdapt(args: string[]): CliResult {
-  const options = parseArgs(args);
-  const deckPath = resolve(options.positionals[0] ?? "deck.md");
-  const scenario = stringFlag(options.flags.scenario) as ScenarioId | undefined;
-  if (!scenario) {
-    throw new Error("Usage: agentdeck adapt <deck.md> --scenario media|pitch|keynote|course|bid|launch-campaign [--out deck.md]");
-  }
-  const definition = getScenarioDefinition(scenario);
-  const source = readFileSync(deckPath, "utf8");
-  const out = resolve(String(options.flags.out ?? deckPath));
-  const adaptation = adaptDeckMarkdownToScenario(source, scenario, deckPath);
-  writeFileSync(out, adaptation.markdown, "utf8");
-  console.log(`Adapted ${deckPath} to scenario ${definition.id} (${definition.title})`);
-  console.log(`Generated ${adaptation.slideCount} slide(s): ${adaptation.insertedBeats.join(" / ")}`);
-  console.log(`Wrote ${out}`);
-  return { code: 0 };
-}
-
 function commandDev(args: string[]): CliResult {
   const deckPath = resolve(args[0] ?? "deck.md");
   const deck = loadDeck(deckPath);
@@ -322,46 +203,31 @@ function commandDev(args: string[]): CliResult {
 }
 
 function commandDoctor(): CliResult {
+  const office = findCommand(["/Applications/LibreOffice.app/Contents/MacOS/soffice", "soffice", "libreoffice"]);
+  const pdfRenderer = findCommand(["pdftoppm"]);
   const checks = [
     ["Node", process.version],
     ["Working directory", process.cwd()],
+    ["Office converter", office ? describeOfficeConverter(office) : "not found; PPT/PPTX wrap needs LibreOffice/soffice"],
+    ["PDF renderer", pdfRenderer ? describePdfRenderer(pdfRenderer) : "not found; PDF/PPT wrap needs poppler pdftoppm"],
     ["Playwright", hasNodeModule("playwright") ? "available" : "not installed; export will ask for it"],
   ];
   for (const [name, value] of checks) console.log(`${name}: ${value}`);
   return { code: 0 };
 }
 
-function commandCompat(args: string[]): CliResult {
-  const options = parseArgs(args);
-  const [target, file] = options.positionals;
-  if (target !== "swiss-locked" || !file) {
-    console.error("Usage: agentdeck compat swiss-locked <index.html> [--strict] [--visual]");
-    return { code: 2 };
-  }
-  const html = readFileSync(resolve(file), "utf8");
-  const report = inspectSwissLockedHtml(html, { visual: Boolean(options.flags.visual) });
-  printDiagnostics(report.diagnostics);
-  console.log(`Slides: ${report.slideCount}`);
-  console.log(`Layouts: ${Object.entries(report.layoutCounts).map(([layout, count]) => `${layout}=${count}`).join(", ") || "none"}`);
-  console.log(`Compatibility levels: ${report.levels.join(", ")}`);
-  const hasWarnings = report.diagnostics.some((diagnostic) => diagnostic.level === "warning");
-  return { code: hasErrors(report.diagnostics) || (Boolean(options.flags.strict) && hasWarnings) ? 1 : 0 };
+function describeOfficeConverter(commandPath: string): string {
+  const probe = spawnSync(commandPath, ["--version"], { encoding: "utf8", timeout: 5_000 });
+  if (probe.error) return `${commandPath} (${probe.error.message.includes("ETIMEDOUT") ? "version check timed out" : `version check failed: ${probe.error.message}`})`;
+  const output = `${probe.stdout || ""}${probe.stderr || ""}`.trim();
+  return output ? `${commandPath} (${output.split(/\r?\n/)[0]})` : `${commandPath} (found; version output unavailable)`;
 }
 
-function commandImportSwissLocked(args: string[]): CliResult {
-  const options = parseArgs(args);
-  const file = options.positionals[0];
-  if (!file) {
-    console.error("Usage: agentdeck import-swiss-locked <index.html> [--out deck.md]");
-    return { code: 2 };
-  }
-  const html = readFileSync(resolve(file), "utf8");
-  const result = importSwissLockedHtml(html, file);
-  const out = resolve(String(options.flags.out ?? "deck.md"));
-  writeFileSync(out, result.markdown, "utf8");
-  console.log(`Imported ${result.slideCount} slide(s) into ${out}`);
-  if (result.warnings.length) printDiagnostics(result.warnings);
-  return { code: 0 };
+function describePdfRenderer(commandPath: string): string {
+  const probe = spawnSync(commandPath, ["-v"], { encoding: "utf8", timeout: 5_000 });
+  if (probe.error) return `${commandPath} (${probe.error.message.includes("ETIMEDOUT") ? "version check timed out" : `version check failed: ${probe.error.message}`})`;
+  const output = `${probe.stdout || ""}${probe.stderr || ""}`.trim();
+  return output ? `${commandPath} (${output.split(/\r?\n/)[0]})` : `${commandPath} (found; version output unavailable)`;
 }
 
 function buildDeck(deckPathInput: string, outDir: string, singleHtml: boolean, renderOptions: { mode?: string; profile?: string }): BuildResult {
@@ -406,6 +272,157 @@ function buildDeck(deckPathInput: string, outDir: string, singleHtml: boolean, r
   writeFileSync(htmlPath, html, "utf8");
   writeFileSync(assetReportPath, JSON.stringify(assetReport, null, 2), "utf8");
   return { deck, htmlPath, assetReportPath };
+}
+
+function commandWrapRenderedFile(pdfPath: string, options: { positionals: string[]; flags: Record<string, string | boolean> }, originalSourcePath = pdfPath): CliResult {
+  const outDir = resolve(String(options.flags.out ?? "dist"));
+  const title = stringFlag(options.flags.title) ?? parse(originalSourcePath).name;
+  const dpi = Number(options.flags.dpi ?? 180);
+  const tempDir = mkdtempSync(join(tmpdir(), "agentdeck-pages-"));
+  try {
+    const pages = renderPdfToPngPages(pdfPath, tempDir, dpi);
+    const deck = renderedFileDeck(title, originalSourcePath, pages);
+    mkdirSync(outDir, { recursive: true });
+    const outputHtml = renderStandaloneHtml(deck, {
+      includeSourceJson: false,
+      mode: "audience",
+      profile: "rendered-file",
+    });
+    const outputPath = join(outDir, "index.html");
+    const assetReportPath = join(outDir, "asset-report.json");
+    writeFileSync(outputPath, outputHtml, "utf8");
+    writeFileSync(
+      assetReportPath,
+      JSON.stringify(
+        {
+          source: originalSourcePath,
+          renderedFrom: pdfPath,
+          fidelity: "raster",
+          dpi,
+          pages: pages.map((page) => ({ index: page.index, bytes: page.bytes })),
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+    console.log(`Wrapped ${pages.length} rendered page(s) into ${outputPath}`);
+    console.log(`Wrote ${assetReportPath}`);
+    return { code: 0 };
+  } finally {
+    if (!options.flags["keep-temp"]) rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+function convertOfficeToPdf(sourcePath: string, outDir: string): string {
+  const converter = findCommand(["/Applications/LibreOffice.app/Contents/MacOS/soffice", "soffice", "libreoffice"]);
+  if (!converter) throw new Error("PPT/PPTX wrapping requires LibreOffice/soffice. Install LibreOffice and retry.");
+  const userProfile = join(outDir, "libreoffice-profile");
+  mkdirSync(userProfile, { recursive: true });
+  const result = spawnSync(
+    converter,
+    [
+      `-env:UserInstallation=${pathToFileURL(userProfile).href}`,
+      "--headless",
+      "--norestore",
+      "--nodefault",
+      "--nolockcheck",
+      "--nofirststartwizard",
+      "--convert-to",
+      "pdf",
+      "--outdir",
+      outDir,
+      sourcePath,
+    ],
+    { encoding: "utf8", timeout: 120_000 },
+  );
+  if (result.error) {
+    const timedOut = result.error.message.includes("ETIMEDOUT") || result.signal === "SIGTERM";
+    throw new Error(timedOut ? "Office to PDF conversion timed out after 120 seconds." : `Office to PDF conversion failed: ${result.error.message}`);
+  }
+  if (result.status !== 0) {
+    throw new Error(`Office to PDF conversion failed.\n${result.stderr || result.stdout || ""}`.trim());
+  }
+  const expected = join(outDir, `${parse(sourcePath).name}.pdf`);
+  if (existsSync(expected)) return expected;
+  const pdf = readdirSync(outDir).find((file) => file.toLowerCase().endsWith(".pdf"));
+  if (!pdf) throw new Error("Office to PDF conversion did not produce a PDF.");
+  return join(outDir, pdf);
+}
+
+function renderPdfToPngPages(pdfPath: string, outDir: string, dpi: number): Array<{ index: number; src: string; bytes: number }> {
+  const renderer = findCommand(["pdftoppm"]);
+  if (!renderer) throw new Error("PDF wrapping requires pdftoppm from poppler. Install poppler and retry.");
+  const prefix = join(outDir, "page");
+  const result = spawnSync(renderer, ["-png", "-r", String(dpi), pdfPath, prefix], { encoding: "utf8" });
+  if (result.status !== 0) {
+    throw new Error(`PDF rendering failed.\n${result.stderr || result.stdout || ""}`.trim());
+  }
+  const files = readdirSync(outDir)
+    .filter((file) => /^page-\d+\.png$/i.test(file))
+    .sort((a, b) => pageNumber(a) - pageNumber(b));
+  if (!files.length) throw new Error("PDF rendering produced no pages.");
+  return files.map((file, index) => {
+    const imagePath = join(outDir, file);
+    const data = readFileSync(imagePath);
+    return {
+      index: index + 1,
+      src: `data:image/png;base64,${data.toString("base64")}`,
+      bytes: data.byteLength,
+    };
+  });
+}
+
+function renderedFileDeck(title: string, sourcePath: string, pages: Array<{ index: number; src: string }>): DeckDocument {
+  return {
+    meta: {
+      title,
+      subtitle: `Rendered from ${basename(sourcePath)}`,
+      author: "Source file",
+      lang: "zh-CN",
+      theme: "swiss",
+      aspect: "16:9",
+      outputs: ["html", "pdf", "png"],
+      mode: "audience",
+      variants: [],
+      compatibility: "rendered-file",
+      filenameStem: slugifyLocal(title),
+      sourceStyles: ".layout-html-import .ad-html-block img.ad-imported-page{display:block;width:100%;height:100%;object-fit:contain;background:#fff}",
+    },
+    slides: pages.map((page) => ({
+      id: `page-${page.index}`,
+      title: `Page ${page.index}`,
+      layout: "html-import",
+      blocks: [{ type: "html" as const, html: `<img class="ad-imported-page" src="${page.src}" alt="Page ${page.index}">`, source: sourcePath }],
+      raw: "",
+    })),
+  };
+}
+
+function findCommand(candidates: string[]): string | undefined {
+  for (const candidate of candidates) {
+    if (candidate.includes("/") && existsSync(candidate)) return candidate;
+    const result = spawnSync("sh", ["-lc", `command -v ${shellQuote(candidate)}`], { encoding: "utf8" });
+    const found = result.stdout.trim();
+    if (result.status === 0 && found) return found;
+  }
+  return undefined;
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function pageNumber(file: string): number {
+  return Number(file.match(/-(\d+)\.png$/i)?.[1] ?? 0);
+}
+
+function slugifyLocal(value: string): string {
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "deck";
 }
 
 async function exportWithPlaywright(
@@ -607,28 +624,30 @@ compatibility: agentdeck
 layout: cover
 note: 开场说明 AgentDeck 只负责封装与演示增强
 
-第三方 Skill 负责内容与视觉，AgentDeck 负责单文件 HTML 播放器
+已有 PPT、PDF、HTML 负责内容，AgentDeck 负责单文件 HTML 播放器
 
 # 核心边界
 layout: statement
 note: 明确 AgentDeck 的产品哲学
 
-不替代 PPT Skill，不抢美化工作，只把各种 deck 变成可演示、可分享、可导出的单 HTML
+不重排、不改编、不替用户做 PPT，只把已有演示文件变成可播放、可分享、可导出的单 HTML
 
 # 两种入口
 layout: steps
 note: 用户可以从 Markdown 或已有 HTML 进入
 
 - agentdeck build deck.md
-- agentdeck wrap-html path/to/index.html
+- agentdeck wrap deck.pdf
+- agentdeck wrap deck.pptx
+- agentdeck wrap deck.html
 - 获得同一套增强播放能力
 
 # 收束
 layout: closing
 
-- 尊重外部作者
-- 兼容多种来源
-- 一个 HTML 走天下
+- 原样兼容
+- 增强播放
+- 单文件交付
 `;
 }
 

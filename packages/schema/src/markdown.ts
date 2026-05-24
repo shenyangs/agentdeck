@@ -4,7 +4,6 @@ import type {
   DeckMode,
   CompatibilityProfile,
   OutputFormat,
-  ScenarioId,
   Slide,
   SlideBlock,
   ThemeId,
@@ -15,9 +14,8 @@ const SLIDE_HEADING_RE = /^#\s+(.+)$/gm;
 const DIRECTIVE_RE = /^([a-zA-Z][\w-]*)\s*:\s*(.+)$/;
 const DEFAULT_OUTPUTS: OutputFormat[] = ["html", "pdf", "png", "long-image", "grid9"];
 const THEME_IDS = new Set(["editorial", "swiss", "launch", "course"]);
-const SCENARIO_IDS = new Set(["media", "pitch", "keynote", "course", "bid", "launch-campaign"]);
 const DECK_MODES = new Set(["audience", "presenter", "creator"]);
-const COMPATIBILITY_PROFILES = new Set(["agentdeck", "external-html", "swiss-locked"]);
+const COMPATIBILITY_PROFILES = new Set(["agentdeck", "external-html", "rendered-file"]);
 
 export function parseDeckMarkdown(markdown: string, sourcePath?: string): DeckDocument {
   const frontmatter = markdown.match(FRONTMATTER_RE);
@@ -86,7 +84,6 @@ function normalizeMeta(raw: Record<string, unknown>): DeckMeta {
     theme: theme as ThemeId,
     aspect: "16:9",
     outputs,
-    scenario: scenarioValue(raw.scenario),
     audience: stringValue(raw.audience),
     mode: modeValue(raw.mode),
     variants: arrayStringValue(raw.variants),
@@ -101,10 +98,6 @@ function stringValue(value: unknown): string | undefined {
 
 function arrayStringValue(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [];
-}
-
-function scenarioValue(value: unknown): ScenarioId | undefined {
-  return typeof value === "string" && SCENARIO_IDS.has(value) ? (value as ScenarioId) : undefined;
 }
 
 function modeValue(value: unknown): DeckMode {

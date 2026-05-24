@@ -8,10 +8,9 @@ describe("parseDeckMarkdown", () => {
 title: AI Agent 内容生产新工作流
 theme: swiss
 outputs: [html, pdf, grid9, social-pack]
-scenario: launch-campaign
 mode: creator
 variants: [executive-briefing, social-pack]
-compatibility: swiss-locked
+compatibility: rendered-file
 ---
 
 # 为什么现在需要新的 slides 工具
@@ -29,10 +28,9 @@ AI Agent 不缺写作能力，缺的是可验证的视觉生产协议
 
     expect(deck.meta.theme).toBe("swiss");
     expect(deck.meta.outputs).toEqual(["html", "pdf", "grid9", "social-pack"]);
-    expect(deck.meta.scenario).toBe("launch-campaign");
     expect(deck.meta.mode).toBe("creator");
     expect(deck.meta.variants).toEqual(["executive-briefing", "social-pack"]);
-    expect(deck.meta.compatibility).toBe("swiss-locked");
+    expect(deck.meta.compatibility).toBe("rendered-file");
     expect(deck.slides).toHaveLength(2);
     expect(deck.slides[0].layout).toBe("statement");
     expect(deck.slides[0].note).toContain("开场");
