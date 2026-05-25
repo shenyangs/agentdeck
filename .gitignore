@@ -12,3 +12,8 @@ examples/**/*.png
 examples/**/*.pdf
 
 .DS_Store
+
+# Local social preview cards. README uses the smaller screenshots above; keep
+# these private/local unless explicitly preparing a social release asset.
+docs/assets/screenshots/*social-card.png
+docs/assets/social/

@@ -4,7 +4,21 @@ AgentDeck is a **single-file HTML playback and delivery layer** for presentation
 
 Positioning:
 
-**Wrap PPT, PDF, HTML, or Markdown presentations into one playable, shareable, exportable single-file HTML.**
+**Wrap HTML, PDF, PPT, or Markdown presentations into one playable, shareable, exportable single-file HTML.**
+
+## Screenshots
+
+| Light mode | Dark mode |
+|---|---|
+| ![AgentDeck light mode](./docs/assets/screenshots/agentdeck-light-mode.png) | ![AgentDeck dark mode](./docs/assets/screenshots/agentdeck-dark-mode.png) |
+
+| Overview | Compare View |
+|---|---|
+| ![AgentDeck overview](./docs/assets/screenshots/agentdeck-overview.png) | ![AgentDeck compare view](./docs/assets/screenshots/agentdeck-compare-view.png) |
+
+| Blank screen | Spotlight |
+|---|---|
+| ![AgentDeck blank screen](./docs/assets/screenshots/agentdeck-blank-screen.png) | ![AgentDeck spotlight](./docs/assets/screenshots/agentdeck-spotlight.png) |
 
 ## Product Boundary
 
@@ -12,12 +26,35 @@ AgentDeck does not make slides for users, choose third-party PPT skills, imitate
 
 It does one lower-level job:
 
-- accept existing `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.pdf`, `.html`, or `.md` files
+- accept existing `.html`, `.pdf`, `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, or `.md` files
 - preserve the source visuals as much as possible
 - generate one self-contained `index.html`
 - add the AgentDeck presenter controls
 
 The product focus is compatibility, playback, sharing, and export.
+
+## Current Support Maturity
+
+AgentDeck is currently most stable and most recommended for:
+
+- existing HTML presentation -> enhanced single-file HTML player
+- existing PDF -> enhanced single-file HTML player
+
+These are the primary routes today. Their goal is high-fidelity playback, sharing, thumbnail overview, blank screen, spotlight, autoplay, print/PDF, and other presentation controls.
+
+`.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, and `.md` are also supported, but they should be treated as experimental compatibility routes:
+
+- Office files depend on local LibreOffice, Keynote, Quick Look, or Windows Office COM to become PDF first.
+- Markdown is a lightweight fallback authoring path, not AgentDeck's primary product promise.
+- These routes prioritize playable delivery, not editable Office compatibility or perfect fidelity for every complex layout.
+
+## Relationship To PPT Design / Generation Skills
+
+AgentDeck does not provide content restructuring, visual design, PPT beautification, or template generation.
+
+If you need to turn ideas, documents, or rough material into a polished deck, use the PPT generation, PPT beautification, or design skill/tool you trust first. Then use AgentDeck to wrap the final HTML, PDF, or Office output into one enhanced single-file HTML player.
+
+AgentDeck is the presentation delivery layer, not the content creation layer.
 
 ## Compatibility Routes
 
@@ -169,7 +206,7 @@ The generated `dist/index.html` includes:
 - spotlight
 - fullscreen
 - browser print / PDF
-- dark player chrome by default, with Light still selectable
+- light player chrome by default, with Dark still selectable
 
 Shortcuts:
 
