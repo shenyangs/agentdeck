@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="AgentDeck">
+  <meta property="og:title" content="AgentDeck">
+  <meta property="og:description" content="优先把 HTML / PDF 演示材料变成可播放的单文件 HTML">
+  <title>AgentDeck</title>
+  <style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ad-surface);color:var(--ad-ink);font-family:var(--ad-font-sans);font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button{font:inherit}
+body[data-color-mode=dark]{--ad-paper:#171a18;--ad-ink:#eff4ef;--ad-muted:#b7c2bb;--ad-surface:#101210}
+body[data-color-mode=dark] .ad-toolbar-group{border-color:rgba(255,255,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.agentdeck-app{position:relative;width:100vw;height:100vh;background:var(--ad-surface)}
+.ad-dock-zone{position:absolute;left:0;right:0;bottom:0;z-index:69;height:32px;pointer-events:none}
+body.is-dock-autohide .ad-dock-zone,body.is-fullscreen-toolbar-hidden .ad-dock-zone{pointer-events:auto}
+.ad-dock{position:absolute;z-index:70;left:50%;bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px;max-width:calc(100vw - 28px);opacity:.9;filter:blur(0);transform:translate3d(-50%,0,0) scale(1);transform-origin:50% 100%;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1),filter .42s cubic-bezier(.22,1,.36,1);will-change:opacity,transform,filter}
+body.is-dock-active .ad-dock,.ad-dock:hover,.ad-dock:focus-within{opacity:1;filter:blur(0);transform:translate3d(-50%,-4px,0) scale(1)}
+body.is-dock-hidden .ad-dock{opacity:0;filter:blur(6px);pointer-events:none;transform:translate3d(-50%,36px,0) scale(.985)}
+.ad-toolbar-group{display:flex;align-items:center;gap:8px;height:42px;padding:4px;color:var(--ad-muted);border:1px solid rgba(0,0,0,.12);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 90%,transparent);box-shadow:0 10px 24px rgba(20,24,21,.08);backdrop-filter:blur(16px)}
+.ad-toolbar-group--nav{padding:4px 8px}
+.ad-dock button{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;min-width:32px;padding:0 11px;border:0;border-radius:6px;outline:0;background:transparent;color:var(--ad-muted);font-size:13px;font-weight:760;line-height:1;cursor:pointer}
+.ad-dock button:hover,.ad-dock button:focus-visible,.ad-dock button.is-active{color:var(--ad-ink);background:var(--ad-surface)}
+.ad-dock button:disabled{cursor:not-allowed;opacity:.36}
+.ad-icon-only{padding:0 10px!important}
+.ad-interval-button{min-width:46px!important;padding:0 10px!important}
+.ad-toolbar-icon{display:inline-flex;margin-left:4px;color:var(--ad-muted)}
+.ad-icon{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.ad-segmented{display:flex;gap:2px}
+.ad-counter{width:54px;text-align:center;color:var(--ad-muted);font-size:13px;font-weight:760}
+.ad-progress{position:absolute;left:0;right:0;bottom:0;z-index:18;height:3px;background:transparent}
+.ad-progress span{display:block;width:0;height:100%;background:var(--ad-accent);transition:width .18s ease}
+.ad-stage{position:absolute;inset:28px 36px 76px;display:flex;align-items:center;justify-content:center}
+.ad-scaled-shell{position:relative;flex:0 0 auto}
+.ad-scaled{position:absolute;top:0;left:0;width:1920px;height:1080px;transform-origin:top left}
+.ad-slide{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--ad-surface) 72%,transparent),transparent 42%),var(--ad-paper);color:var(--ad-ink);box-shadow:0 28px 70px rgba(25,32,28,.12)}
+.ad-content{position:relative;z-index:2;display:grid;grid-template-rows:auto 1fr;gap:54px;width:100%;height:100%;padding:122px 128px 100px}
+.ad-slide-head{max-width:1240px}
+.ad-kicker{margin:0 0 18px;color:var(--ad-accent);font-family:var(--ad-font-mono);font-size:18px;font-weight:800;text-transform:uppercase}
+.ad-slide h1{margin:0;font-size:74px;line-height:1.04;letter-spacing:0;font-weight:760;word-break:keep-all;overflow-wrap:normal}
+[data-theme=swiss] .ad-slide h1{font-weight:260;letter-spacing:0;text-transform:none}
+.ad-lead{max-width:980px;margin:26px 0 0;color:var(--ad-muted);font-size:30px;line-height:1.42}
+.ad-blocks{display:grid;align-content:center;gap:28px;min-height:0}
+.ad-paragraph{max-width:1180px;margin:0;color:var(--ad-ink);font-size:34px;line-height:1.45}
+.ad-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 28px;margin:0;padding:0;list-style:none}
+.ad-list li{min-height:104px;padding:28px 30px;border:1px solid rgba(0,0,0,.12);background:var(--ad-surface);font-size:27px;line-height:1.35}
+.ad-quote{max-width:1220px;margin:0;padding:52px 64px;border-left:10px solid var(--ad-accent);background:var(--ad-surface);font-family:var(--ad-font-serif);font-size:48px;line-height:1.32}
+.ad-quote cite{display:block;margin-top:30px;color:var(--ad-muted);font-family:var(--ad-font-sans);font-size:22px;font-style:normal}
+.ad-image{position:relative;margin:0;overflow:hidden;background:var(--ad-surface);border:1px solid rgba(0,0,0,.1)}
+.ad-image img{display:block;width:100%;height:540px;object-fit:cover}
+.ad-image figcaption{position:absolute;left:24px;bottom:20px;padding:8px 12px;background:rgba(0,0,0,.62);color:#fff;font-size:18px}
+.ad-table{width:100%;border-collapse:collapse;background:var(--ad-paper);font-size:24px}
+.ad-table th,.ad-table td{padding:22px 24px;border:1px solid rgba(0,0,0,.14);text-align:left}
+.ad-table th{background:var(--ad-surface);font-weight:800}
+.ad-code{margin:0;overflow:hidden;background:#101512;color:#e8f4ed;font-family:var(--ad-font-mono)}
+.ad-code figcaption{padding:14px 24px;border-bottom:1px solid rgba(255,255,255,.12);color:#9de08f;text-transform:uppercase}
+.ad-code pre{margin:0;padding:28px;font-size:25px;line-height:1.52;white-space:pre-wrap}
+.ad-kpi{display:grid;gap:10px;width:max-content;min-width:420px;padding:36px 42px;background:var(--ad-accent);color:#fff}
+.ad-kpi span{font-size:20px;font-family:var(--ad-font-mono);text-transform:uppercase}
+.ad-kpi strong{font-size:92px;line-height:.9}
+.ad-kpi p{margin:0;font-size:24px}
+.ad-diagram,.ad-formula{margin:0;padding:42px;background:var(--ad-surface);border:1px solid rgba(0,0,0,.12);font-size:30px}
+.ad-diagram pre{margin:0;white-space:pre-wrap}
+.ad-formula{font-family:var(--ad-font-serif);font-size:60px;text-align:center}
+.layout-cover .ad-content{display:flex;flex-direction:column;justify-content:center;gap:46px}
+.layout-cover .ad-slide-head{max-width:1280px}
+.layout-cover .ad-blocks{align-content:start;max-width:1120px}
+.layout-cover .ad-paragraph{font-size:30px;color:var(--ad-muted)}
+.layout-closing .ad-content{display:grid;grid-template-rows:auto 1fr;gap:54px}
+.layout-cover .ad-slide-head h1{font-size:92px;max-width:1380px}
+.layout-statement .ad-slide-head h1{font-size:86px;max-width:1420px}
+.layout-image-hero .ad-blocks,.layout-screenshot .ad-blocks{align-content:stretch}
+.layout-image-hero .ad-image img,.layout-screenshot .ad-image img{height:650px}
+.layout-evidence-grid .ad-blocks{grid-template-columns:repeat(3,minmax(0,1fr));align-content:center}
+.layout-evidence-grid .ad-image img{height:300px}
+.layout-table .ad-blocks,.layout-code .ad-blocks{align-content:stretch}
+.layout-html-import{background:#fff;color:#111}
+.layout-html-import .ad-content{display:block;width:100%;height:100%;padding:0}
+.layout-html-import .ad-blocks{display:block;width:100%;height:100%}
+.layout-html-import .ad-html-block{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+.layout-html-import .ad-html-block>*{max-width:none}
+.ad-page-indicator{position:absolute;right:128px;bottom:28px;color:var(--ad-muted);font-size:18px;font-weight:700}
+.ad-brand-line{position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--ad-accent)}
+.ad-overview{position:absolute;inset:28px;z-index:80;display:grid;grid-template-rows:auto 1fr;gap:18px;padding:20px 20px 92px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 96%,transparent);box-shadow:0 28px 90px rgba(0,0,0,.22);backdrop-filter:blur(18px)}
+.ad-overview-head{display:flex;align-items:center;justify-content:flex-start;gap:14px}
+.ad-overview-title{display:grid;gap:4px}
+.ad-overview-head strong{font-size:20px}
+.ad-overview-title p{margin:0;color:var(--ad-muted);font-size:13px}
+.ad-overview-close{position:absolute;right:14px;bottom:14px;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:var(--ad-surface);color:var(--ad-ink);cursor:pointer}
+.ad-overview-close:hover{color:#fff;background:var(--ad-accent);border-color:transparent}
+.ad-overview-grid{display:grid;grid-template-columns:repeat(auto-fill,280px);justify-content:space-between;gap:14px;overflow:auto}
+.ad-overview-card{position:relative;display:block;width:280px;height:158px;padding:0;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:var(--ad-paper);color:var(--ad-ink);text-align:left;cursor:pointer;overflow:hidden}
+.ad-overview-card:hover,.ad-overview-card.is-current{border-color:var(--ad-accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--ad-accent) 28%,transparent)}
+.ad-overview-card:hover{transform:translateY(-2px)}
+.ad-overview-viewport{position:relative;width:280px;height:158px;overflow:hidden;background:var(--ad-paper)}
+.ad-overview-slide{position:absolute!important;top:0;left:0;inset:auto!important;width:1920px!important;height:1080px!important;transform:scale(.1458333333)!important;transform-origin:top left!important;box-shadow:none!important;pointer-events:none}
+.ad-overview-card .ad-content{padding:122px 128px 100px}
+.ad-overview-card .ad-slide h1{font-size:74px}
+.ad-compare{position:absolute;right:38px;bottom:96px;z-index:62;width:min(420px,28vw);padding:0;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:color-mix(in srgb,var(--ad-paper) 96%,transparent);box-shadow:0 28px 90px rgba(0,0,0,.22);backdrop-filter:blur(18px);overflow:hidden}
+.ad-compare-viewport{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--ad-paper)}
+.ad-compare-slide{position:absolute!important;top:0;left:0;inset:auto!important;width:1920px!important;height:1080px!important;transform-origin:top left!important;box-shadow:none!important;pointer-events:none}
+.ad-compare-empty{display:grid;place-items:center;width:100%;height:100%;color:var(--ad-muted);font-size:15px}
+.ad-print-help{position:absolute;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(12,14,16,.38);backdrop-filter:blur(12px)}
+.ad-print-help-card{display:grid;gap:14px;max-width:520px;padding:24px;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:var(--ad-paper);color:var(--ad-ink);box-shadow:0 30px 90px rgba(0,0,0,.24)}
+.ad-print-help-card strong{font-size:30px}
+.ad-print-help-card p,.ad-print-help-card li{margin:0;color:var(--ad-muted);font-size:16px;line-height:1.45}
+.ad-print-help-card ul{display:grid;gap:8px;margin:0;padding-left:20px}
+.ad-print-help-note code{font-size:13px}
+.ad-print-help-actions{display:flex;justify-content:flex-end;gap:10px}
+.ad-print-help-actions button{height:40px;padding:0 14px;border:1px solid rgba(0,0,0,.12);border-radius:7px;background:var(--ad-surface);color:var(--ad-ink);cursor:pointer}
+.ad-print-help-actions [data-action="print-confirm"]{background:var(--ad-accent);color:#fff;border-color:transparent}
+.ad-blackout{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#000;color:rgba(255,255,255,.72);cursor:pointer}
+.ad-blackout strong{font-size:28px;font-weight:700}
+.ad-blackout span{font-size:14px}
+.ad-spotlight{position:absolute;inset:0;z-index:55;pointer-events:none;background:radial-gradient(circle 150px at var(--ad-spot-x,50%) var(--ad-spot-y,50%),transparent 0 118px,rgba(0,0,0,.66) 158px)}
+.ad-presenter-panel,.ad-creator-panel{position:absolute;top:28px;right:28px;z-index:25;display:none;gap:14px;width:360px;max-height:calc(100vh - 56px);overflow:auto;padding:18px;border:1px solid rgba(0,0,0,.14);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 94%,transparent);box-shadow:0 24px 70px rgba(0,0,0,.16);backdrop-filter:blur(18px)}
+.ad-presenter-panel section,.ad-creator-panel section{display:grid;gap:8px;padding:0 0 14px;border-bottom:1px solid rgba(0,0,0,.1)}
+.ad-presenter-panel section:last-child,.ad-creator-panel section:last-child{border-bottom:0;padding-bottom:0}
+.ad-panel-label{margin:0;color:var(--ad-accent);font-family:var(--ad-font-mono);font-size:12px;font-weight:800;text-transform:uppercase}
+.ad-presenter-panel article,.ad-creator-panel p,.ad-creator-panel li{margin:0;color:var(--ad-muted);font-size:15px;line-height:1.45}
+.ad-presenter-panel strong,.ad-creator-panel strong{font-size:28px}
+.ad-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ad-stat-grid div{display:grid;gap:4px;padding:9px;background:var(--ad-surface)}
+.ad-stat-grid span{color:var(--ad-muted);font-family:var(--ad-font-mono);font-size:10px;text-transform:uppercase}
+.ad-stat-grid b{font-size:22px}
+.ad-score-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;color:var(--ad-muted);font-size:12px;text-transform:uppercase}
+.ad-score-row meter{width:100%;height:8px}
+.ad-shortcut-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ad-shortcut-grid div{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--ad-surface);font-size:13px}
+.ad-shortcut-grid kbd{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border:1px solid rgba(0,0,0,.16);border-radius:5px;background:var(--ad-paper);font-family:var(--ad-font-mono);font-size:12px}
+.ad-check-list{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.ad-check-list li{position:relative;padding-left:18px}
+.ad-check-list li::before{content:"";position:absolute;left:0;top:.58em;width:7px;height:7px;border-radius:999px;background:rgba(0,0,0,.2)}
+.ad-check-list li.is-covered{color:var(--ad-ink)}
+.ad-check-list li.is-covered::before{background:var(--ad-accent)}
+.ad-alt-list{display:grid;gap:8px}
+.ad-alt-list div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;background:var(--ad-surface);font-size:13px}
+.ad-outline-list{display:grid;gap:6px;max-height:240px;margin:0;padding:0;overflow:auto;list-style:none}
+.ad-outline-list button{display:grid;grid-template-columns:34px 1fr;gap:8px;width:100%;padding:8px;border:0;background:var(--ad-surface);color:var(--ad-ink);text-align:left;cursor:pointer}
+.ad-outline-list button:hover{color:var(--ad-accent)}
+.ad-outline-list span{color:var(--ad-muted);font-family:var(--ad-font-mono);font-size:12px}
+.ad-chip-row{display:flex;flex-wrap:wrap;gap:7px}
+.ad-chip-row span{padding:5px 8px;border:1px solid rgba(0,0,0,.12);border-radius:999px;color:var(--ad-muted);font-size:12px}
+.ad-command{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;background:var(--ad-surface);color:var(--ad-ink);font-family:var(--ad-font-mono);font-size:12px;white-space:nowrap}
+.ad-panel-hint{font-size:13px!important}
+body[data-deck-mode=presenter] .ad-presenter-panel,body[data-deck-mode=creator] .ad-creator-panel{display:grid}
+body[data-deck-mode=presenter] .ad-stage,body[data-deck-mode=creator] .ad-stage{right:420px}
+body[data-compat-profile=rendered-file] .ad-slide{box-shadow:none;background:#fff}
+@page{size:20in 11.25in;margin:0}
+@media print{
+html,body{width:1920px!important;height:auto!important;margin:0!important;overflow:visible!important;background:var(--ad-paper)!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+.ad-dock,.ad-dock-zone,.ad-progress,.ad-overview,.ad-compare,.ad-print-help,.ad-blackout,.ad-spotlight,.ad-presenter-panel,.ad-creator-panel{display:none!important}
+.agentdeck-app{position:static!important;width:1920px!important;height:auto!important;background:var(--ad-paper)!important}
+.ad-stage,.ad-scaled-shell,.ad-scaled{position:static!important;display:block!important;width:1920px!important;height:auto!important;transform:none!important}
+.ad-slide,.ad-slide[hidden]{position:relative!important;display:block!important;inset:auto!important;width:1920px!important;height:1080px!important;margin:0!important;overflow:hidden!important;break-after:page!important;page-break-after:always!important;box-shadow:none!important;transform:none!important}
+.ad-slide:last-child{break-after:auto!important;page-break-after:auto!important}
+}
+@media (max-width:960px){.ad-dock{flex-wrap:wrap}}
+@media (max-width:980px){.ad-compare{right:18px;left:18px;bottom:96px;width:auto}}
+@media (max-width:760px){.ad-dock{bottom:10px;gap:6px}.ad-dock-zone{height:86px}.ad-toolbar-group{height:38px;padding:3px}.ad-dock button{height:30px;min-width:30px;padding:0 8px}.ad-dock button span,.ad-toolbar-icon{display:none}.ad-counter{width:44px;font-size:12px}.ad-stage{inset:18px 14px 76px}.ad-presenter-panel,.ad-creator-panel{left:10px;right:10px;top:10px;width:auto;max-height:42vh}body[data-deck-mode=presenter] .ad-stage,body[data-deck-mode=creator] .ad-stage{right:14px;top:45vh}}
+</style>
+  <style>
+    :root {
+      --ad-paper: #ffffff;
+      --ad-ink: #0a0a0a;
+      --ad-accent: #0038ff;
+      --ad-accent-alt: #f5ff00;
+      --ad-muted: #686868;
+      --ad-surface: #f4f4f4;
+      --ad-font-sans: Inter, Helvetica, Arial, 'Noto Sans SC', sans-serif;
+      --ad-font-serif: Georgia, 'Times New Roman', serif;
+      --ad-font-mono: 'SFMono-Regular', 'JetBrains Mono', Consolas, monospace;
+    }
+  </style>
+  <style data-agentdeck-source-styles>.ad-brand-line{display:none!important}</style>
+</head>
+<body data-theme="swiss" data-color-mode="light" data-deck-mode="audience" data-compat-profile="agentdeck">
+  <div class="agentdeck-app">
+    <div class="ad-dock-zone" data-dock-zone data-html2canvas-ignore></div>
+    <header class="ad-dock" data-html2canvas-ignore>
+      <div class="ad-toolbar-group ad-toolbar-group--nav" aria-label="Slide navigation">
+        <button type="button" data-action="restart" aria-label="Restart deck" title="Restart"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v6h6"></path></svg></button>
+        <button type="button" data-action="prev" aria-label="Previous slide" title="Previous slide">‹</button>
+        <button type="button" data-action="play" aria-label="Start autoplay" title="Autoplay"><span data-play-icon="play"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"></path></svg></span><span data-play-icon="pause" hidden><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14"></path><path d="M16 5v14"></path></svg></span></button>
+        <button type="button" data-action="interval" class="ad-interval-button" aria-label="Change autoplay interval" title="Autoplay interval"><span data-interval-label>8s</span></button>
+        <span class="ad-counter"><span data-current>1</span> / 10</span>
+        <button type="button" data-action="next" aria-label="Next slide" title="Next slide">›</button>
+      </div>
+      <div class="ad-toolbar-group" aria-label="Theme">
+        <span class="ad-toolbar-icon" aria-hidden="true"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8"></path><path d="M12 16v4"></path></svg></span>
+        <div class="ad-segmented">
+          <button type="button" data-action="theme" data-theme-value="light" class="is-active" aria-label="Use light theme" title="Light"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg><span>Light</span></button>
+          <button type="button" data-action="theme" data-theme-value="dark" aria-label="Use dark theme" title="Dark"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6.7 6.7 0 0 0 9 9 8 8 0 1 1-9-9Z"></path></svg><span>Dark</span></button>
+        </div>
+      </div>
+      <div class="ad-toolbar-group">
+        <button type="button" data-action="compare" class="ad-icon-only" aria-label="Toggle compare view" title="Compare View"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1.5"></rect><rect x="14" y="5" width="7" height="14" rx="1.5"></rect><path d="M12 5v14"></path></svg></button>
+        <button type="button" data-action="overview" class="ad-icon-only" aria-label="Open overview" title="Overview"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg></button>
+        <button type="button" data-action="blackout" class="ad-icon-only" aria-label="Toggle blank screen" title="Blank screen"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a6 6 0 0 1 4.8 9.6c-.85 1.1-1.8 2.1-2.3 3.4h-5c-.5-1.3-1.45-2.3-2.3-3.4A6 6 0 0 1 12 2Z"></path><path d="m4 4 16 16"></path></svg></button>
+        <button type="button" data-action="spotlight" class="ad-icon-only" aria-label="Toggle spotlight" title="Spotlight"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3"></path><path d="M12 19v3"></path><path d="M2 12h3"></path><path d="M19 12h3"></path><path d="m4.9 4.9 2.1 2.1"></path><path d="m17 17 2.1 2.1"></path><path d="m19.1 4.9-2.1 2.1"></path><path d="m7 17-2.1 2.1"></path></svg></button>
+      </div>
+      <div class="ad-toolbar-group">
+        <button type="button" data-action="dock-autohide" class="ad-icon-only" aria-label="Auto-hide toolbar" title="Auto-hide toolbar" aria-pressed="false"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path><path d="M8 20h8"></path><path d="M12 16v4"></path><path d="m8 10 4 3 4-3"></path></svg></button>
+        <button type="button" data-action="fullscreen" class="ad-icon-only" aria-label="Enter fullscreen" title="Fullscreen"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M16 3h3a2 2 0 0 1 2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M8 21H5a2 2 0 0 1-2-2v-3"></path></svg></button>
+        <button type="button" data-action="print" class="ad-icon-only" aria-label="Print or save PDF" title="Print / PDF"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></button>
+      </div>
+    </header>
+    <div class="ad-progress" data-html2canvas-ignore><span data-progress-bar></span></div>
+    <main class="ad-stage" aria-live="polite">
+      <div class="ad-scaled-shell" data-shell>
+        <div class="ad-scaled" data-scaled>
+          <section class="ad-slide layout-cover" data-export-page data-slide-index="0" data-agentdeck-layout="cover"  aria-label="已经有 HTML 或 PDF，怎么直接演示？" >
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        
+        <h1>已经有 HTML 或 PDF，怎么直接演示？</h1>
+        <p class="ad-lead">优先把 HTML / PDF 演示材料变成可播放的单文件 HTML</p>
+      </header>
+      <div class="ad-blocks"><p class="ad-paragraph">最推荐的路径，是把现成 HTML 演示页或 PDF 包成一个增强型 HTML 播放器。PPT 和 Markdown 也能处理，但不是第一优先级。</p></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">01</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-statement" data-export-page data-slide-index="1" data-agentdeck-layout="statement"  aria-label="AgentDeck 做的事很简单" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">statement</p>
+        <h1>AgentDeck 做的事很简单</h1>
+        <p class="ad-lead">默认 Light 模式，工具栏不抢内容。</p>
+      </header>
+      <div class="ad-blocks"><p class="ad-paragraph">把已有 HTML 或 PDF 包成一个 <code>index.html</code>。内容尽量不动，只加一层统一的演示播放器。</p></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">02</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-steps" data-export-page data-slide-index="2" data-agentdeck-layout="steps"  aria-label="当前最推荐的两条输入" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">steps</p>
+        <h1>当前最推荐的两条输入</h1>
+        <p class="ad-lead">不做重排，重点是封装、播放和验收。</p>
+      </header>
+      <div class="ad-blocks"><ul class="ad-list"><li>已有 HTML 演示页 -&gt; 增强型单 HTML 播放器</li><li>已有 PDF -&gt; 增强型单 HTML 播放器</li><li>PPT / Office 文件 -&gt; 先转 PDF，再封装</li><li>Markdown -&gt; 轻量兜底起稿路径</li><li>交付：发一个 HTML，或者发 <code>index.html + assets</code></li></ul></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">03</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-statement" data-export-page data-slide-index="3" data-agentdeck-layout="statement"  aria-label="暗场演示时，切到 Dark" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">statement</p>
+        <h1>暗场演示时，切到 Dark</h1>
+        <p class="ad-lead">灯光暗、投屏强时，播放器也能低干扰。</p>
+      </header>
+      <div class="ad-blocks"><p class="ad-paragraph">投屏、培训、路演时，播放器外壳可以切成深色。观众看的是内容，工具栏不要抢戏。</p></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">04</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-cards" data-export-page data-slide-index="4" data-agentdeck-layout="cards"  aria-label="页数一多，Overview 就很有用" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">cards</p>
+        <h1>页数一多，Overview 就很有用</h1>
+        <p class="ad-lead">用缩略图找页面，比记页码靠谱。</p>
+      </header>
+      <div class="ad-blocks"><ul class="ad-list"><li>先扫一眼整套材料的结构</li><li>客户问到哪页，直接点缩略图</li><li>评审时快速回到证据页</li><li>不需要记住“第几页讲过什么”</li></ul></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">05</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-statement" data-export-page data-slide-index="5" data-agentdeck-layout="statement"  aria-label="讲当前页时，也能看到下一页" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">statement</p>
+        <h1>讲当前页时，也能看到下一页</h1>
+        <p class="ad-lead">右下角预览下一页，讲起来更稳。</p>
+      </header>
+      <div class="ad-blocks"><p class="ad-paragraph">打开 Compare View，右下角会露出下一页预览。讲培训、路演、复盘时，不用切页也知道接下来要讲什么。</p></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">06</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-statement" data-export-page data-slide-index="6" data-agentdeck-layout="statement"  aria-label="需要讨论时，一键 Blank" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">statement</p>
+        <h1>需要讨论时，一键 Blank</h1>
+        <p class="ad-lead">先把画面收掉，把注意力还给现场。</p>
+      </header>
+      <div class="ad-blocks"><p class="ad-paragraph">客户提问、现场讨论、临时停顿时，先把画面收掉。注意力从屏幕回到人。</p></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">07</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-steps" data-export-page data-slide-index="7" data-agentdeck-layout="steps"  aria-label="讲重点时，用 Spotlight" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">steps</p>
+        <h1>讲重点时，用 Spotlight</h1>
+        <p class="ad-lead">让观众只看这一句话、这个数字、这块截图。</p>
+      </header>
+      <div class="ad-blocks"><ul class="ad-list"><li>按 <code>L</code> 打开聚光</li><li>鼠标移到要强调的文字或数字</li><li>其他区域自动变暗</li><li>适合讲数据、截图和复杂页面</li></ul></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">08</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-table" data-export-page data-slide-index="8" data-agentdeck-layout="table"  aria-label="演示工具跟着文件一起走" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">table</p>
+        <h1>演示工具跟着文件一起走</h1>
+        <p class="ad-lead">打开 HTML，就有一套完整的演示控制。</p>
+      </header>
+      <div class="ad-blocks"><table class="ad-table"><thead><tr><th>场景</th><th>工具</th><th>快捷键</th></tr></thead><tbody><tr><td>快速跳页</td><td>Overview</td><td>O</td></tr><tr><td>看下一页</td><td>Compare View</td><td>C</td></tr><tr><td>暂停画面</td><td>Blank</td><td>B</td></tr><tr><td>聚焦重点</td><td>Spotlight</td><td>L</td></tr><tr><td>全屏演示</td><td>Fullscreen</td><td>F</td></tr></tbody></table></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">09</div>
+    <div class="ad-brand-line"></div>
+  </section>
+<section class="ad-slide layout-closing" data-export-page data-slide-index="9" data-agentdeck-layout="closing"  aria-label="最后交付的是一个能打开的文件" hidden>
+    <div class="ad-content">
+      <header class="ad-slide-head">
+        <p class="ad-kicker">closing</p>
+        <h1>最后交付的是一个能打开的文件</h1>
+        <p class="ad-lead">对方不用装插件，也不用知道你怎么转换的。</p>
+      </header>
+      <div class="ad-blocks"><ul class="ad-list"><li>浏览器直接打开</li><li>可以发给客户或同事</li><li>可以打印 / 导出 PDF</li></ul></div>
+    </div>
+    <div class="ad-page-indicator" aria-hidden="true">10</div>
+    <div class="ad-brand-line"></div>
+  </section>
+        </div>
+      </div>
+    </main>
+    <div class="ad-overview" data-overlay="overview" data-html2canvas-ignore hidden>
+      <div class="ad-overview-head">
+        <div class="ad-overview-title">
+          <strong>AgentDeck</strong>
+          <p>Click a thumbnail to jump · 点击缩略图跳转</p>
+        </div>
+      </div>
+      <div class="ad-overview-grid"><button type="button" class="ad-overview-card is-current" data-goto="0" data-overview-index="0" aria-label="Go to slide 1: 已经有 HTML 或 PDF，怎么直接演示？">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-cover" data-agentdeck-layout="cover" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            
+            <h1>已经有 HTML 或 PDF，怎么直接演示？</h1>
+            <p class="ad-lead">优先把 HTML / PDF 演示材料变成可播放的单文件 HTML</p>
+          </header>
+          <div class="ad-blocks"><p class="ad-paragraph">最推荐的路径，是把现成 HTML 演示页或 PDF 包成一个增强型 HTML 播放器。PPT 和 Markdown 也能处理，但不是第一优先级。</p></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">01</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="1" data-overview-index="1" aria-label="Go to slide 2: AgentDeck 做的事很简单">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-statement" data-agentdeck-layout="statement" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">statement</p>
+            <h1>AgentDeck 做的事很简单</h1>
+            <p class="ad-lead">默认 Light 模式，工具栏不抢内容。</p>
+          </header>
+          <div class="ad-blocks"><p class="ad-paragraph">把已有 HTML 或 PDF 包成一个 <code>index.html</code>。内容尽量不动，只加一层统一的演示播放器。</p></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">02</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="2" data-overview-index="2" aria-label="Go to slide 3: 当前最推荐的两条输入">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-steps" data-agentdeck-layout="steps" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">steps</p>
+            <h1>当前最推荐的两条输入</h1>
+            <p class="ad-lead">不做重排，重点是封装、播放和验收。</p>
+          </header>
+          <div class="ad-blocks"><ul class="ad-list"><li>已有 HTML 演示页 -&gt; 增强型单 HTML 播放器</li><li>已有 PDF -&gt; 增强型单 HTML 播放器</li><li>PPT / Office 文件 -&gt; 先转 PDF，再封装</li><li>Markdown -&gt; 轻量兜底起稿路径</li><li>交付：发一个 HTML，或者发 <code>index.html + assets</code></li></ul></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">03</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="3" data-overview-index="3" aria-label="Go to slide 4: 暗场演示时，切到 Dark">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-statement" data-agentdeck-layout="statement" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">statement</p>
+            <h1>暗场演示时，切到 Dark</h1>
+            <p class="ad-lead">灯光暗、投屏强时，播放器也能低干扰。</p>
+          </header>
+          <div class="ad-blocks"><p class="ad-paragraph">投屏、培训、路演时，播放器外壳可以切成深色。观众看的是内容，工具栏不要抢戏。</p></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">04</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="4" data-overview-index="4" aria-label="Go to slide 5: 页数一多，Overview 就很有用">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-cards" data-agentdeck-layout="cards" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">cards</p>
+            <h1>页数一多，Overview 就很有用</h1>
+            <p class="ad-lead">用缩略图找页面，比记页码靠谱。</p>
+          </header>
+          <div class="ad-blocks"><ul class="ad-list"><li>先扫一眼整套材料的结构</li><li>客户问到哪页，直接点缩略图</li><li>评审时快速回到证据页</li><li>不需要记住“第几页讲过什么”</li></ul></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">05</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="5" data-overview-index="5" aria-label="Go to slide 6: 讲当前页时，也能看到下一页">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-statement" data-agentdeck-layout="statement" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">statement</p>
+            <h1>讲当前页时，也能看到下一页</h1>
+            <p class="ad-lead">右下角预览下一页，讲起来更稳。</p>
+          </header>
+          <div class="ad-blocks"><p class="ad-paragraph">打开 Compare View，右下角会露出下一页预览。讲培训、路演、复盘时，不用切页也知道接下来要讲什么。</p></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">06</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="6" data-overview-index="6" aria-label="Go to slide 7: 需要讨论时，一键 Blank">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-statement" data-agentdeck-layout="statement" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">statement</p>
+            <h1>需要讨论时，一键 Blank</h1>
+            <p class="ad-lead">先把画面收掉，把注意力还给现场。</p>
+          </header>
+          <div class="ad-blocks"><p class="ad-paragraph">客户提问、现场讨论、临时停顿时，先把画面收掉。注意力从屏幕回到人。</p></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">07</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="7" data-overview-index="7" aria-label="Go to slide 8: 讲重点时，用 Spotlight">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-steps" data-agentdeck-layout="steps" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">steps</p>
+            <h1>讲重点时，用 Spotlight</h1>
+            <p class="ad-lead">让观众只看这一句话、这个数字、这块截图。</p>
+          </header>
+          <div class="ad-blocks"><ul class="ad-list"><li>按 <code>L</code> 打开聚光</li><li>鼠标移到要强调的文字或数字</li><li>其他区域自动变暗</li><li>适合讲数据、截图和复杂页面</li></ul></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">08</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="8" data-overview-index="8" aria-label="Go to slide 9: 演示工具跟着文件一起走">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-table" data-agentdeck-layout="table" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">table</p>
+            <h1>演示工具跟着文件一起走</h1>
+            <p class="ad-lead">打开 HTML，就有一套完整的演示控制。</p>
+          </header>
+          <div class="ad-blocks"><table class="ad-table"><thead><tr><th>场景</th><th>工具</th><th>快捷键</th></tr></thead><tbody><tr><td>快速跳页</td><td>Overview</td><td>O</td></tr><tr><td>看下一页</td><td>Compare View</td><td>C</td></tr><tr><td>暂停画面</td><td>Blank</td><td>B</td></tr><tr><td>聚焦重点</td><td>Spotlight</td><td>L</td></tr><tr><td>全屏演示</td><td>Fullscreen</td><td>F</td></tr></tbody></table></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">09</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button>
+<button type="button" class="ad-overview-card" data-goto="9" data-overview-index="9" aria-label="Go to slide 10: 最后交付的是一个能打开的文件">
+    <div class="ad-overview-viewport">
+      <section class="ad-slide ad-overview-slide layout-closing" data-agentdeck-layout="closing" >
+        <div class="ad-content">
+          <header class="ad-slide-head">
+            <p class="ad-kicker">closing</p>
+            <h1>最后交付的是一个能打开的文件</h1>
+            <p class="ad-lead">对方不用装插件，也不用知道你怎么转换的。</p>
+          </header>
+          <div class="ad-blocks"><ul class="ad-list"><li>浏览器直接打开</li><li>可以发给客户或同事</li><li>可以打印 / 导出 PDF</li></ul></div>
+        </div>
+        <div class="ad-page-indicator" aria-hidden="true">10</div>
+        <div class="ad-brand-line"></div>
+      </section>
+    </div>
+  </button></div>
+      <button type="button" class="ad-overview-close" data-action="overview-close" aria-label="Close overview" title="Close overview"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg></button>
+    </div>
+    <div class="ad-compare" data-overlay="compare" data-html2canvas-ignore hidden>
+      <div class="ad-compare-viewport" data-compare-next></div>
+    </div>
+    <div class="ad-print-help" data-overlay="print-help" data-html2canvas-ignore hidden>
+      <div class="ad-print-help-card">
+        <strong>Print / PDF · 打印 / PDF</strong>
+        <p>Browser PDF depends on the print dialog, not just the deck.<br>浏览器导出 PDF 取决于打印设置，不只是页面本身。</p>
+        <ul>
+          <li>Turn on Background graphics · 打开背景图形</li>
+          <li>Turn off Headers and footers · 关闭页眉和页脚</li>
+          <li>Keep margins at None or Default zero-margin mode · 使用无边距或零边距模式</li>
+        </ul>
+        <p class="ad-print-help-note">For pixel-perfect export, prefer CLI: <code>agentdeck export deck.md --pdf</code><br>如果要更稳定的高保真导出，优先使用 CLI。</p>
+        <div class="ad-print-help-actions">
+          <button type="button" data-action="print-close">Close / 关闭</button>
+          <button type="button" data-action="print-confirm">Continue / 继续</button>
+        </div>
+      </div>
+    </div>
+    <div class="ad-blackout" data-overlay="blackout" data-action="blackout" data-html2canvas-ignore hidden>
+      <strong>Blank screen</strong>
+      <span>Click anywhere, press B, or press Esc to return</span>
+    </div>
+    <div class="ad-spotlight" data-overlay="spotlight" data-html2canvas-ignore hidden></div>
+    <aside class="ad-presenter-panel" data-panel="presenter" data-html2canvas-ignore>
+      <section>
+        <p class="ad-panel-label">Presenter</p>
+        <strong data-timer>00:00</strong>
+      </section>
+      <section>
+        <p class="ad-panel-label">Notes</p>
+        <article data-note="0" >现成材料也应该能快速进入演示状态。</article><article data-note="1" hidden>默认 Light 模式，工具栏不抢内容。</article><article data-note="2" hidden>不做重排，重点是封装、播放和验收。</article><article data-note="3" hidden>灯光暗、投屏强时，播放器也能低干扰。</article><article data-note="4" hidden>用缩略图找页面，比记页码靠谱。</article><article data-note="5" hidden>右下角预览下一页，讲起来更稳。</article><article data-note="6" hidden>先把画面收掉，把注意力还给现场。</article><article data-note="7" hidden>让观众只看这一句话、这个数字、这块截图。</article><article data-note="8" hidden>打开 HTML，就有一套完整的演示控制。</article><article data-note="9" hidden>对方不用装插件，也不用知道你怎么转换的。</article>
+      </section>
+      <section>
+        <p class="ad-panel-label">Next</p>
+        <div data-next-title>AgentDeck 做的事很简单</div>
+      </section>
+    </aside>
+    <aside class="ad-creator-panel" data-panel="creator" data-html2canvas-ignore>
+      <section>
+        <p class="ad-panel-label">Deck Studio</p>
+        <strong>10 slides</strong>
+        <p>Ready for audience, presenter, and export modes.</p>
+        <div class="ad-stat-grid">
+          <div><span>Layouts</span><b>6</b></div>
+          <div><span>Notes</span><b>10</b></div>
+          <div><span>Dense</span><b>0</b></div>
+        </div>
+      </section>
+      <section>
+        <p class="ad-panel-label">Presentation Tools</p>
+        <div class="ad-shortcut-grid">
+          <div><kbd>O</kbd><span>Overview</span></div>
+          <div><kbd>B</kbd><span>Black screen</span></div>
+          <div><kbd>L</kbd><span>Spotlight</span></div>
+          <div><kbd>F</kbd><span>Fullscreen</span></div>
+        </div>
+      </section>
+      <section>
+        <p class="ad-panel-label">Quality Checks</p>
+        <ul class="ad-check-list">
+          <li class="is-covered">No dense text slides</li>
+          <li class="is-covered">Speaker notes coverage</li>
+          <li class="is-covered">Image slots ready</li>
+          <li class="is-covered">Layout variety</li>
+        </ul>
+      </section>
+      <section>
+        <p class="ad-panel-label">Outline</p>
+        <ol class="ad-outline-list">
+          <li><button type="button" data-goto="0"><span>01</span>已经有 HTML 或 PDF，怎么直接演示？</button></li><li><button type="button" data-goto="1"><span>02</span>AgentDeck 做的事很简单</button></li><li><button type="button" data-goto="2"><span>03</span>当前最推荐的两条输入</button></li><li><button type="button" data-goto="3"><span>04</span>暗场演示时，切到 Dark</button></li><li><button type="button" data-goto="4"><span>05</span>页数一多，Overview 就很有用</button></li><li><button type="button" data-goto="5"><span>06</span>讲当前页时，也能看到下一页</button></li><li><button type="button" data-goto="6"><span>07</span>需要讨论时，一键 Blank</button></li><li><button type="button" data-goto="7"><span>08</span>讲重点时，用 Spotlight</button></li><li><button type="button" data-goto="8"><span>09</span>演示工具跟着文件一起走</button></li><li><button type="button" data-goto="9"><span>10</span>最后交付的是一个能打开的文件</button></li>
+        </ol>
+      </section>
+      <section>
+        <p class="ad-panel-label">Export Pack</p>
+        <div class="ad-chip-row"><span>html</span><span>pdf</span><span>png</span><span>long-image</span><span>grid9</span><span>social-pack</span></div>
+        <code class="ad-command">agentdeck export deck.md --pdf --png --long-image --grid9</code>
+      </section>
+    </aside>
+  </div>
+  <script type="application/json" id="agentdeck-source">{&quot;meta&quot;:{&quot;title&quot;:&quot;AgentDeck&quot;,&quot;subtitle&quot;:&quot;优先把 HTML / PDF 演示材料变成可播放的单文件 HTML&quot;,&quot;author&quot;:&quot;AgentDeck&quot;,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;theme&quot;:&quot;swiss&quot;,&quot;aspect&quot;:&quot;16:9&quot;,&quot;outputs&quot;:[&quot;html&quot;,&quot;pdf&quot;,&quot;png&quot;,&quot;long-image&quot;,&quot;grid9&quot;,&quot;social-pack&quot;],&quot;sourceStyles&quot;:&quot;.ad-brand-line{display:none!important}&quot;,&quot;mode&quot;:&quot;audience&quot;,&quot;variants&quot;:[],&quot;compatibility&quot;:&quot;agentdeck&quot;,&quot;filenameStem&quot;:&quot;agentdeck&quot;},&quot;slides&quot;:[{&quot;id&quot;:&quot;已经有-html-或-pdf-怎么直接演示&quot;,&quot;title&quot;:&quot;已经有 HTML 或 PDF，怎么直接演示？&quot;,&quot;layout&quot;:&quot;cover&quot;,&quot;note&quot;:&quot;现成材料也应该能快速进入演示状态。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;paragraph&quot;,&quot;text&quot;:&quot;最推荐的路径，是把现成 HTML 演示页或 PDF 包成一个增强型 HTML 播放器。PPT 和 Markdown 也能处理，但不是第一优先级。&quot;}],&quot;raw&quot;:&quot;layout: cover\nnote: 现成材料也应该能快速进入演示状态。\n\n最推荐的路径，是把现成 HTML 演示页或 PDF 包成一个增强型 HTML 播放器。PPT 和 Markdown 也能处理，但不是第一优先级。&quot;},{&quot;id&quot;:&quot;agentdeck-做的事很简单&quot;,&quot;title&quot;:&quot;AgentDeck 做的事很简单&quot;,&quot;layout&quot;:&quot;statement&quot;,&quot;note&quot;:&quot;默认 Light 模式，工具栏不抢内容。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;paragraph&quot;,&quot;text&quot;:&quot;把已有 HTML 或 PDF 包成一个 `index.html`。内容尽量不动，只加一层统一的演示播放器。&quot;}],&quot;raw&quot;:&quot;layout: statement\nnote: 默认 Light 模式，工具栏不抢内容。\n\n把已有 HTML 或 PDF 包成一个 `index.html`。内容尽量不动，只加一层统一的演示播放器。&quot;},{&quot;id&quot;:&quot;当前最推荐的两条输入&quot;,&quot;title&quot;:&quot;当前最推荐的两条输入&quot;,&quot;layout&quot;:&quot;steps&quot;,&quot;note&quot;:&quot;不做重排，重点是封装、播放和验收。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;list&quot;,&quot;items&quot;:[&quot;已有 HTML 演示页 -&gt; 增强型单 HTML 播放器&quot;,&quot;已有 PDF -&gt; 增强型单 HTML 播放器&quot;,&quot;PPT / Office 文件 -&gt; 先转 PDF，再封装&quot;,&quot;Markdown -&gt; 轻量兜底起稿路径&quot;,&quot;交付：发一个 HTML，或者发 `index.html + assets`&quot;]}],&quot;raw&quot;:&quot;layout: steps\nnote: 不做重排，重点是封装、播放和验收。\n\n- 已有 HTML 演示页 -&gt; 增强型单 HTML 播放器\n- 已有 PDF -&gt; 增强型单 HTML 播放器\n- PPT / Office 文件 -&gt; 先转 PDF，再封装\n- Markdown -&gt; 轻量兜底起稿路径\n- 交付：发一个 HTML，或者发 `index.html + assets`&quot;},{&quot;id&quot;:&quot;暗场演示时-切到-dark&quot;,&quot;title&quot;:&quot;暗场演示时，切到 Dark&quot;,&quot;layout&quot;:&quot;statement&quot;,&quot;note&quot;:&quot;灯光暗、投屏强时，播放器也能低干扰。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;paragraph&quot;,&quot;text&quot;:&quot;投屏、培训、路演时，播放器外壳可以切成深色。观众看的是内容，工具栏不要抢戏。&quot;}],&quot;raw&quot;:&quot;layout: statement\nnote: 灯光暗、投屏强时，播放器也能低干扰。\n\n投屏、培训、路演时，播放器外壳可以切成深色。观众看的是内容，工具栏不要抢戏。&quot;},{&quot;id&quot;:&quot;页数一多-overview-就很有用&quot;,&quot;title&quot;:&quot;页数一多，Overview 就很有用&quot;,&quot;layout&quot;:&quot;cards&quot;,&quot;note&quot;:&quot;用缩略图找页面，比记页码靠谱。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;list&quot;,&quot;items&quot;:[&quot;先扫一眼整套材料的结构&quot;,&quot;客户问到哪页，直接点缩略图&quot;,&quot;评审时快速回到证据页&quot;,&quot;不需要记住“第几页讲过什么”&quot;]}],&quot;raw&quot;:&quot;layout: cards\nnote: 用缩略图找页面，比记页码靠谱。\n\n- 先扫一眼整套材料的结构\n- 客户问到哪页，直接点缩略图\n- 评审时快速回到证据页\n- 不需要记住“第几页讲过什么”&quot;},{&quot;id&quot;:&quot;讲当前页时-也能看到下一页&quot;,&quot;title&quot;:&quot;讲当前页时，也能看到下一页&quot;,&quot;layout&quot;:&quot;statement&quot;,&quot;note&quot;:&quot;右下角预览下一页，讲起来更稳。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;paragraph&quot;,&quot;text&quot;:&quot;打开 Compare View，右下角会露出下一页预览。讲培训、路演、复盘时，不用切页也知道接下来要讲什么。&quot;}],&quot;raw&quot;:&quot;layout: statement\nnote: 右下角预览下一页，讲起来更稳。\n\n打开 Compare View，右下角会露出下一页预览。讲培训、路演、复盘时，不用切页也知道接下来要讲什么。&quot;},{&quot;id&quot;:&quot;需要讨论时-一键-blank&quot;,&quot;title&quot;:&quot;需要讨论时，一键 Blank&quot;,&quot;layout&quot;:&quot;statement&quot;,&quot;note&quot;:&quot;先把画面收掉，把注意力还给现场。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;paragraph&quot;,&quot;text&quot;:&quot;客户提问、现场讨论、临时停顿时，先把画面收掉。注意力从屏幕回到人。&quot;}],&quot;raw&quot;:&quot;layout: statement\nnote: 先把画面收掉，把注意力还给现场。\n\n客户提问、现场讨论、临时停顿时，先把画面收掉。注意力从屏幕回到人。&quot;},{&quot;id&quot;:&quot;讲重点时-用-spotlight&quot;,&quot;title&quot;:&quot;讲重点时，用 Spotlight&quot;,&quot;layout&quot;:&quot;steps&quot;,&quot;note&quot;:&quot;让观众只看这一句话、这个数字、这块截图。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;list&quot;,&quot;items&quot;:[&quot;按 `L` 打开聚光&quot;,&quot;鼠标移到要强调的文字或数字&quot;,&quot;其他区域自动变暗&quot;,&quot;适合讲数据、截图和复杂页面&quot;]}],&quot;raw&quot;:&quot;layout: steps\nnote: 让观众只看这一句话、这个数字、这块截图。\n\n- 按 `L` 打开聚光\n- 鼠标移到要强调的文字或数字\n- 其他区域自动变暗\n- 适合讲数据、截图和复杂页面&quot;},{&quot;id&quot;:&quot;演示工具跟着文件一起走&quot;,&quot;title&quot;:&quot;演示工具跟着文件一起走&quot;,&quot;layout&quot;:&quot;table&quot;,&quot;note&quot;:&quot;打开 HTML，就有一套完整的演示控制。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;table&quot;,&quot;headers&quot;:[&quot;场景&quot;,&quot;工具&quot;,&quot;快捷键&quot;],&quot;rows&quot;:[[&quot;快速跳页&quot;,&quot;Overview&quot;,&quot;O&quot;],[&quot;看下一页&quot;,&quot;Compare View&quot;,&quot;C&quot;],[&quot;暂停画面&quot;,&quot;Blank&quot;,&quot;B&quot;],[&quot;聚焦重点&quot;,&quot;Spotlight&quot;,&quot;L&quot;],[&quot;全屏演示&quot;,&quot;Fullscreen&quot;,&quot;F&quot;]]}],&quot;raw&quot;:&quot;layout: table\nnote: 打开 HTML，就有一套完整的演示控制。\n\n| 场景 | 工具 | 快捷键 |\n|---|---|---:|\n| 快速跳页 | Overview | O |\n| 看下一页 | Compare View | C |\n| 暂停画面 | Blank | B |\n| 聚焦重点 | Spotlight | L |\n| 全屏演示 | Fullscreen | F |&quot;},{&quot;id&quot;:&quot;最后交付的是一个能打开的文件&quot;,&quot;title&quot;:&quot;最后交付的是一个能打开的文件&quot;,&quot;layout&quot;:&quot;closing&quot;,&quot;note&quot;:&quot;对方不用装插件，也不用知道你怎么转换的。&quot;,&quot;blocks&quot;:[{&quot;type&quot;:&quot;list&quot;,&quot;items&quot;:[&quot;浏览器直接打开&quot;,&quot;可以发给客户或同事&quot;,&quot;可以打印 / 导出 PDF&quot;]}],&quot;raw&quot;:&quot;layout: closing\nnote: 对方不用装插件，也不用知道你怎么转换的。\n\n- 浏览器直接打开\n- 可以发给客户或同事\n- 可以打印 / 导出 PDF&quot;}],&quot;sourcePath&quot;:&quot;/Users/sam/Downloads/codex/deck/examples/showcase/deck.zh.md&quot;}</script>
+  <script>
+(() => {
+  const width = 1920;
+  const height = 1080;
+  const stage = document.querySelector('.ad-stage');
+  const dock = document.querySelector('.ad-dock');
+  const dockZone = document.querySelector('[data-dock-zone]');
+  const shell = document.querySelector('[data-shell]');
+  const scaled = document.querySelector('[data-scaled]');
+  const slides = [...document.querySelectorAll('.ad-scaled > .ad-slide')];
+  const overviewCards = [...document.querySelectorAll('[data-overview-index]')];
+  const current = document.querySelector('[data-current]');
+  const prevButton = document.querySelector('[data-action="prev"]');
+  const nextButton = document.querySelector('[data-action="next"]');
+  const playButton = document.querySelector('[data-action="play"]');
+  const intervalButton = document.querySelector('[data-action="interval"]');
+  const intervalLabel = document.querySelector('[data-interval-label]');
+  const nextTitle = document.querySelector('[data-next-title]');
+  const timer = document.querySelector('[data-timer]');
+  const progressBar = document.querySelector('[data-progress-bar]');
+  const overview = document.querySelector('[data-overlay="overview"]');
+  const compare = document.querySelector('[data-overlay="compare"]');
+  const compareNext = document.querySelector('[data-compare-next]');
+  const printHelp = document.querySelector('[data-overlay="print-help"]');
+  const blackout = document.querySelector('[data-overlay="blackout"]');
+  const spotlight = document.querySelector('[data-overlay="spotlight"]');
+  const startedAt = Date.now();
+  let dockTimer = 0;
+  let dockHideTimer = 0;
+  let dockAutohide = false;
+  let index = 0;
+  let wheelAt = 0;
+  let autoplayIntervalMs = 8000;
+  let autoplayTimer = 0;
+  const dockRevealPx = 32;
+  function isFullscreen() {
+    return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+  function shouldAutoHideDock() {
+    return dockAutohide || isFullscreen();
+  }
+  function revealDock() {
+    document.body.classList.add('is-dock-active');
+    document.body.classList.remove('is-dock-hidden');
+    clearTimeout(dockTimer);
+    dockTimer = setTimeout(() => document.body.classList.remove('is-dock-active'), 3000);
+  }
+  function activateDock() {
+    revealDock();
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 1600 : 2000);
+  }
+  function scheduleDockHide(delay = 2000, force = false) {
+    clearTimeout(dockHideTimer);
+    if (!shouldAutoHideDock()) return;
+    dockHideTimer = setTimeout(() => {
+      if (force || (!dock?.matches(':hover') && !dock?.contains(document.activeElement))) {
+        document.body.classList.add('is-dock-hidden');
+        document.body.classList.remove('is-dock-active');
+      }
+    }, delay);
+  }
+  function hideDockIfPointerLeft(event) {
+    if (!shouldAutoHideDock()) return;
+    if (document.body.classList.contains('is-dock-hidden')) return;
+    if (event.clientY >= window.innerHeight - dockRevealPx) return;
+    if (dock?.contains(event.target)) return;
+    scheduleDockHide(0, true);
+  }
+  function setDockAutohide(next) {
+    dockAutohide = next;
+    document.body.classList.toggle('is-dock-autohide', next);
+    document.body.classList.remove('is-dock-hidden');
+    document.querySelectorAll('[data-action="dock-autohide"]').forEach((button) => {
+      button.classList.toggle('is-active', next);
+      button.setAttribute('aria-pressed', next ? 'true' : 'false');
+      button.setAttribute('title', next ? 'Toolbar auto-hide on' : 'Auto-hide toolbar');
+      button.setAttribute('aria-label', next ? 'Disable toolbar auto-hide' : 'Auto-hide toolbar');
+    });
+    clearTimeout(dockHideTimer);
+    if (next) scheduleDockHide(0, true);
+    else if (isFullscreen()) scheduleDockHide(1600, true);
+    else revealDock();
+  }
+  function syncFullscreenToolbar() {
+    const fullscreen = isFullscreen();
+    document.body.classList.toggle('is-fullscreen-toolbar-hidden', fullscreen);
+    clearTimeout(dockHideTimer);
+    if (fullscreen) {
+      scheduleDockHide(450, true);
+    } else {
+      document.body.classList.remove('is-dock-hidden');
+      activateDock();
+    }
+  }
+  function tickTimer() {
+    if (!timer) return;
+    const seconds = Math.floor((Date.now() - startedAt) / 1000);
+    const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const ss = String(seconds % 60).padStart(2, '0');
+    timer.textContent = mm + ':' + ss;
+  }
+  function setActionActive(action, active) {
+    document.querySelectorAll('[data-action="' + action + '"]').forEach((button) => {
+      button.classList.toggle('is-active', active);
+    });
+  }
+  function toggleOverview(force) {
+    if (!overview) return;
+    const next = force ?? overview.hidden;
+    overview.hidden = !next;
+    document.body.classList.toggle('is-overview-open', next);
+    setActionActive('overview', next);
+  }
+  function toggleCompare(force) {
+    if (!compare) return;
+    const next = force ?? compare.hidden;
+    compare.hidden = !next;
+    document.body.classList.toggle('is-compare-open', next);
+    setActionActive('compare', next);
+    if (next) syncCompareView();
+  }
+  function setAutoplayActive(next) {
+    if (next) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = setInterval(() => {
+        show(index + 1);
+      }, autoplayIntervalMs);
+    } else {
+      clearInterval(autoplayTimer);
+      autoplayTimer = 0;
+    }
+    setActionActive('play', next);
+    if (playButton) {
+      playButton.setAttribute('aria-label', next ? 'Pause autoplay' : 'Start autoplay');
+      playButton.setAttribute('title', next ? 'Pause autoplay' : 'Autoplay');
+      playButton.querySelectorAll('[data-play-icon]').forEach((icon) => {
+        icon.hidden = icon.getAttribute('data-play-icon') !== (next ? 'pause' : 'play');
+      });
+    }
+  }
+  function setAutoplayInterval(ms) {
+    autoplayIntervalMs = ms;
+    if (intervalLabel) intervalLabel.textContent = String(ms / 1000) + 's';
+    if (intervalButton) intervalButton.title = 'Autoplay interval ' + String(ms / 1000) + 's';
+    if (autoplayTimer) setAutoplayActive(true);
+  }
+  function cycleAutoplayInterval() {
+    const options = [5000, 8000, 12000, 20000];
+    const currentIndex = options.indexOf(autoplayIntervalMs);
+    const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % options.length;
+    setAutoplayInterval(options[nextIndex]);
+  }
+  function toggleAutoplay() {
+    setAutoplayActive(!autoplayTimer);
+  }
+  function toggleBlackout(force) {
+    if (!blackout) return;
+    const next = force ?? blackout.hidden;
+    blackout.hidden = !next;
+    setActionActive('blackout', next);
+  }
+  function toggleSpotlight(force) {
+    if (!spotlight) return;
+    const next = force ?? spotlight.hidden;
+    spotlight.hidden = !next;
+    document.body.classList.toggle('is-spotlight-on', next);
+    setActionActive('spotlight', next);
+  }
+  function hidePresentationOverlays() {
+    toggleOverview(false);
+    toggleCompare(false);
+    if (printHelp) printHelp.hidden = true;
+    toggleBlackout(false);
+    toggleSpotlight(false);
+  }
+  function updateNavButtons() {
+    if (prevButton) prevButton.disabled = index === 0;
+    if (nextButton) nextButton.disabled = index === slides.length - 1 && !autoplayTimer;
+  }
+  function syncComparePane(target, slideIndex, label) {
+    if (!target) return;
+    target.replaceChildren();
+    if (slideIndex < 0 || slideIndex >= slides.length) {
+      const empty = document.createElement('div');
+      empty.className = 'ad-compare-empty';
+      empty.textContent = label;
+      target.append(empty);
+      return;
+    }
+    const source = slides[slideIndex];
+    const clone = source.cloneNode(true);
+    clone.hidden = false;
+    clone.classList.add('ad-compare-slide');
+    clone.style.transform = 'scale(' + (target.clientWidth / 1920) + ')';
+    target.append(clone);
+  }
+  function syncCompareView() {
+    if (!compare || compare.hidden) return;
+    const nextIndex = index === slides.length - 1 ? (autoplayTimer ? 0 : -1) : index + 1;
+    syncComparePane(compareNext, nextIndex, nextIndex === -1 ? 'End of deck' : 'Next');
+  }
+  function scale() {
+    if (!stage || !scaled || !shell) return;
+    const rect = stage.getBoundingClientRect();
+    const value = Math.min(rect.width / width, rect.height / height);
+    shell.style.width = (width * value) + 'px';
+    shell.style.height = (height * value) + 'px';
+    scaled.style.transform = 'scale(' + value + ')';
+    scaled.style.width = width + 'px';
+    scaled.style.height = height + 'px';
+  }
+  function show(next) {
+    if (autoplayTimer) {
+      index = ((next % slides.length) + slides.length) % slides.length;
+    } else {
+      index = Math.max(0, Math.min(slides.length - 1, next));
+    }
+    slides.forEach((slide, slideIndex) => { slide.hidden = slideIndex !== index; });
+    overviewCards.forEach((card) => {
+      card.classList.toggle('is-current', Number(card.getAttribute('data-overview-index')) === index);
+    });
+    document.querySelectorAll('[data-note]').forEach((note) => { note.hidden = Number(note.getAttribute('data-note')) !== index; });
+    if (current) current.textContent = String(index + 1);
+    if (progressBar) progressBar.style.width = (((index + 1) / slides.length) * 100) + '%';
+    if (nextTitle) {
+      const nextIndex = index === slides.length - 1 ? (autoplayTimer ? 0 : -1) : index + 1;
+      nextTitle.textContent = nextIndex === -1 ? 'End' : slides[nextIndex]?.querySelector('h1')?.textContent || 'End';
+    }
+    updateNavButtons();
+    syncCompareView();
+    location.hash = '#/' + (index + 1);
+  }
+  function hashIndex() {
+    const value = Number((location.hash.match(/#\/(\d+)/) || [])[1]);
+    return Number.isFinite(value) && value > 0 ? value - 1 : 0;
+  }
+  document.addEventListener('click', async (event) => {
+    const target = event.target.closest('[data-action],[data-goto]');
+    if (!target) return;
+    activateDock();
+    const action = target.getAttribute('data-action');
+    if (target.hasAttribute('data-goto')) {
+      show(Number(target.getAttribute('data-goto')));
+      toggleOverview(false);
+    }
+    if (action === 'prev') show(index - 1);
+    if (action === 'next') show(index + 1);
+    if (action === 'restart') {
+      show(0);
+    }
+    if (action === 'play') toggleAutoplay();
+    if (action === 'interval') cycleAutoplayInterval();
+    if (action === 'overview') toggleOverview();
+    if (action === 'overview-close') toggleOverview(false);
+    if (action === 'compare') toggleCompare();
+    if (action === 'dock-autohide') setDockAutohide(!dockAutohide);
+    if (action === 'print') {
+      if (printHelp) printHelp.hidden = false;
+    }
+    if (action === 'print-close') {
+      if (printHelp) printHelp.hidden = true;
+    }
+    if (action === 'print-confirm') {
+      if (printHelp) printHelp.hidden = true;
+      window.print();
+    }
+    if (action === 'blackout') toggleBlackout();
+    if (action === 'spotlight') toggleSpotlight();
+    if (action === 'theme') {
+      const mode = target.getAttribute('data-theme-value') || 'light';
+      document.body.dataset.colorMode = mode === 'dark' ? 'dark' : 'light';
+      try { localStorage.setItem('agentdeck:colorMode', document.body.dataset.colorMode); } catch {}
+      document.querySelectorAll('[data-action="theme"]').forEach((button) => {
+        button.classList.toggle('is-active', button.getAttribute('data-theme-value') === mode);
+      });
+    }
+    if (action === 'fullscreen') {
+      if (isFullscreen()) await document.exitFullscreen?.();
+      else await document.documentElement.requestFullscreen?.();
+      syncFullscreenToolbar();
+    }
+  });
+  document.addEventListener('fullscreenchange', syncFullscreenToolbar);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenToolbar);
+  window.addEventListener('hashchange', () => show(hashIndex()));
+  document.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+    if (event.key === 'Escape') {
+      hidePresentationOverlays();
+      return;
+    }
+    if (key === 'o') toggleOverview();
+    if (key === 'c') toggleCompare();
+    if (key === 'p') toggleAutoplay();
+    if (key === 'b') toggleBlackout();
+    if (key === 'l') toggleSpotlight();
+    if (key === 'f') document.querySelector('[data-action="fullscreen"]')?.click();
+    if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') show(index + 1);
+    if (event.key === 'ArrowLeft' || event.key === 'PageUp') show(index - 1);
+    if (event.key === 'Home') show(0);
+    if (event.key === 'End') show(slides.length - 1);
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 700 : 1200, true);
+  });
+  document.addEventListener('wheel', (event) => {
+    const now = Date.now();
+    if (now - wheelAt < 550 || Math.abs(event.deltaY) < 24) return;
+    wheelAt = now;
+    show(index + (event.deltaY > 0 ? 1 : -1));
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 700 : 1200, true);
+  }, { passive: true });
+  let touchStart = null;
+  document.addEventListener('touchstart', (event) => { touchStart = event.changedTouches[0]?.clientX ?? null; }, { passive: true });
+  document.addEventListener('touchend', (event) => {
+    if (touchStart === null) return;
+    const delta = (event.changedTouches[0]?.clientX ?? touchStart) - touchStart;
+    if (Math.abs(delta) > 50) show(index + (delta < 0 ? 1 : -1));
+    touchStart = null;
+  }, { passive: true });
+  dock?.addEventListener('pointerenter', () => {
+    clearTimeout(dockHideTimer);
+    activateDock();
+  });
+  dock?.addEventListener('pointerleave', () => scheduleDockHide(0, true));
+  dock?.addEventListener('focusin', () => {
+    clearTimeout(dockHideTimer);
+    activateDock();
+  });
+  dock?.addEventListener('focusout', () => scheduleDockHide());
+  dockZone?.addEventListener('pointermove', (event) => {
+    if (!shouldAutoHideDock()) return;
+    if (!document.body.classList.contains('is-dock-hidden')) return;
+    if (event.clientY < window.innerHeight - dockRevealPx) return;
+    clearTimeout(dockHideTimer);
+    revealDock();
+    scheduleDockHide(isFullscreen() ? 1200 : 1600, true);
+  });
+  window.addEventListener('resize', scale);
+  window.addEventListener('resize', syncCompareView);
+  document.addEventListener('mousemove', (event) => {
+    hideDockIfPointerLeft(event);
+    if (spotlight && !spotlight.hidden) {
+      document.documentElement.style.setProperty('--ad-spot-x', event.clientX + 'px');
+      document.documentElement.style.setProperty('--ad-spot-y', event.clientY + 'px');
+    }
+  }, { passive: true });
+  try {
+    const savedMode = localStorage.getItem('agentdeck:colorMode');
+    if (savedMode === 'light' || savedMode === 'dark') {
+      document.body.dataset.colorMode = savedMode;
+      document.querySelectorAll('[data-action="theme"]').forEach((button) => {
+        button.classList.toggle('is-active', button.getAttribute('data-theme-value') === savedMode);
+      });
+    }
+  } catch {}
+  setInterval(tickTimer, 1000);
+  setAutoplayInterval(autoplayIntervalMs);
+  scale();
+  tickTimer();
+  activateDock();
+  show(hashIndex());
+})();
+</script>
+</body>
+</html>

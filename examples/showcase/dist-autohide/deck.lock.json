@@ -1,0 +1,203 @@
+{
+  "schemaVersion": "1.0",
+  "agentdeckVersion": "0.1.0",
+  "source": "deck.zh.md",
+  "title": "AgentDeck",
+  "theme": "swiss",
+  "slides": [
+    {
+      "index": 1,
+      "id": "已经有-html-或-pdf-怎么直接演示",
+      "title": "已经有 HTML 或 PDF，怎么直接演示？",
+      "layout": "cover",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "title",
+          "kind": "text",
+          "required": true
+        },
+        {
+          "id": "subtitle",
+          "kind": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "contentLimits": {
+        "maxTitleChars": 48
+      }
+    },
+    {
+      "index": 2,
+      "id": "agentdeck-做的事很简单",
+      "title": "AgentDeck 做的事很简单",
+      "layout": "statement",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "title",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxTitleChars": 72,
+        "maxBodyChars": 120
+      }
+    },
+    {
+      "index": 3,
+      "id": "当前最推荐的两条输入",
+      "title": "当前最推荐的两条输入",
+      "layout": "steps",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "items",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxItems": 6,
+        "maxBodyChars": 420
+      }
+    },
+    {
+      "index": 4,
+      "id": "暗场演示时-切到-dark",
+      "title": "暗场演示时，切到 Dark",
+      "layout": "statement",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "title",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxTitleChars": 72,
+        "maxBodyChars": 120
+      }
+    },
+    {
+      "index": 5,
+      "id": "页数一多-overview-就很有用",
+      "title": "页数一多，Overview 就很有用",
+      "layout": "cards",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "items",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxItems": 6,
+        "maxBodyChars": 520
+      }
+    },
+    {
+      "index": 6,
+      "id": "讲当前页时-也能看到下一页",
+      "title": "讲当前页时，也能看到下一页",
+      "layout": "statement",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "title",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxTitleChars": 72,
+        "maxBodyChars": 120
+      }
+    },
+    {
+      "index": 7,
+      "id": "需要讨论时-一键-blank",
+      "title": "需要讨论时，一键 Blank",
+      "layout": "statement",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "title",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxTitleChars": 72,
+        "maxBodyChars": 120
+      }
+    },
+    {
+      "index": 8,
+      "id": "讲重点时-用-spotlight",
+      "title": "讲重点时，用 Spotlight",
+      "layout": "steps",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "items",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxItems": 6,
+        "maxBodyChars": 420
+      }
+    },
+    {
+      "index": 9,
+      "id": "演示工具跟着文件一起走",
+      "title": "演示工具跟着文件一起走",
+      "layout": "table",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "table",
+          "kind": "table",
+          "required": false
+        }
+      ],
+      "contentLimits": {
+        "maxItems": 8
+      }
+    },
+    {
+      "index": 10,
+      "id": "最后交付的是一个能打开的文件",
+      "title": "最后交付的是一个能打开的文件",
+      "layout": "closing",
+      "templateLayout": false,
+      "slots": [
+        {
+          "id": "title",
+          "kind": "text",
+          "required": true
+        },
+        {
+          "id": "items",
+          "kind": "text",
+          "required": true
+        }
+      ],
+      "contentLimits": {
+        "maxItems": 3,
+        "maxBodyChars": 240
+      }
+    }
+  ],
+  "warnings": []
+}

@@ -6,7 +6,7 @@ button{font:inherit}
 body[data-color-mode=dark]{--ad-paper:#171a18;--ad-ink:#eff4ef;--ad-muted:#b7c2bb;--ad-surface:#101210}
 body[data-color-mode=dark] .ad-toolbar-group{border-color:rgba(255,255,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.25)}
 .agentdeck-app{position:relative;width:100vw;height:100vh;background:var(--ad-surface)}
-.ad-dock-zone{position:absolute;left:0;right:0;bottom:0;z-index:69;height:92px;pointer-events:none}
+.ad-dock-zone{position:absolute;left:0;right:0;bottom:0;z-index:69;height:32px;pointer-events:none}
 body.is-dock-autohide .ad-dock-zone,body.is-fullscreen-toolbar-hidden .ad-dock-zone{pointer-events:auto}
 .ad-dock{position:absolute;z-index:70;left:50%;bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px;max-width:calc(100vw - 28px);opacity:.9;filter:blur(0);transform:translate3d(-50%,0,0) scale(1);transform-origin:50% 100%;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1),filter .42s cubic-bezier(.22,1,.36,1);will-change:opacity,transform,filter}
 body.is-dock-active .ad-dock,.ad-dock:hover,.ad-dock:focus-within{opacity:1;filter:blur(0);transform:translate3d(-50%,-4px,0) scale(1)}
@@ -189,17 +189,21 @@ export const runtimeJs = `
   let wheelAt = 0;
   let autoplayIntervalMs = 8000;
   let autoplayTimer = 0;
+  const dockRevealPx = 32;
   function isFullscreen() {
     return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
   }
   function shouldAutoHideDock() {
     return dockAutohide || isFullscreen();
   }
-  function activateDock() {
+  function revealDock() {
     document.body.classList.add('is-dock-active');
     document.body.classList.remove('is-dock-hidden');
     clearTimeout(dockTimer);
     dockTimer = setTimeout(() => document.body.classList.remove('is-dock-active'), 3000);
+  }
+  function activateDock() {
+    revealDock();
     if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 1600 : 2000);
   }
   function scheduleDockHide(delay = 2000, force = false) {
@@ -212,6 +216,13 @@ export const runtimeJs = `
       }
     }, delay);
   }
+  function hideDockIfPointerLeft(event) {
+    if (!shouldAutoHideDock()) return;
+    if (document.body.classList.contains('is-dock-hidden')) return;
+    if (event.clientY >= window.innerHeight - dockRevealPx) return;
+    if (dock?.contains(event.target)) return;
+    scheduleDockHide(0, true);
+  }
   function setDockAutohide(next) {
     dockAutohide = next;
     document.body.classList.toggle('is-dock-autohide', next);
@@ -223,8 +234,9 @@ export const runtimeJs = `
       button.setAttribute('aria-label', next ? 'Disable toolbar auto-hide' : 'Auto-hide toolbar');
     });
     clearTimeout(dockHideTimer);
-    if (next) scheduleDockHide(2000, true);
+    if (next) scheduleDockHide(0, true);
     else if (isFullscreen()) scheduleDockHide(1600, true);
+    else revealDock();
   }
   function syncFullscreenToolbar() {
     const fullscreen = isFullscreen();
@@ -429,7 +441,6 @@ export const runtimeJs = `
   document.addEventListener('webkitfullscreenchange', syncFullscreenToolbar);
   window.addEventListener('hashchange', () => show(hashIndex()));
   document.addEventListener('keydown', (event) => {
-    activateDock();
     const key = event.key.toLowerCase();
     if (event.key === 'Escape') {
       hidePresentationOverlays();
@@ -445,13 +456,14 @@ export const runtimeJs = `
     if (event.key === 'ArrowLeft' || event.key === 'PageUp') show(index - 1);
     if (event.key === 'Home') show(0);
     if (event.key === 'End') show(slides.length - 1);
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 700 : 1200, true);
   });
   document.addEventListener('wheel', (event) => {
-    activateDock();
     const now = Date.now();
     if (now - wheelAt < 550 || Math.abs(event.deltaY) < 24) return;
     wheelAt = now;
     show(index + (event.deltaY > 0 ? 1 : -1));
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 700 : 1200, true);
   }, { passive: true });
   let touchStart = null;
   document.addEventListener('touchstart', (event) => { touchStart = event.changedTouches[0]?.clientX ?? null; }, { passive: true });
@@ -465,20 +477,24 @@ export const runtimeJs = `
     clearTimeout(dockHideTimer);
     activateDock();
   });
-  dock?.addEventListener('pointerleave', () => scheduleDockHide());
+  dock?.addEventListener('pointerleave', () => scheduleDockHide(0, true));
   dock?.addEventListener('focusin', () => {
     clearTimeout(dockHideTimer);
     activateDock();
   });
   dock?.addEventListener('focusout', () => scheduleDockHide());
-  dockZone?.addEventListener('pointerenter', () => {
+  dockZone?.addEventListener('pointermove', (event) => {
     if (!shouldAutoHideDock()) return;
+    if (!document.body.classList.contains('is-dock-hidden')) return;
+    if (event.clientY < window.innerHeight - dockRevealPx) return;
     clearTimeout(dockHideTimer);
-    activateDock();
+    revealDock();
+    scheduleDockHide(isFullscreen() ? 1200 : 1600, true);
   });
   window.addEventListener('resize', scale);
   window.addEventListener('resize', syncCompareView);
   document.addEventListener('mousemove', (event) => {
+    hideDockIfPointerLeft(event);
     if (spotlight && !spotlight.hidden) {
       document.documentElement.style.setProperty('--ad-spot-x', event.clientX + 'px');
       document.documentElement.style.setProperty('--ad-spot-y', event.clientY + 'px');

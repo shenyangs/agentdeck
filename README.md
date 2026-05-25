@@ -44,6 +44,8 @@ AgentDeck 当前最稳定、最推荐的使用方式是：
 
 这两类输入是当前主线，目标是高保真播放、分享、缩略总览、Blank、Spotlight、自动播放、打印 / PDF 等增强演示能力。
 
+对 HTML 演示页，AgentDeck 会保留原内容，并让外层播放器自适应 Light / Dark 模式；如果原 HTML 使用可主题化样式，也可以跟随播放器切换明暗模式。
+
 `.ppt` / `.pptx` / `.key` / `.doc` / `.docx` / `.xls` / `.xlsx` / `.md` 目前也可以处理，但属于实验性兼容路径：
 
 - Office 类文件依赖本机 LibreOffice、Keynote、Quick Look 或 Windows Office COM 转成 PDF。

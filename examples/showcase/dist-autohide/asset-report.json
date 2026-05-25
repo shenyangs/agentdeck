@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "agentdeckVersion": "0.1.0",
+  "source": {
+    "path": "deck.zh.md",
+    "redacted": true,
+    "extension": ".md",
+    "bytes": 2847,
+    "sha256": "f970ef30bec1db9a348d1c58c52f3b6b00bd59218c0b3dd27c5911e9feda1bd3",
+    "detectedMime": "text/markdown"
+  },
+  "environment": {
+    "os": "darwin",
+    "arch": "arm64",
+    "node": "v24.15.0",
+    "availableBackends": [
+      "markdown"
+    ]
+  },
+  "pipeline": [
+    {
+      "step": "template-contract",
+      "backend": "built-in-theme",
+      "status": "success",
+      "durationMs": 0,
+      "message": "swiss"
+    },
+    {
+      "step": "markdown-to-html",
+      "backend": "agentdeck-markdown",
+      "status": "success",
+      "durationMs": 0,
+      "message": "10 slide(s)"
+    }
+  ],
+  "output": {
+    "htmlPath": "index.html",
+    "bytes": 71457,
+    "pageCount": 10,
+    "packMode": "single-html",
+    "fidelity": "markdown"
+  },
+  "qualitySignals": {
+    "blankPages": [],
+    "pageCountMismatch": false,
+    "oversizedOutput": false,
+    "warnings": []
+  },
+  "assets": [],
+  "deckLockPath": "deck.lock.json"
+}

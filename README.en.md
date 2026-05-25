@@ -42,6 +42,8 @@ AgentDeck is currently most stable and most recommended for:
 
 These are the primary routes today. Their goal is high-fidelity playback, sharing, thumbnail overview, blank screen, spotlight, autoplay, print/PDF, and other presentation controls.
 
+For HTML decks, AgentDeck preserves the source content while the player shell adapts to Light/Dark mode. If the source HTML uses themeable styles, it can follow the player color mode too.
+
 `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, and `.md` are also supported, but they should be treated as experimental compatibility routes:
 
 - Office files depend on local LibreOffice, Keynote, Quick Look, or Windows Office COM to become PDF first.
