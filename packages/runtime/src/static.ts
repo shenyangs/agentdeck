@@ -62,7 +62,7 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
       <div class="ad-toolbar-group ad-toolbar-group--nav" aria-label="Slide navigation">
         <button type="button" data-action="restart" aria-label="Restart deck" title="Restart">${icon("restart")}</button>
         <button type="button" data-action="prev" aria-label="Previous slide" title="Previous slide">‹</button>
-        <button type="button" data-action="play" aria-label="Toggle autoplay" title="Autoplay">${icon("play")}</button>
+        <button type="button" data-action="play" aria-label="Start autoplay" title="Autoplay"><span data-play-icon="play">${icon("play")}</span><span data-play-icon="pause" hidden>${icon("pause")}</span></button>
         <button type="button" data-action="interval" class="ad-interval-button" aria-label="Change autoplay interval" title="Autoplay interval"><span data-interval-label>8s</span></button>
         <span class="ad-counter"><span data-current>1</span> / ${deck.slides.length}</span>
         <button type="button" data-action="next" aria-label="Next slide" title="Next slide">›</button>
@@ -323,7 +323,7 @@ function renderBlock(block: SlideBlock, options: StandaloneRenderOptions): strin
   }
 }
 
-function icon(name: "monitor" | "sun" | "moon" | "fullscreen" | "download" | "grid" | "spotlight" | "restart" | "compare" | "play" | "lights-off" | "dock-hide" | "x"): string {
+function icon(name: "monitor" | "sun" | "moon" | "fullscreen" | "download" | "grid" | "spotlight" | "restart" | "compare" | "play" | "pause" | "lights-off" | "dock-hide" | "x"): string {
   const paths: Record<typeof name, string> = {
     monitor: '<rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8"></path><path d="M12 16v4"></path>',
     sun: '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>',
@@ -335,6 +335,7 @@ function icon(name: "monitor" | "sun" | "moon" | "fullscreen" | "download" | "gr
     restart: '<path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v6h6"></path>',
     compare: '<rect x="3" y="5" width="7" height="14" rx="1.5"></rect><rect x="14" y="5" width="7" height="14" rx="1.5"></rect><path d="M12 5v14"></path>',
     play: '<path d="M7 5v14l11-7z"></path>',
+    pause: '<path d="M8 5v14"></path><path d="M16 5v14"></path>',
     "lights-off": '<path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a6 6 0 0 1 4.8 9.6c-.85 1.1-1.8 2.1-2.3 3.4h-5c-.5-1.3-1.45-2.3-2.3-3.4A6 6 0 0 1 12 2Z"></path><path d="m4 4 16 16"></path>',
     "dock-hide": '<path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path><path d="M8 20h8"></path><path d="M12 16v4"></path><path d="m8 10 4 3 4-3"></path>',
     x: '<path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>',

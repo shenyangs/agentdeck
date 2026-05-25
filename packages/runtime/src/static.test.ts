@@ -18,6 +18,10 @@ Hello
     expect(html).toContain("data-export-page");
     expect(html).toContain('data-action="overview"');
     expect(html).toContain('data-action="play"');
+    expect(html).toContain('aria-label="Start autoplay"');
+    expect(html).toContain('data-play-icon="play"');
+    expect(html).toContain('data-play-icon="pause" hidden');
+    expect(html).toContain("Pause autoplay");
     expect(html).toContain('data-action="interval"');
     expect(html).not.toContain('data-action="seek"');
     expect(html).toContain('data-action="dock-autohide"');

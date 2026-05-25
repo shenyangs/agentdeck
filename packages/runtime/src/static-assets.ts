@@ -275,6 +275,13 @@ export const runtimeJs = `
       autoplayTimer = 0;
     }
     setActionActive('play', next);
+    if (playButton) {
+      playButton.setAttribute('aria-label', next ? 'Pause autoplay' : 'Start autoplay');
+      playButton.setAttribute('title', next ? 'Pause autoplay' : 'Autoplay');
+      playButton.querySelectorAll('[data-play-icon]').forEach((icon) => {
+        icon.hidden = icon.getAttribute('data-play-icon') !== (next ? 'pause' : 'play');
+      });
+    }
   }
   function setAutoplayInterval(ms) {
     autoplayIntervalMs = ms;
