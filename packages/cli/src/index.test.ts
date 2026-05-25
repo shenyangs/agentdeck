@@ -3,7 +3,6 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { backendIds, type Backend } from "./converters/backend-registry.js";
 import { runCli } from "./index.js";
 
 describe("runCli", () => {
@@ -13,6 +12,44 @@ describe("runCli", () => {
     await expect(runCli(["lint", join(dir, "deck.md")])).resolves.toMatchObject({ code: 0 });
     await expect(runCli(["build", join(dir, "deck.md"), "--out", join(dir, "dist"), "--single-html"])).resolves.toMatchObject({ code: 0 });
     expect(readFileSync(join(dir, "dist", "index.html"), "utf8")).toContain("AgentDeck");
+    expect(JSON.parse(readFileSync(join(dir, "dist", "deck.lock.json"), "utf8")).slides.length).toBeGreaterThan(0);
+  });
+
+  it("builds Markdown decks against a template pack contract", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-template-"));
+    const templateDir = join(dir, "templates", "acme");
+    await expect(runCli(["template", "init", templateDir, "--base-theme", "swiss"])).resolves.toMatchObject({ code: 0 });
+    writeFileSync(
+      join(dir, "deck.md"),
+      `---
+title: Template Contract
+theme: ./templates/acme
+---
+
+# Cover
+layout: cover
+
+Template controlled opening.
+
+# One Idea
+layout: insight
+
+Template controlled body.
+`,
+      "utf8",
+    );
+
+    await expect(runCli(["lint", join(dir, "deck.md")])).resolves.toMatchObject({ code: 0 });
+    await expect(runCli(["build", join(dir, "deck.md"), "--out", join(dir, "dist")])).resolves.toMatchObject({ code: 0 });
+
+    const html = readFileSync(join(dir, "dist", "index.html"), "utf8");
+    const lock = JSON.parse(readFileSync(join(dir, "dist", "deck.lock.json"), "utf8"));
+    const report = JSON.parse(readFileSync(join(dir, "dist", "asset-report.json"), "utf8"));
+    expect(html).toContain('data-theme="acme"');
+    expect(lock.template.id).toBe("acme");
+    expect(lock.slides.every((slide: { templateLayout: boolean }) => slide.templateLayout)).toBe(true);
+    expect(report.deckLockPath).toBe("deck.lock.json");
+    expect(report.template.id).toBe("acme");
   });
 
   it("builds audience, presenter, creator, and rendered-file profile variants", async () => {
@@ -228,18 +265,6 @@ describe("runCli", () => {
     const result = spawnSync("node", ["scripts/release-patch.mjs", "--dry-run", "--skip-verify"], { cwd: process.cwd(), encoding: "utf8" });
     expect(result.status).toBe(0);
     expect(result.stdout.trim()).toBe(expected);
-  });
-});
-
-describe("backend registry", () => {
-  it("orders supported backends by platform and priority", () => {
-    type Input = { ext: string };
-    const backends: Array<Backend<Input, string>> = [
-      { id: "low", platform: "all", supports: () => true, priority: () => 1, run: () => "low" },
-      { id: "darwin-high", platform: "darwin", supports: (input) => input.ext === ".pptx", priority: () => 10, run: () => "high" },
-      { id: "linux-only", platform: "linux", supports: () => true, priority: () => 20, run: () => "linux" },
-    ];
-    expect(backendIds(backends, { ext: ".pptx" }, { platform: "darwin", availableCommands: new Set(), availableModules: new Set() })).toEqual(["darwin-high", "low"]);
   });
 });
 

@@ -4,6 +4,20 @@ AgentDeck is for agents that need to deliver a reliable single HTML presentation
 
 ## Default Loop
 
+0. Confirm the CLI is installed:
+
+   ```bash
+   command -v agentdeck
+   agentdeck doctor --json
+   ```
+
+   If `agentdeck` is missing on macOS and Homebrew is available, install it with:
+
+   ```bash
+   brew tap shenyangs/agentdeck
+   brew install agentdeck
+   ```
+
 1. Detect the input:
 
    ```bash
@@ -47,6 +61,7 @@ Do not:
 - generate a new deck when the user asked to preserve an existing one
 - re-layout Office, PDF, or existing HTML content
 - claim editable PowerPoint compatibility
+- modify AgentDeck runtime when a `deck.md` edit is enough
 
 Do:
 
@@ -54,3 +69,4 @@ Do:
 - write reports
 - verify the single HTML
 - preserve the source as the truth
+- use the Authoring Kit only for Markdown-first decks

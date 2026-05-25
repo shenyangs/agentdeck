@@ -1,9 +1,11 @@
 import { readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { findCommand } from "../process/find-command.js";
+import { pythonModuleAvailable } from "../process/python.js";
 import { commandErrorMessage, runCommand } from "../process/run-command.js";
 import { pipelineAttempt } from "../reports.js";
 import type { PdfRenderResult, PipelineAttempt, RenderedPage } from "../types.js";
+import { pageNumber, pngDimensions } from "../utils/images.js";
 
 export function renderPdfToPngPages(pdfPath: string, outDir: string, dpi: number, options: { timeoutMs?: number; maxPages?: number } = {}): PdfRenderResult {
   const failures: string[] = [];
@@ -165,26 +167,4 @@ print(len(images))
     throw new Error(commandErrorMessage(result, `${moduleName} failed`));
   }
   return { durationMs: result.durationMs };
-}
-
-
-
-function pngDimensions(data: Buffer): { width: number; height: number } {
-  if (data.length >= 24 && data.toString("ascii", 1, 4) === "PNG") {
-    return { width: data.readUInt32BE(16), height: data.readUInt32BE(20) };
-  }
-  return { width: 0, height: 0 };
-}
-
-function pageNumber(file: string): number {
-  return Number(file.match(/-(\d+)\.png$/i)?.[1] ?? 0);
-}
-
-function pythonModuleAvailable(python: string, moduleName: string): boolean {
-  const result = runCommand(
-    python,
-    ["-c", "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec(module_name) else 1)", moduleName],
-    { timeoutMs: 5_000 },
-  );
-  return result.status === 0;
 }

@@ -1,7 +1,7 @@
 import type { LayoutManifest, ThemeId } from "@agentdeck/schema";
 
 export interface ThemeTokens {
-  id: ThemeId;
+  id: string;
   label: string;
   paper: string;
   ink: string;
@@ -95,8 +95,14 @@ export const layoutRegistry: LayoutManifest[] = [
   layout("html-import", all, "Imported HTML", "Full-slide HTML imported from an external deck or PPT skill", ["body"], {}, ["Preserve the source deck visual work and only add AgentDeck playback controls."]),
 ];
 
-export function resolveTheme(theme: string | undefined): ThemeTokens {
-  return themeTokens[(theme as ThemeId) || "editorial"] ?? themeTokens.editorial;
+export function resolveTheme(theme: string | undefined, overrides: Partial<ThemeTokens> = {}): ThemeTokens {
+  const base = themeTokens[(theme as ThemeId) || "editorial"] ?? themeTokens.editorial;
+  return {
+    ...base,
+    ...overrides,
+    id: overrides.id ?? base.id,
+    label: overrides.label ?? base.label,
+  };
 }
 
 export function getLayout(id: string): LayoutManifest | undefined {

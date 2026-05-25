@@ -142,10 +142,15 @@ agentdeck verify dist/index.html --out verify-report.json
 
 ```bash
 agentdeck init my-deck --theme swiss
+agentdeck template init my-deck/templates/acme --base-theme swiss
 agentdeck build my-deck/deck.md --single-html --out my-deck/dist
 ```
 
 Markdown is a lightweight fallback authoring path. The main product path is still existing presentation file to single-file HTML player.
+
+If a user really starts from Markdown, see the [Authoring Kit](./docs/authoring-kit.md). It borrows useful ideas from lightweight web slide templates: stable page types for covers, images, cards, tables, code, quotes, formulas, and flow diagrams without changing AgentDeck's core boundary.
+
+When Markdown authoring needs stable brand or layout constraints, create a template pack with `agentdeck template init` and reference it with `theme: ./templates/acme` in frontmatter. `build` reads `template.json`, applies theme tokens and layout contracts, and writes `deck.lock.json` with the concrete layouts, slots, and limits used by each slide.
 
 ## Player Features
 
@@ -156,13 +161,15 @@ The generated `dist/index.html` includes:
 - autoplay
 - autoplay interval switcher
 - looped playback
-- progress bar and scrubber
+- bottom progress bar
+- toolbar auto-hide
 - thumbnail overview with click-to-jump
 - next-slide preview
 - blank screen
 - spotlight
 - fullscreen
 - browser print / PDF
+- dark player chrome by default, with Light still selectable
 
 Shortcuts:
 
@@ -235,6 +242,7 @@ agentdeck probe deck.pptx
 agentdeck verify dist/index.html
 agentdeck doctor --json
 agentdeck init my-deck --theme swiss
+agentdeck template init my-deck/templates/acme --base-theme swiss
 agentdeck lint my-deck/deck.md
 agentdeck build my-deck/deck.md --single-html --mode audience --out my-deck/dist
 agentdeck export my-deck/deck.md --pdf --png --long-image --grid9 --out my-deck/export
@@ -245,14 +253,16 @@ agentdeck doctor
 
 Recommended workflow:
 
-1. If the user provides `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.pdf`, or `.html`, run `agentdeck probe path/to/file`.
-2. Follow the recommended route with `agentdeck wrap path/to/file --out dist`.
-3. If the user provides `.md`, run `agentdeck lint` and `agentdeck build`.
-4. Read `dist/asset-report.json` and `dist/compat-report.json`.
-5. Run `agentdeck verify dist/index.html` and read `verify-report.json`.
-6. Do not recommend, install, or route to PPT skills.
-7. Do not re-layout Office or PDF content.
-8. If conversion fails, report the converter issue instead of rewriting the user's deck.
+1. Run `command -v agentdeck`; if the CLI is missing, install it with Homebrew when available, or build it from this repository with `npm install && npm run build`.
+2. Run `agentdeck doctor --json` to check converters.
+3. If the user provides `.ppt`, `.pptx`, `.key`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.pdf`, or `.html`, run `agentdeck probe path/to/file`.
+4. Follow the recommended route with `agentdeck wrap path/to/file --out dist`.
+5. If the user provides `.md`, run `agentdeck lint` and `agentdeck build`.
+6. Read `dist/asset-report.json` and `dist/compat-report.json`.
+7. Run `agentdeck verify dist/index.html` and read `verify-report.json`.
+8. Do not recommend, install, or route to PPT skills.
+9. Do not re-layout Office or PDF content.
+10. If conversion fails, report the converter issue instead of rewriting the user's deck.
 
 AgentDeck expects agents to reason and act adaptively: try the default compatibility path first, then use the reports and visual result to retry when pages are tiny, blank, mismatched, or malformed. Interrupt the user only when converters are missing, the source file is broken, or both HTML routes fail.
 
@@ -279,6 +289,7 @@ Principles:
 - [Troubleshooting](./docs/troubleshooting.md)
 - [Security model](./docs/security.md)
 - [Agent workflow](./docs/agent-workflow.md)
+- [Authoring Kit](./docs/authoring-kit.md)
 
 ## Development
 

@@ -28,7 +28,7 @@ export interface DeckMeta {
   subtitle?: string;
   author?: string;
   lang: string;
-  theme: ThemeId;
+  theme: string;
   aspect: "16:9";
   outputs: OutputFormat[];
   audience?: string;
@@ -174,4 +174,73 @@ export interface LayoutManifest {
   };
   agentHints: string[];
   compatibleWith: string[];
+}
+
+export interface TemplateThemeTokens {
+  paper?: string;
+  ink?: string;
+  accent?: string;
+  accentAlt?: string;
+  muted?: string;
+  surface?: string;
+  fontSans?: string;
+  fontSerif?: string;
+  fontMono?: string;
+}
+
+export interface TemplateLayout {
+  id: string;
+  title?: string;
+  purpose?: string;
+  slots?: LayoutSlot[];
+  contentLimits?: LayoutManifest["contentLimits"];
+  exportSafe?: LayoutManifest["exportSafe"];
+  agentHints?: string[];
+  compatibleWith?: string[];
+}
+
+export interface TemplateQualityRules {
+  strict?: boolean;
+  allowedColors?: string[];
+  allowedFonts?: string[];
+  requiredLayouts?: string[];
+}
+
+export interface TemplatePack {
+  schemaVersion?: "1.0";
+  id: string;
+  name?: string;
+  description?: string;
+  baseTheme?: ThemeId;
+  tokens?: TemplateThemeTokens;
+  layouts?: TemplateLayout[];
+  assets?: Record<string, string>;
+  quality?: TemplateQualityRules;
+}
+
+export interface DeckLockSlide {
+  index: number;
+  id: string;
+  title: string;
+  layout: string;
+  templateLayout: boolean;
+  slots: LayoutSlot[];
+  contentLimits: LayoutManifest["contentLimits"];
+}
+
+export interface DeckLock {
+  schemaVersion: "1.0";
+  agentdeckVersion: string;
+  source: string;
+  title: string;
+  theme: string;
+  template?: {
+    id: string;
+    name?: string;
+    path: string;
+    baseTheme: ThemeId;
+    strict: boolean;
+  };
+  slides: DeckLockSlide[];
+  warnings: string[];
 }

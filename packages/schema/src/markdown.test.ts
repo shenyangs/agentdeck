@@ -36,6 +36,18 @@ AI Agent 不缺写作能力，缺的是可验证的视觉生产协议
     expect(deck.slides[0].note).toContain("开场");
     expect(deck.slides[1].blocks[0]).toMatchObject({ type: "list" });
   });
+
+  it("preserves template pack paths as theme references", () => {
+    const deck = parseDeckMarkdown(`---
+title: Template Deck
+theme: ./templates/acme
+---
+
+# Cover
+`);
+
+    expect(deck.meta.theme).toBe("./templates/acme");
+  });
 });
 
 describe("validateDeck", () => {
@@ -54,5 +66,33 @@ describe("validateDeck", () => {
       },
     ]);
     expect(diagnostics.some((diagnostic) => diagnostic.code === "slide.layout")).toBe(true);
+  });
+
+  it("enforces strict template layouts", () => {
+    const diagnostics = validateDeck(
+      parseDeckMarkdown("---\ntitle: Test\n---\n\n# Off Template\nlayout: statement\n"),
+      [
+        {
+          id: "cover",
+          theme: "all",
+          title: "Cover",
+          purpose: "Cover",
+          slots: [],
+          contentLimits: {},
+          exportSafe: { pdf: true, png: true, singleHtml: true },
+          agentHints: [],
+          compatibleWith: [],
+        },
+      ],
+      {
+        template: {
+          id: "strict",
+          layouts: [{ id: "cover" }],
+          quality: { strict: true },
+        },
+      },
+    );
+
+    expect(diagnostics.some((diagnostic) => diagnostic.code === "template.layout")).toBe(true);
   });
 });

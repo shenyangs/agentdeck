@@ -1,13 +1,18 @@
-import type { DeckDocument, Diagnostic, LayoutManifest } from "./types.js";
+import type { DeckDocument, Diagnostic, LayoutManifest, TemplatePack } from "./types.js";
 
 const SUPPORTED_OUTPUTS = new Set(["html", "pdf", "png", "long-image", "grid9", "cover", "social-pack"]);
+const HEX_COLOR_RE = /#[0-9a-f]{3}(?:[0-9a-f]{3})?\b/gi;
 
 export function validateDeck(
   deck: DeckDocument,
   layouts: LayoutManifest[] = [],
+  options: { template?: TemplatePack } = {},
 ): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   const layoutIds = new Set(layouts.map((layout) => layout.id));
+  const templateLayoutIds = new Set((options.template?.layouts ?? []).map((layout) => layout.id));
+  const strictTemplate = Boolean(options.template?.quality?.strict && templateLayoutIds.size > 0);
+  const allowedColors = new Set((options.template?.quality?.allowedColors ?? []).map(normalizeHexColor));
 
   if (!deck.meta.title || deck.meta.title === "Untitled Deck") {
     diagnostics.push({ level: "error", code: "meta.title", message: "Deck frontmatter must include a title." });
@@ -41,6 +46,15 @@ export function validateDeck(
         detail: "Use one of the layout IDs registered by @agentdeck/themes.",
       });
     }
+    if (strictTemplate && !templateLayoutIds.has(slide.layout)) {
+      diagnostics.push({
+        level: "error",
+        code: "template.layout",
+        message: `Layout "${slide.layout}" is outside strict template "${options.template?.id}".`,
+        slideIndex,
+        detail: "Use a layout declared in the template pack or disable quality.strict.",
+      });
+    }
     if (slide.title.length > 72) {
       diagnostics.push({
         level: "warning",
@@ -72,7 +86,31 @@ export function validateDeck(
         slideIndex,
       });
     }
+
+    if (allowedColors.size > 0) {
+      for (const color of slide.raw.match(HEX_COLOR_RE) ?? []) {
+        if (!allowedColors.has(normalizeHexColor(color))) {
+          diagnostics.push({
+            level: "error",
+            code: "template.color",
+            message: `Color ${color} is outside template allowedColors.`,
+            slideIndex,
+            detail: "Use a template token color or add the color to template.json.",
+          });
+        }
+      }
+    }
   });
+
+  for (const requiredLayout of options.template?.quality?.requiredLayouts ?? []) {
+    if (!deck.slides.some((slide) => slide.layout === requiredLayout)) {
+      diagnostics.push({
+        level: "warning",
+        code: "template.requiredLayout",
+        message: `Template recommends at least one "${requiredLayout}" slide.`,
+      });
+    }
+  }
 
   return diagnostics;
 }
@@ -89,4 +127,8 @@ export function formatDiagnostics(diagnostics: Diagnostic[]): string {
       return `${diagnostic.level.toUpperCase()} ${diagnostic.code} (${scope}): ${diagnostic.message}${diagnostic.detail ? ` ${diagnostic.detail}` : ""}`;
     })
     .join("\n");
+}
+
+function normalizeHexColor(value: string): string {
+  return value.toLowerCase();
 }

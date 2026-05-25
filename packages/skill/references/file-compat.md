@@ -5,6 +5,8 @@ AgentDeck's core route is playback compatibility, not PPT generation.
 Use `agentdeck wrap` whenever the user gives an existing presentation artifact:
 
 ```bash
+command -v agentdeck
+agentdeck doctor --json
 agentdeck probe deck.pptx
 agentdeck wrap deck.pptx --out dist
 agentdeck wrap deck.ppt --out dist

@@ -8,6 +8,7 @@ export interface BuildResult {
   deck: DeckDocument;
   htmlPath: string;
   assetReportPath: string;
+  deckLockPath: string;
 }
 
 export type HtmlWrapStrategy = "auto" | "dom" | "raster";

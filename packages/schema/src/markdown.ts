@@ -6,14 +6,12 @@ import type {
   OutputFormat,
   Slide,
   SlideBlock,
-  ThemeId,
 } from "./types.js";
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 const SLIDE_HEADING_RE = /^#\s+(.+)$/gm;
 const DIRECTIVE_RE = /^([a-zA-Z][\w-]*)\s*:\s*(.+)$/;
 const DEFAULT_OUTPUTS: OutputFormat[] = ["html", "pdf", "png", "long-image", "grid9"];
-const THEME_IDS = new Set(["editorial", "swiss", "launch", "course"]);
 const DECK_MODES = new Set(["audience", "presenter", "creator"]);
 const COMPATIBILITY_PROFILES = new Set(["agentdeck", "external-html", "rendered-file"]);
 
@@ -69,7 +67,7 @@ function stripQuotes(value: string): string {
 }
 
 function normalizeMeta(raw: Record<string, unknown>): DeckMeta {
-  const theme = typeof raw.theme === "string" && THEME_IDS.has(raw.theme) ? raw.theme : "editorial";
+  const theme = typeof raw.theme === "string" && raw.theme.trim() ? raw.theme.trim() : "editorial";
   const outputs = Array.isArray(raw.outputs)
     ? raw.outputs.filter((output): output is OutputFormat => typeof output === "string")
     : DEFAULT_OUTPUTS;
@@ -81,7 +79,7 @@ function normalizeMeta(raw: Record<string, unknown>): DeckMeta {
     subtitle: stringValue(raw.subtitle),
     author: stringValue(raw.author),
     lang: stringValue(raw.lang) ?? "zh-CN",
-    theme: theme as ThemeId,
+    theme,
     aspect: "16:9",
     outputs,
     audience: stringValue(raw.audience),
