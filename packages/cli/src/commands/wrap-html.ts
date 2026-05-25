@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { analyzeHtmlCompatibility, formatHtmlStrategyDecision } from "../converters/html.js";
+import { adjustHtmlAnalysisForCompatibilityScan, scanInputCompatibility } from "../converters/risk-scanner.js";
 import { htmlStrategy, parseArgs } from "../flags.js";
 import type { CliResult, HtmlWrapStrategy } from "../types.js";
 import { resolveInputPath } from "../utils/files.js";
@@ -16,12 +17,16 @@ export async function commandWrapHtml(args: string[]): Promise<CliResult> {
   const htmlPath = resolveInputPath(file);
   const htmlSource = readFileSync(htmlPath, "utf8");
   const requestedStrategy = htmlStrategy(options.flags["html-strategy"] ?? options.flags.strategy);
-  const analysis = analyzeHtmlCompatibility(htmlSource);
+  const compatibilityScan = scanInputCompatibility(htmlPath, {
+    htmlSource,
+    allowNetwork: Boolean(options.flags["allow-network"]),
+  });
+  const analysis = adjustHtmlAnalysisForCompatibilityScan(analyzeHtmlCompatibility(htmlSource), compatibilityScan);
   const selectedStrategy: Exclude<HtmlWrapStrategy, "auto"> = requestedStrategy === "auto" ? analysis.recommendedStrategy : requestedStrategy;
   console.log(formatHtmlStrategyDecision(requestedStrategy, selectedStrategy, analysis));
 
   if (selectedStrategy === "raster") {
-    return wrapHtmlRaster(htmlPath, htmlSource, options, analysis, requestedStrategy);
+    return wrapHtmlRaster(htmlPath, htmlSource, options, analysis, requestedStrategy, undefined, compatibilityScan);
   }
 
   return wrapHtmlDom({
@@ -30,8 +35,9 @@ export async function commandWrapHtml(args: string[]): Promise<CliResult> {
     htmlSource,
     options,
     analysis,
+    compatibilityScan,
     requestedStrategy,
     selectedStrategy,
-    fallback: (fallbackAnalysis, fallbackReason) => wrapHtmlRaster(htmlPath, htmlSource, options, fallbackAnalysis, requestedStrategy, fallbackReason),
+    fallback: (fallbackAnalysis, fallbackReason) => wrapHtmlRaster(htmlPath, htmlSource, options, fallbackAnalysis, requestedStrategy, fallbackReason, compatibilityScan),
   });
 }

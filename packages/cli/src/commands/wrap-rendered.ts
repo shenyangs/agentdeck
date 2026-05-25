@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join, parse, resolve } from "node:path";
 import { renderStandaloneHtml } from "@agentdeck/runtime";
 import { renderPdfToPngPages } from "../converters/pdf.js";
+import { scanInputCompatibility } from "../converters/risk-scanner.js";
 import { imageOutputOptions, stringFlag, timeoutMsFlag } from "../flags.js";
 import { applyImageOutputOptions, renderedFileDeck, writeRenderedPageAssets } from "../output/rendered-file.js";
 import {
@@ -51,7 +52,12 @@ export async function commandWrapRenderedFile(
     const assetReportPath = join(outDir, "asset-report.json");
     writeFileSync(outputPath, outputHtml, "utf8");
     const htmlBytes = statSync(outputPath).size;
-    const warnings = sizeBudgetWarnings(totalBytes, imageOptions);
+    const compatibilityScan = scanInputCompatibility(originalSourcePath);
+    const sizeWarnings = sizeBudgetWarnings(totalBytes, imageOptions);
+    const warnings = [
+      ...sizeWarnings,
+      ...compatibilityScan.warnings,
+    ];
     const assetReport = {
       schemaVersion: REPORT_SCHEMA_VERSION,
       agentdeckVersion: AGENTDECK_VERSION,
@@ -71,8 +77,9 @@ export async function commandWrapRenderedFile(
       }),
       qualitySignals: {
         ...defaultQualitySignals(warnings),
-        oversizedOutput: warnings.length > 0,
+        oversizedOutput: sizeWarnings.length > 0,
       },
+      compatibilityScan,
       fidelity: "raster",
       officeConverterBackend: officeBackend,
       dpi,

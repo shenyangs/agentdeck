@@ -14,7 +14,7 @@ import {
   reportSource,
   writeJsonReport,
 } from "../reports.js";
-import type { CliResult, HtmlCompatibilityAnalysis, HtmlWrapStrategy } from "../types.js";
+import type { CliResult, CompatibilityScan, HtmlCompatibilityAnalysis, HtmlWrapStrategy } from "../types.js";
 import { resolveHtmlAsset } from "../utils/files.js";
 import { printDiagnostics } from "./build.js";
 import { maybeVerifyWrappedOutput } from "./wrap-shared.js";
@@ -25,11 +25,12 @@ export async function wrapHtmlDom(params: {
   htmlSource: string;
   options: { positionals: string[]; flags: Record<string, string | boolean> };
   analysis: HtmlCompatibilityAnalysis;
+  compatibilityScan: CompatibilityScan;
   requestedStrategy: HtmlWrapStrategy;
   selectedStrategy: Exclude<HtmlWrapStrategy, "auto">;
   fallback: (analysis: HtmlCompatibilityAnalysis, reason: string) => Promise<CliResult>;
 }): Promise<CliResult> {
-  const { file, htmlPath, htmlSource, options, analysis, requestedStrategy, selectedStrategy, fallback } = params;
+  const { file, htmlPath, htmlSource, options, analysis, compatibilityScan, requestedStrategy, selectedStrategy, fallback } = params;
   const outDir = resolve(String(options.flags.out ?? "dist"));
   const sourceDir = dirname(htmlPath);
   const assetEntries: Array<{ src: string; resolved?: string; bytes?: number; inlined: boolean; warning?: string }> = [];
@@ -74,7 +75,11 @@ export async function wrapHtmlDom(params: {
       packMode: "single-html",
       fidelity: "dom",
     }),
-    qualitySignals: defaultQualitySignals(imported.warnings.map((diagnostic) => diagnostic.message)),
+    qualitySignals: defaultQualitySignals([
+      ...imported.warnings.map((diagnostic) => diagnostic.message),
+      ...compatibilityScan.warnings,
+    ]),
+    compatibilityScan,
     assets: assetEntries,
   };
   writeJsonReport(assetReportPath, assetReport);
@@ -90,6 +95,7 @@ export async function wrapHtmlDom(params: {
     pipeline: assetReport.pipeline,
     output: assetReport.output,
     qualitySignals: assetReport.qualitySignals,
+    compatibilityScan,
     wrappedSlides: imported.slideCount,
     fallbackUsed: imported.warnings.some((diagnostic) => diagnostic.code === "compat.external_html.slides.fallback"),
   });

@@ -7,15 +7,14 @@ body[data-color-mode=dark]{--ad-paper:#171a18;--ad-ink:#eff4ef;--ad-muted:#b7c2b
 body[data-color-mode=dark] .ad-toolbar-group{border-color:rgba(255,255,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.25)}
 .agentdeck-app{position:relative;width:100vw;height:100vh;background:var(--ad-surface)}
 .ad-dock-zone{position:absolute;left:0;right:0;bottom:0;z-index:69;height:92px;pointer-events:none}
-body.is-dock-autohide .ad-dock-zone{pointer-events:auto}
-.ad-dock{position:absolute;z-index:70;left:50%;bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px;max-width:calc(100vw - 28px);opacity:.86;transform:translateX(-50%);transition:opacity .22s ease,transform .22s ease}
-body.is-dock-active .ad-dock,.ad-dock:hover,.ad-dock:focus-within{opacity:1;transform:translateX(-50%) translateY(-4px)}
-body.is-dock-autohide.is-dock-hidden .ad-dock{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(20px)}
+body.is-dock-autohide .ad-dock-zone,body.is-fullscreen-toolbar-hidden .ad-dock-zone{pointer-events:auto}
+.ad-dock{position:absolute;z-index:70;left:50%;bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px;max-width:calc(100vw - 28px);opacity:.9;filter:blur(0);transform:translate3d(-50%,0,0) scale(1);transform-origin:50% 100%;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1),filter .42s cubic-bezier(.22,1,.36,1);will-change:opacity,transform,filter}
+body.is-dock-active .ad-dock,.ad-dock:hover,.ad-dock:focus-within{opacity:1;filter:blur(0);transform:translate3d(-50%,-4px,0) scale(1)}
+body.is-dock-hidden .ad-dock{opacity:0;filter:blur(6px);pointer-events:none;transform:translate3d(-50%,36px,0) scale(.985)}
 .ad-toolbar-group{display:flex;align-items:center;gap:8px;height:42px;padding:4px;color:var(--ad-muted);border:1px solid rgba(0,0,0,.12);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 90%,transparent);box-shadow:0 10px 24px rgba(20,24,21,.08);backdrop-filter:blur(16px)}
 .ad-toolbar-group--nav{padding:4px 8px}
-.ad-dock button{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;min-width:32px;padding:0 11px;border:0;border-radius:6px;background:transparent;color:var(--ad-muted);font-size:13px;font-weight:760;line-height:1;cursor:pointer}
-.ad-dock button:hover,.ad-dock button.is-active{color:var(--ad-ink);background:var(--ad-surface)}
-.ad-dock [aria-pressed=true]{color:#fff!important;background:var(--ad-accent)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,#fff 24%,transparent),0 0 0 2px color-mix(in srgb,var(--ad-accent) 18%,transparent)}
+.ad-dock button{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;min-width:32px;padding:0 11px;border:0;border-radius:6px;outline:0;background:transparent;color:var(--ad-muted);font-size:13px;font-weight:760;line-height:1;cursor:pointer}
+.ad-dock button:hover,.ad-dock button:focus-visible,.ad-dock button.is-active{color:var(--ad-ink);background:var(--ad-surface)}
 .ad-dock button:disabled{cursor:not-allowed;opacity:.36}
 .ad-icon-only{padding:0 10px!important}
 .ad-interval-button{min-width:46px!important;padding:0 10px!important}
@@ -76,12 +75,12 @@ body.is-dock-autohide.is-dock-hidden .ad-dock{opacity:0;pointer-events:none;tran
 .layout-html-import .ad-html-block>*{max-width:none}
 .ad-page-indicator{position:absolute;right:128px;bottom:28px;color:var(--ad-muted);font-size:18px;font-weight:700}
 .ad-brand-line{position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--ad-accent)}
-.ad-overview{position:absolute;inset:28px;z-index:80;display:grid;grid-template-rows:auto 1fr;gap:18px;padding:20px 20px 64px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 96%,transparent);box-shadow:0 28px 90px rgba(0,0,0,.22);backdrop-filter:blur(18px)}
+.ad-overview{position:absolute;inset:28px;z-index:80;display:grid;grid-template-rows:auto 1fr;gap:18px;padding:20px 20px 92px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 96%,transparent);box-shadow:0 28px 90px rgba(0,0,0,.22);backdrop-filter:blur(18px)}
 .ad-overview-head{display:flex;align-items:center;justify-content:flex-start;gap:14px}
 .ad-overview-title{display:grid;gap:4px}
 .ad-overview-head strong{font-size:20px}
 .ad-overview-title p{margin:0;color:var(--ad-muted);font-size:13px}
-.ad-overview-close{position:absolute;right:20px;bottom:20px;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:var(--ad-surface);color:var(--ad-ink);cursor:pointer}
+.ad-overview-close{position:absolute;right:14px;bottom:14px;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:var(--ad-surface);color:var(--ad-ink);cursor:pointer}
 .ad-overview-close:hover{color:#fff;background:var(--ad-accent);border-color:transparent}
 .ad-overview-grid{display:grid;grid-template-columns:repeat(auto-fill,280px);justify-content:space-between;gap:14px;overflow:auto}
 .ad-overview-card{position:relative;display:block;width:280px;height:158px;padding:0;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:var(--ad-paper);color:var(--ad-ink);text-align:left;cursor:pointer;overflow:hidden}
@@ -190,17 +189,24 @@ export const runtimeJs = `
   let wheelAt = 0;
   let autoplayIntervalMs = 8000;
   let autoplayTimer = 0;
+  function isFullscreen() {
+    return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+  function shouldAutoHideDock() {
+    return dockAutohide || isFullscreen();
+  }
   function activateDock() {
     document.body.classList.add('is-dock-active');
     document.body.classList.remove('is-dock-hidden');
     clearTimeout(dockTimer);
     dockTimer = setTimeout(() => document.body.classList.remove('is-dock-active'), 3000);
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 1600 : 2000);
   }
-  function scheduleDockHide(delay = 2000) {
+  function scheduleDockHide(delay = 2000, force = false) {
     clearTimeout(dockHideTimer);
-    if (!dockAutohide) return;
+    if (!shouldAutoHideDock()) return;
     dockHideTimer = setTimeout(() => {
-      if (!dock?.matches(':hover') && !dock?.contains(document.activeElement)) {
+      if (force || (!dock?.matches(':hover') && !dock?.contains(document.activeElement))) {
         document.body.classList.add('is-dock-hidden');
         document.body.classList.remove('is-dock-active');
       }
@@ -217,7 +223,19 @@ export const runtimeJs = `
       button.setAttribute('aria-label', next ? 'Disable toolbar auto-hide' : 'Auto-hide toolbar');
     });
     clearTimeout(dockHideTimer);
-    if (next) scheduleDockHide();
+    if (next) scheduleDockHide(2000, true);
+    else if (isFullscreen()) scheduleDockHide(1600, true);
+  }
+  function syncFullscreenToolbar() {
+    const fullscreen = isFullscreen();
+    document.body.classList.toggle('is-fullscreen-toolbar-hidden', fullscreen);
+    clearTimeout(dockHideTimer);
+    if (fullscreen) {
+      scheduleDockHide(450, true);
+    } else {
+      document.body.classList.remove('is-dock-hidden');
+      activateDock();
+    }
   }
   function tickTimer() {
     if (!timer) return;
@@ -395,10 +413,13 @@ export const runtimeJs = `
       });
     }
     if (action === 'fullscreen') {
-      if (document.fullscreenElement) await document.exitFullscreen();
+      if (isFullscreen()) await document.exitFullscreen?.();
       else await document.documentElement.requestFullscreen?.();
+      syncFullscreenToolbar();
     }
   });
+  document.addEventListener('fullscreenchange', syncFullscreenToolbar);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenToolbar);
   window.addEventListener('hashchange', () => show(hashIndex()));
   document.addEventListener('keydown', (event) => {
     activateDock();
@@ -444,7 +465,7 @@ export const runtimeJs = `
   });
   dock?.addEventListener('focusout', () => scheduleDockHide());
   dockZone?.addEventListener('pointerenter', () => {
-    if (!dockAutohide) return;
+    if (!shouldAutoHideDock()) return;
     clearTimeout(dockHideTimer);
     activateDock();
   });

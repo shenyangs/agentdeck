@@ -55,7 +55,7 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
   </style>
   ${sourceStyles}
 </head>
-<body data-theme="${escapeAttr(theme.id)}" data-color-mode="dark" data-deck-mode="${escapeAttr(mode)}" data-compat-profile="${escapeAttr(profile)}">
+<body data-theme="${escapeAttr(theme.id)}" data-color-mode="light" data-deck-mode="${escapeAttr(mode)}" data-compat-profile="${escapeAttr(profile)}">
   <div class="agentdeck-app">
     <div class="ad-dock-zone" data-dock-zone data-html2canvas-ignore></div>
     <header class="ad-dock" data-html2canvas-ignore>
@@ -70,8 +70,8 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
       <div class="ad-toolbar-group" aria-label="Theme">
         <span class="ad-toolbar-icon" aria-hidden="true">${icon("monitor")}</span>
         <div class="ad-segmented">
-          <button type="button" data-action="theme" data-theme-value="light" aria-label="Use light theme" title="Light">${icon("sun")}<span>Light</span></button>
-          <button type="button" data-action="theme" data-theme-value="dark" class="is-active" aria-label="Use dark theme" title="Dark">${icon("moon")}<span>Dark</span></button>
+          <button type="button" data-action="theme" data-theme-value="light" class="is-active" aria-label="Use light theme" title="Light">${icon("sun")}<span>Light</span></button>
+          <button type="button" data-action="theme" data-theme-value="dark" aria-label="Use dark theme" title="Dark">${icon("moon")}<span>Dark</span></button>
         </div>
       </div>
       <div class="ad-toolbar-group">
@@ -102,7 +102,7 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
         </div>
       </div>
       <div class="ad-overview-grid">${overviewSlides}</div>
-      <button type="button" class="ad-overview-close" data-action="overview-close" aria-label="Close overview" title="Close overview">${icon("x")}</button>
+      <button type="button" class="ad-overview-close" data-action="overview-close" aria-label="Close overview" title="Close overview">${icon("grid")}</button>
     </div>
     <div class="ad-compare" data-overlay="compare" data-html2canvas-ignore hidden>
       <div class="ad-compare-viewport" data-compare-next></div>

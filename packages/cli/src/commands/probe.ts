@@ -4,6 +4,7 @@ import {
   analyzeHtmlCompatibility,
 } from "../converters/html.js";
 import { availableOfficeBackends, describeTriedOfficeBackends, recommendedOfficeBackend } from "../converters/office.js";
+import { adjustHtmlAnalysisForCompatibilityScan, scanInputCompatibility } from "../converters/risk-scanner.js";
 import { availablePdfRenderBackends } from "./shared-pdf.js";
 import { htmlStrategy, officeBackendPreference, parseArgs, stringFlag } from "../flags.js";
 import {
@@ -66,7 +67,8 @@ export function probeInput(sourcePath: string, options: { htmlStrategy: HtmlWrap
 
   if (ext === ".html" || ext === ".htm") {
     const html = exists ? readFileSync(sourcePath, "utf8") : "";
-    const analysis = analyzeHtmlCompatibility(html);
+    const compatibilityScan = scanInputCompatibility(sourcePath, { htmlSource: html });
+    const analysis = adjustHtmlAnalysisForCompatibilityScan(analyzeHtmlCompatibility(html), compatibilityScan);
     const selected = options.htmlStrategy === "auto" ? analysis.recommendedStrategy : options.htmlStrategy;
     return {
       ...baseReport,
@@ -77,8 +79,10 @@ export function probeInput(sourcePath: string, options: { htmlStrategy: HtmlWrap
       missingDependencies: hasNodeModule("playwright") ? [] : ["playwright"],
       risks: [
         ...risks,
+        ...compatibilityScan.warnings,
         ...(selected === "raster" ? ["raster HTML preserves visual layout but removes source DOM interactivity"] : []),
       ],
+      compatibilityScan,
       html: {
         requestedStrategy: options.htmlStrategy,
         recommendedStrategy: analysis.recommendedStrategy,
@@ -104,6 +108,7 @@ export function probeInput(sourcePath: string, options: { htmlStrategy: HtmlWrap
   if ([".ppt", ".pptx", ".doc", ".docx", ".xls", ".xlsx", ".key"].includes(ext)) {
     const officeBackends = availableOfficeBackends(ext);
     const recommended = options.officeBackend === "auto" ? recommendedOfficeBackend(ext, officeBackends) : options.officeBackend;
+    const compatibilityScan = scanInputCompatibility(sourcePath);
     return {
       ...baseReport,
       environment: reportEnvironment([...officeBackends, ...baseBackends]),
@@ -117,9 +122,11 @@ export function probeInput(sourcePath: string, options: { htmlStrategy: HtmlWrap
       ],
       risks: [
         ...risks,
+        ...compatibilityScan.warnings,
         ...(recommended ? [] : ["no Office to PDF backend is currently available"]),
         ...(options.officeBackend !== "auto" && !officeBackends.includes(options.officeBackend) ? [`forced backend is unavailable: ${options.officeBackend}`] : []),
       ],
+      compatibilityScan,
       office: {
         extension: ext,
         recommendedBackend: recommended,

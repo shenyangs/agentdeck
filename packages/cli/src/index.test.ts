@@ -130,7 +130,13 @@ Template controlled body.
     const pptxSource = join(dir, "deck.pptx");
     writeFileSync(
       htmlSource,
-      `<!doctype html><style>.slide{position:fixed;width:100vw;height:100vh}</style><section class="slide">A</section><section class="slide">B</section><script>addEventListener("keydown",()=>{})</script>`,
+      `<!doctype html>
+<link rel="stylesheet" href="https://cdn.example.com/theme.css">
+<style>.slide{position:fixed;width:100vw;height:100vh;background:url("./missing-bg.png")}</style>
+<section class="slide"><img src="./missing.png"><pre class="mermaid">graph LR; A-->B;</pre></section>
+<section class="slide"><span class="katex">x^2</span></section>
+<script src="https://cdn.example.com/mermaid.js"></script>
+<script>addEventListener("keydown",()=>{})</script>`,
       "utf8",
     );
     writeFileSync(pdfSource, "%PDF-1.4\n", "utf8");
@@ -149,11 +155,33 @@ Template controlled body.
     expect(htmlProbe.environment.os).toBe(process.platform);
     expect(htmlProbe.inputKind).toBe("html");
     expect(htmlProbe.html.recommendedStrategy).toBe("raster");
+    expect(htmlProbe.compatibilityScan.summary.externalResources).toBeGreaterThanOrEqual(2);
+    expect(htmlProbe.compatibilityScan.summary.missingLocalResources).toBeGreaterThanOrEqual(2);
+    expect(htmlProbe.compatibilityScan.renderRisks.map((risk: { code: string }) => risk.code)).toContain("html.diagram-renderer");
+    expect(htmlProbe.compatibilityScan.renderRisks.map((risk: { code: string }) => risk.code)).toContain("html.math-renderer");
     expect(pdfProbe.inputKind).toBe("pdf");
     expect(pdfProbe.recommendedRoute).toContain("pdf->page-images");
     expect(pptxProbe.inputKind).toBe("office");
     expect(pptxProbe.office.extension).toBe(".pptx");
   }, 15_000);
+
+  const itZip = process.platform === "win32" ? it.skip : commandAvailable("zip") ? it : it.skip;
+
+  itZip("reports external OpenXML visual relationships during probe", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-openxml-risk-"));
+    const source = createPptxExternalImageFixture(dir);
+
+    await expect(runCli(["probe", source, "--json", "--out", join(dir, "probe.json")])).resolves.toMatchObject({ code: 0 });
+    const report = JSON.parse(readFileSync(join(dir, "probe.json"), "utf8"));
+    expect(report.inputKind).toBe("office");
+    expect(report.compatibilityScan.summary.externalOfficeRelationships).toBe(1);
+    expect(report.compatibilityScan.assets[0]).toMatchObject({
+      kind: "image",
+      status: "external",
+      url: "https://example.com/linked-image.png",
+    });
+    expect(report.risks.join("\n")).toContain("external visual/object relationship");
+  });
 
   it("verifies generated decks and reports visual failures", async () => {
     const dir = mkdtempSync(join(tmpdir(), "agentdeck-verify-"));
@@ -427,4 +455,58 @@ function createXlsxFixture(dir: string): string {
     throw new Error((result.stderr || result.stdout || "").trim() || "zip failed to create xlsx fixture");
   }
   return xlsxPath;
+}
+
+function createPptxExternalImageFixture(dir: string): string {
+  const rootDir = join(dir, "pptx-src");
+  mkdirSync(join(rootDir, "_rels"), { recursive: true });
+  mkdirSync(join(rootDir, "ppt", "slides", "_rels"), { recursive: true });
+  mkdirSync(join(rootDir, "ppt", "slides"), { recursive: true });
+
+  writeFileSync(
+    join(rootDir, "[Content_Types].xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
+  <Override PartName="/ppt/slides/slide1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>
+</Types>`,
+    "utf8",
+  );
+  writeFileSync(
+    join(rootDir, "_rels", ".rels"),
+    `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>
+</Relationships>`,
+    "utf8",
+  );
+  writeFileSync(
+    join(rootDir, "ppt", "presentation.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>
+<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"/>`,
+    "utf8",
+  );
+  writeFileSync(
+    join(rootDir, "ppt", "slides", "slide1.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>
+<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"/>`,
+    "utf8",
+  );
+  writeFileSync(
+    join(rootDir, "ppt", "slides", "_rels", "slide1.xml.rels"),
+    `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="https://example.com/linked-image.png" TargetMode="External"/>
+</Relationships>`,
+    "utf8",
+  );
+
+  const pptxPath = join(dir, "external-image.pptx");
+  const result = spawnSync("zip", ["-qr", pptxPath, "."], { cwd: rootDir, encoding: "utf8" });
+  if (result.status !== 0 || !existsSync(pptxPath)) {
+    throw new Error((result.stderr || result.stdout || "").trim() || "zip failed to create pptx fixture");
+  }
+  return pptxPath;
 }

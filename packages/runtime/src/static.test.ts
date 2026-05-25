@@ -22,8 +22,16 @@ Hello
     expect(html).not.toContain('data-action="seek"');
     expect(html).toContain('data-action="dock-autohide"');
     expect(html).toContain('aria-pressed="false"');
-    expect(html).toContain('data-color-mode="dark"');
-    expect(html).toContain('data-theme-value="dark" class="is-active"');
+    expect(html).not.toContain(".ad-dock [aria-pressed=true]");
+    expect(html).toContain("body.is-dock-autohide .ad-dock-zone,body.is-fullscreen-toolbar-hidden .ad-dock-zone");
+    expect(html).toContain("cubic-bezier(.22,1,.36,1)");
+    expect(html).toContain(".ad-dock button{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;min-width:32px;padding:0 11px;border:0;border-radius:6px;outline:0");
+    expect(html).toContain(".ad-dock button:hover,.ad-dock button:focus-visible,.ad-dock button.is-active");
+    expect(html).toContain("scheduleDockHide(2000, true)");
+    expect(html).toContain("document.addEventListener('fullscreenchange', syncFullscreenToolbar)");
+    expect(html).toContain("is-fullscreen-toolbar-hidden");
+    expect(html).toContain('data-color-mode="light"');
+    expect(html).toContain('data-theme-value="light" class="is-active"');
     expect(html).toContain('data-action="compare"');
     expect(html).toContain('data-overlay="blackout"');
     expect(html).toContain('data-overlay="compare"');
@@ -31,6 +39,7 @@ Hello
     expect(html).toContain("Print / PDF");
     expect(html).toContain("Click a thumbnail to jump");
     expect(html).toContain('class="ad-overview-close"');
+    expect(html).toContain('data-action="overview-close"');
     expect(html).toContain("Deck Studio");
     expect(html).toContain("@page{size:20in 11.25in;margin:0}");
     expect(html).toContain("print-color-adjust:exact");

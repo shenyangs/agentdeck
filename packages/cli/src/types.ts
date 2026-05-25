@@ -30,6 +30,53 @@ export interface HtmlCompatibilityAnalysis {
   };
 }
 
+export type CompatibilityAssetStatus = "external" | "local" | "missing" | "data" | "special";
+export type CompatibilityAssetKind =
+  | "image"
+  | "script"
+  | "stylesheet"
+  | "font"
+  | "media"
+  | "iframe"
+  | "object"
+  | "css-url"
+  | "hyperlink"
+  | "office-relationship"
+  | "other";
+
+export interface CompatibilityAssetSignal {
+  kind: CompatibilityAssetKind;
+  url: string;
+  status: CompatibilityAssetStatus;
+  source?: string;
+  relationshipType?: string;
+}
+
+export interface CompatibilityRenderRisk {
+  code: string;
+  level: "info" | "warn";
+  message: string;
+  evidence?: string;
+  recommendation?: string;
+}
+
+export interface CompatibilityScan {
+  schemaVersion: string;
+  scanner: "agentdeck-compatibility-risk";
+  sourceKind: "html" | "office" | "pdf" | "markdown" | "unsupported";
+  summary: {
+    externalResources: number;
+    missingLocalResources: number;
+    localResources: number;
+    dataResources: number;
+    renderRiskCount: number;
+    externalOfficeRelationships: number;
+  };
+  assets: CompatibilityAssetSignal[];
+  renderRisks: CompatibilityRenderRisk[];
+  warnings: string[];
+}
+
 export interface CapturePageStatus {
   index: number;
   success: boolean;
@@ -50,6 +97,7 @@ export interface HtmlCompatibilityReport {
   pipeline: PipelineAttempt[];
   output: ReportOutput;
   qualitySignals: QualitySignals;
+  compatibilityScan?: CompatibilityScan;
   wrappedSlides: number;
   fallbackUsed: boolean;
   fallbackReason?: string;
@@ -120,6 +168,7 @@ export interface ProbeReport {
   pipeline: PipelineAttempt[];
   output?: Partial<ReportOutput>;
   qualitySignals: QualitySignals;
+  compatibilityScan?: CompatibilityScan;
   html?: {
     requestedStrategy: HtmlWrapStrategy;
     recommendedStrategy: Exclude<HtmlWrapStrategy, "auto">;

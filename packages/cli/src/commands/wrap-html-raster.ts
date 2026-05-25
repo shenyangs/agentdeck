@@ -28,6 +28,7 @@ import {
 import type {
   CapturePageStatus,
   CliResult,
+  CompatibilityScan,
   HtmlCaptureStrategy,
   HtmlCompatibilityAnalysis,
   HtmlWrapStrategy,
@@ -44,6 +45,7 @@ export async function wrapHtmlRaster(
   analysis: HtmlCompatibilityAnalysis = analyzeHtmlCompatibility(htmlSource),
   requestedStrategy: HtmlWrapStrategy = "auto",
   fallbackReason?: string,
+  compatibilityScan?: CompatibilityScan,
 ): Promise<CliResult> {
   const outDir = resolve(String(options.flags.out ?? "dist"));
   const title = stringFlag(options.flags.title) ?? htmlTitle(htmlSource) ?? parse(htmlPath).name;
@@ -142,7 +144,11 @@ body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
   const assetReportPath = join(outDir, "asset-report.json");
   writeFileSync(outputPath, outputHtml, "utf8");
   const htmlBytes = statSync(outputPath).size;
-  const warnings = sizeBudgetWarnings(totalBytes, imageOptions);
+  const sizeWarnings = sizeBudgetWarnings(totalBytes, imageOptions);
+  const warnings = [
+    ...sizeWarnings,
+    ...(compatibilityScan?.warnings ?? []),
+  ];
   const compatReportPath = writeHtmlCompatibilityReport(outDir, {
     schemaVersion: REPORT_SCHEMA_VERSION,
     agentdeckVersion: AGENTDECK_VERSION,
@@ -164,8 +170,9 @@ body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
     }),
     qualitySignals: {
       ...defaultQualitySignals(warnings),
-      oversizedOutput: warnings.length > 0,
+      oversizedOutput: sizeWarnings.length > 0,
     },
+    compatibilityScan,
     wrappedSlides: pages.length,
     fallbackUsed: Boolean(fallbackReason),
     fallbackReason,
@@ -186,8 +193,9 @@ body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
     }),
     qualitySignals: {
       ...defaultQualitySignals(warnings),
-      oversizedOutput: warnings.length > 0,
+      oversizedOutput: sizeWarnings.length > 0,
     },
+    compatibilityScan,
     fidelity: "raster-html",
     requestedStrategy,
     selectedStrategy: "raster",
