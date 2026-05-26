@@ -6,10 +6,6 @@ Positioning:
 
 **Wrap HTML, PDF, PPT, or Markdown presentations into one playable, shareable, exportable single-file HTML.**
 
-## Live Preview
-
-[Open the AgentDeck demo](https://shenyangs.github.io/agentdeck/demo/): a wrapped HTML deck with playback, overview, blank screen, spotlight, and Light / Dark controls.
-
 ## Screenshots
 
 | Light mode | Dark mode |
