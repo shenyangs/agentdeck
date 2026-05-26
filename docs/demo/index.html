@@ -1,0 +1,2445 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="AgentDeck">
+  <meta property="og:title" content="打工人 AI 求生手册">
+  <meta property="og:description" content="Wrapped from /Users/sam/Downloads/codex/test/打工人AI求生手册_PPT横版_agentdeck_dom_source.html">
+  <title>打工人 AI 求生手册</title>
+  <style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ad-surface);color:var(--ad-ink);font-family:var(--ad-font-sans);font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button{font:inherit}
+body[data-color-mode=dark]{--ad-paper:#171a18;--ad-ink:#eff4ef;--ad-muted:#b7c2bb;--ad-surface:#101210}
+body[data-color-mode=dark] .ad-toolbar-group{border-color:rgba(255,255,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.agentdeck-app{position:relative;width:100vw;height:100vh;background:var(--ad-surface)}
+.ad-dock-zone{position:absolute;left:0;right:0;bottom:0;z-index:69;height:32px;pointer-events:none}
+body.is-dock-autohide .ad-dock-zone,body.is-fullscreen-toolbar-hidden .ad-dock-zone{pointer-events:auto}
+.ad-dock{position:absolute;z-index:70;left:50%;bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px;max-width:calc(100vw - 28px);opacity:.9;filter:blur(0);transform:translate3d(-50%,0,0) scale(1);transform-origin:50% 100%;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1),filter .42s cubic-bezier(.22,1,.36,1);will-change:opacity,transform,filter}
+body.is-dock-active .ad-dock,.ad-dock:hover,.ad-dock:focus-within{opacity:1;filter:blur(0);transform:translate3d(-50%,-4px,0) scale(1)}
+body.is-dock-hidden .ad-dock{opacity:0;filter:blur(6px);pointer-events:none;transform:translate3d(-50%,36px,0) scale(.985)}
+.ad-toolbar-group{display:flex;align-items:center;gap:8px;height:42px;padding:4px;color:var(--ad-muted);border:1px solid rgba(0,0,0,.12);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 90%,transparent);box-shadow:0 10px 24px rgba(20,24,21,.08);backdrop-filter:blur(16px)}
+.ad-toolbar-group--nav{padding:4px 8px}
+.ad-dock button{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;min-width:32px;padding:0 11px;border:0;border-radius:6px;outline:0;background:transparent;color:var(--ad-muted);font-size:13px;font-weight:760;line-height:1;cursor:pointer}
+.ad-dock button:hover,.ad-dock button:focus-visible,.ad-dock button.is-active{color:var(--ad-ink);background:var(--ad-surface)}
+.ad-dock button:disabled{cursor:not-allowed;opacity:.36}
+.ad-icon-only{padding:0 10px!important}
+.ad-interval-button{min-width:46px!important;padding:0 10px!important}
+.ad-toolbar-icon{display:inline-flex;margin-left:4px;color:var(--ad-muted)}
+.ad-icon{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.ad-segmented{display:flex;gap:2px}
+.ad-counter{width:54px;text-align:center;color:var(--ad-muted);font-size:13px;font-weight:760}
+.ad-progress{position:absolute;left:0;right:0;bottom:0;z-index:18;height:3px;background:transparent}
+.ad-progress span{display:block;width:0;height:100%;background:var(--ad-accent);transition:width .18s ease}
+.ad-stage{position:absolute;inset:28px 36px 76px;display:flex;align-items:center;justify-content:center}
+.ad-scaled-shell{position:relative;flex:0 0 auto}
+.ad-scaled{position:absolute;top:0;left:0;width:1920px;height:1080px;transform-origin:top left}
+.ad-slide{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--ad-surface) 72%,transparent),transparent 42%),var(--ad-paper);color:var(--ad-ink);box-shadow:0 28px 70px rgba(25,32,28,.12)}
+.ad-content{position:relative;z-index:2;display:grid;grid-template-rows:auto 1fr;gap:54px;width:100%;height:100%;padding:122px 128px 100px}
+.ad-slide-head{max-width:1240px}
+.ad-kicker{margin:0 0 18px;color:var(--ad-accent);font-family:var(--ad-font-mono);font-size:18px;font-weight:800;text-transform:uppercase}
+.ad-slide h1{margin:0;font-size:74px;line-height:1.04;letter-spacing:0;font-weight:760;word-break:keep-all;overflow-wrap:normal}
+[data-theme=swiss] .ad-slide h1{font-weight:260;letter-spacing:0;text-transform:none}
+.ad-lead{max-width:980px;margin:26px 0 0;color:var(--ad-muted);font-size:30px;line-height:1.42}
+.ad-blocks{display:grid;align-content:center;gap:28px;min-height:0}
+.ad-paragraph{max-width:1180px;margin:0;color:var(--ad-ink);font-size:34px;line-height:1.45}
+.ad-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 28px;margin:0;padding:0;list-style:none}
+.ad-list li{min-height:104px;padding:28px 30px;border:1px solid rgba(0,0,0,.12);background:var(--ad-surface);font-size:27px;line-height:1.35}
+.ad-quote{max-width:1220px;margin:0;padding:52px 64px;border-left:10px solid var(--ad-accent);background:var(--ad-surface);font-family:var(--ad-font-serif);font-size:48px;line-height:1.32}
+.ad-quote cite{display:block;margin-top:30px;color:var(--ad-muted);font-family:var(--ad-font-sans);font-size:22px;font-style:normal}
+.ad-image{position:relative;margin:0;overflow:hidden;background:var(--ad-surface);border:1px solid rgba(0,0,0,.1)}
+.ad-image img{display:block;width:100%;height:540px;object-fit:cover}
+.ad-image figcaption{position:absolute;left:24px;bottom:20px;padding:8px 12px;background:rgba(0,0,0,.62);color:#fff;font-size:18px}
+.ad-table{width:100%;border-collapse:collapse;background:var(--ad-paper);font-size:24px}
+.ad-table th,.ad-table td{padding:22px 24px;border:1px solid rgba(0,0,0,.14);text-align:left}
+.ad-table th{background:var(--ad-surface);font-weight:800}
+.ad-code{margin:0;overflow:hidden;background:#101512;color:#e8f4ed;font-family:var(--ad-font-mono)}
+.ad-code figcaption{padding:14px 24px;border-bottom:1px solid rgba(255,255,255,.12);color:#9de08f;text-transform:uppercase}
+.ad-code pre{margin:0;padding:28px;font-size:25px;line-height:1.52;white-space:pre-wrap}
+.ad-kpi{display:grid;gap:10px;width:max-content;min-width:420px;padding:36px 42px;background:var(--ad-accent);color:#fff}
+.ad-kpi span{font-size:20px;font-family:var(--ad-font-mono);text-transform:uppercase}
+.ad-kpi strong{font-size:92px;line-height:.9}
+.ad-kpi p{margin:0;font-size:24px}
+.ad-diagram,.ad-formula{margin:0;padding:42px;background:var(--ad-surface);border:1px solid rgba(0,0,0,.12);font-size:30px}
+.ad-diagram pre{margin:0;white-space:pre-wrap}
+.ad-formula{font-family:var(--ad-font-serif);font-size:60px;text-align:center}
+.layout-cover .ad-content{display:flex;flex-direction:column;justify-content:center;gap:46px}
+.layout-cover .ad-slide-head{max-width:1280px}
+.layout-cover .ad-blocks{align-content:start;max-width:1120px}
+.layout-cover .ad-paragraph{font-size:30px;color:var(--ad-muted)}
+.layout-closing .ad-content{display:grid;grid-template-rows:auto 1fr;gap:54px}
+.layout-cover .ad-slide-head h1{font-size:92px;max-width:1380px}
+.layout-statement .ad-slide-head h1{font-size:86px;max-width:1420px}
+.layout-image-hero .ad-blocks,.layout-screenshot .ad-blocks{align-content:stretch}
+.layout-image-hero .ad-image img,.layout-screenshot .ad-image img{height:650px}
+.layout-evidence-grid .ad-blocks{grid-template-columns:repeat(3,minmax(0,1fr));align-content:center}
+.layout-evidence-grid .ad-image img{height:300px}
+.layout-table .ad-blocks,.layout-code .ad-blocks{align-content:stretch}
+.layout-html-import{background:#fff;color:#111}
+.layout-html-import .ad-content{display:block;width:100%;height:100%;padding:0}
+.layout-html-import .ad-blocks{display:block;width:100%;height:100%}
+.layout-html-import .ad-html-block{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+.layout-html-import .ad-html-block>*{max-width:none}
+.ad-page-indicator{position:absolute;right:128px;bottom:28px;color:var(--ad-muted);font-size:18px;font-weight:700}
+.ad-brand-line{position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--ad-accent)}
+.ad-overview{position:absolute;inset:28px;z-index:80;display:grid;grid-template-rows:auto 1fr;gap:18px;padding:20px 20px 92px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 96%,transparent);box-shadow:0 28px 90px rgba(0,0,0,.22);backdrop-filter:blur(18px)}
+.ad-overview-head{display:flex;align-items:center;justify-content:flex-start;gap:14px}
+.ad-overview-title{display:grid;gap:4px}
+.ad-overview-head strong{font-size:20px}
+.ad-overview-title p{margin:0;color:var(--ad-muted);font-size:13px}
+.ad-overview-close{position:absolute;right:14px;bottom:14px;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:var(--ad-surface);color:var(--ad-ink);cursor:pointer}
+.ad-overview-close:hover{color:#fff;background:var(--ad-accent);border-color:transparent}
+.ad-overview-grid{display:grid;grid-template-columns:repeat(auto-fill,280px);justify-content:space-between;gap:14px;overflow:auto}
+.ad-overview-card{position:relative;display:block;width:280px;height:158px;padding:0;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:var(--ad-paper);color:var(--ad-ink);text-align:left;cursor:pointer;overflow:hidden}
+.ad-overview-card:hover,.ad-overview-card.is-current{border-color:var(--ad-accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--ad-accent) 28%,transparent)}
+.ad-overview-card:hover{transform:translateY(-2px)}
+.ad-overview-viewport{position:relative;width:280px;height:158px;overflow:hidden;background:var(--ad-paper)}
+.ad-overview-slide{position:absolute!important;top:0;left:0;inset:auto!important;width:1920px!important;height:1080px!important;transform:scale(.1458333333)!important;transform-origin:top left!important;box-shadow:none!important;pointer-events:none}
+.ad-overview-card .ad-content{padding:122px 128px 100px}
+.ad-overview-card .ad-slide h1{font-size:74px}
+.ad-compare{position:absolute;right:38px;bottom:96px;z-index:62;width:min(420px,28vw);padding:0;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:color-mix(in srgb,var(--ad-paper) 96%,transparent);box-shadow:0 28px 90px rgba(0,0,0,.22);backdrop-filter:blur(18px);overflow:hidden}
+.ad-compare-viewport{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--ad-paper)}
+.ad-compare-slide{position:absolute!important;top:0;left:0;inset:auto!important;width:1920px!important;height:1080px!important;transform-origin:top left!important;box-shadow:none!important;pointer-events:none}
+.ad-compare-empty{display:grid;place-items:center;width:100%;height:100%;color:var(--ad-muted);font-size:15px}
+.ad-print-help{position:absolute;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(12,14,16,.38);backdrop-filter:blur(12px)}
+.ad-print-help-card{display:grid;gap:14px;max-width:520px;padding:24px;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:var(--ad-paper);color:var(--ad-ink);box-shadow:0 30px 90px rgba(0,0,0,.24)}
+.ad-print-help-card strong{font-size:30px}
+.ad-print-help-card p,.ad-print-help-card li{margin:0;color:var(--ad-muted);font-size:16px;line-height:1.45}
+.ad-print-help-card ul{display:grid;gap:8px;margin:0;padding-left:20px}
+.ad-print-help-note code{font-size:13px}
+.ad-print-help-actions{display:flex;justify-content:flex-end;gap:10px}
+.ad-print-help-actions button{height:40px;padding:0 14px;border:1px solid rgba(0,0,0,.12);border-radius:7px;background:var(--ad-surface);color:var(--ad-ink);cursor:pointer}
+.ad-print-help-actions [data-action="print-confirm"]{background:var(--ad-accent);color:#fff;border-color:transparent}
+.ad-blackout{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#000;color:rgba(255,255,255,.72);cursor:pointer}
+.ad-blackout strong{font-size:28px;font-weight:700}
+.ad-blackout span{font-size:14px}
+.ad-spotlight{position:absolute;inset:0;z-index:55;pointer-events:none;background:radial-gradient(circle 150px at var(--ad-spot-x,50%) var(--ad-spot-y,50%),transparent 0 118px,rgba(0,0,0,.66) 158px)}
+.ad-presenter-panel,.ad-creator-panel{position:absolute;top:28px;right:28px;z-index:25;display:none;gap:14px;width:360px;max-height:calc(100vh - 56px);overflow:auto;padding:18px;border:1px solid rgba(0,0,0,.14);border-radius:8px;background:color-mix(in srgb,var(--ad-paper) 94%,transparent);box-shadow:0 24px 70px rgba(0,0,0,.16);backdrop-filter:blur(18px)}
+.ad-presenter-panel section,.ad-creator-panel section{display:grid;gap:8px;padding:0 0 14px;border-bottom:1px solid rgba(0,0,0,.1)}
+.ad-presenter-panel section:last-child,.ad-creator-panel section:last-child{border-bottom:0;padding-bottom:0}
+.ad-panel-label{margin:0;color:var(--ad-accent);font-family:var(--ad-font-mono);font-size:12px;font-weight:800;text-transform:uppercase}
+.ad-presenter-panel article,.ad-creator-panel p,.ad-creator-panel li{margin:0;color:var(--ad-muted);font-size:15px;line-height:1.45}
+.ad-presenter-panel strong,.ad-creator-panel strong{font-size:28px}
+.ad-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ad-stat-grid div{display:grid;gap:4px;padding:9px;background:var(--ad-surface)}
+.ad-stat-grid span{color:var(--ad-muted);font-family:var(--ad-font-mono);font-size:10px;text-transform:uppercase}
+.ad-stat-grid b{font-size:22px}
+.ad-score-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;color:var(--ad-muted);font-size:12px;text-transform:uppercase}
+.ad-score-row meter{width:100%;height:8px}
+.ad-shortcut-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ad-shortcut-grid div{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--ad-surface);font-size:13px}
+.ad-shortcut-grid kbd{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border:1px solid rgba(0,0,0,.16);border-radius:5px;background:var(--ad-paper);font-family:var(--ad-font-mono);font-size:12px}
+.ad-check-list{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.ad-check-list li{position:relative;padding-left:18px}
+.ad-check-list li::before{content:"";position:absolute;left:0;top:.58em;width:7px;height:7px;border-radius:999px;background:rgba(0,0,0,.2)}
+.ad-check-list li.is-covered{color:var(--ad-ink)}
+.ad-check-list li.is-covered::before{background:var(--ad-accent)}
+.ad-alt-list{display:grid;gap:8px}
+.ad-alt-list div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;background:var(--ad-surface);font-size:13px}
+.ad-outline-list{display:grid;gap:6px;max-height:240px;margin:0;padding:0;overflow:auto;list-style:none}
+.ad-outline-list button{display:grid;grid-template-columns:34px 1fr;gap:8px;width:100%;padding:8px;border:0;background:var(--ad-surface);color:var(--ad-ink);text-align:left;cursor:pointer}
+.ad-outline-list button:hover{color:var(--ad-accent)}
+.ad-outline-list span{color:var(--ad-muted);font-family:var(--ad-font-mono);font-size:12px}
+.ad-chip-row{display:flex;flex-wrap:wrap;gap:7px}
+.ad-chip-row span{padding:5px 8px;border:1px solid rgba(0,0,0,.12);border-radius:999px;color:var(--ad-muted);font-size:12px}
+.ad-command{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;background:var(--ad-surface);color:var(--ad-ink);font-family:var(--ad-font-mono);font-size:12px;white-space:nowrap}
+.ad-panel-hint{font-size:13px!important}
+body[data-deck-mode=presenter] .ad-presenter-panel,body[data-deck-mode=creator] .ad-creator-panel{display:grid}
+body[data-deck-mode=presenter] .ad-stage,body[data-deck-mode=creator] .ad-stage{right:420px}
+body[data-compat-profile=rendered-file] .ad-slide{box-shadow:none;background:#fff}
+@page{size:20in 11.25in;margin:0}
+@media print{
+html,body{width:1920px!important;height:auto!important;margin:0!important;overflow:visible!important;background:var(--ad-paper)!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+.ad-dock,.ad-dock-zone,.ad-progress,.ad-overview,.ad-compare,.ad-print-help,.ad-blackout,.ad-spotlight,.ad-presenter-panel,.ad-creator-panel{display:none!important}
+.agentdeck-app{position:static!important;width:1920px!important;height:auto!important;background:var(--ad-paper)!important}
+.ad-stage,.ad-scaled-shell,.ad-scaled{position:static!important;display:block!important;width:1920px!important;height:auto!important;transform:none!important}
+.ad-slide,.ad-slide[hidden]{position:relative!important;display:block!important;inset:auto!important;width:1920px!important;height:1080px!important;margin:0!important;overflow:hidden!important;break-after:page!important;page-break-after:always!important;box-shadow:none!important;transform:none!important}
+.ad-slide:last-child{break-after:auto!important;page-break-after:auto!important}
+}
+@media (max-width:960px){.ad-dock{flex-wrap:wrap}}
+@media (max-width:980px){.ad-compare{right:18px;left:18px;bottom:96px;width:auto}}
+@media (max-width:760px){.ad-dock{bottom:10px;gap:6px}.ad-dock-zone{height:86px}.ad-toolbar-group{height:38px;padding:3px}.ad-dock button{height:30px;min-width:30px;padding:0 8px}.ad-dock button span,.ad-toolbar-icon{display:none}.ad-counter{width:44px;font-size:12px}.ad-stage{inset:18px 14px 76px}.ad-presenter-panel,.ad-creator-panel{left:10px;right:10px;top:10px;width:auto;max-height:42vh}body[data-deck-mode=presenter] .ad-stage,body[data-deck-mode=creator] .ad-stage{right:14px;top:45vh}}
+</style>
+  <style>
+    :root {
+      --ad-paper: #ffffff;
+      --ad-ink: #0a0a0a;
+      --ad-accent: #0038ff;
+      --ad-accent-alt: #f5ff00;
+      --ad-muted: #686868;
+      --ad-surface: #f4f4f4;
+      --ad-font-sans: Inter, Helvetica, Arial, 'Noto Sans SC', sans-serif;
+      --ad-font-serif: Georgia, 'Times New Roman', serif;
+      --ad-font-mono: 'SFMono-Regular', 'JetBrains Mono', Consolas, monospace;
+    }
+  </style>
+  <style data-agentdeck-source-styles>
+    :root {
+      --paper: #fafaf8;
+      --ink: #0a0a0a;
+      --muted: #666;
+      --line: #d8d8d4;
+      --line-strong: #a8a8a2;
+      --fill: #efefec;
+      --accent: #002fa7;
+      --accent-on: #fff;
+      --danger: #ff4b2b;
+      --safe: #1b8a5a;
+      --warn: #ffd500;
+      --sans: Inter, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --mono: "SFMono-Regular", "JetBrains Mono", "IBM Plex Mono", Consolas, monospace;
+    }
+
+    body[data-color-mode="dark"] {
+      --deck-paper-dark: #171a18;
+      --deck-ink-dark: #eff4ef;
+      --deck-muted-dark: #b7c2bb;
+      --deck-line-dark: #3e4440;
+      --deck-line-strong-dark: #5a615c;
+      --deck-fill-dark: #101411;
+      --deck-card-dark: #121714;
+      --deck-card-alt-dark: #0d110f;
+      --deck-warn-dark: #66570f;
+      --deck-warn-text-dark: #fff5bf;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      width: 100%;
+      height: 100%;
+    }
+
+    body:not([data-compat-profile]) {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body:not([data-compat-profile])::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0, 47, 167, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 47, 167, 0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at 70% 20%, #000 0, transparent 62%);
+      z-index: 0;
+    }
+
+    body[data-compat-profile] .slide {
+      width: 100%;
+      height: 100%;
+      flex: none;
+    }
+
+    body[data-compat-profile] .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0, 47, 167, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 47, 167, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at 70% 20%, #000 0, transparent 62%);
+      z-index: 0;
+    }
+
+    body[data-compat-profile] .stage,
+    body[data-compat-profile] .slide > header,
+    body[data-compat-profile] .slide > footer,
+    body[data-compat-profile] .card,
+    body[data-compat-profile] .matrix,
+    body[data-compat-profile] .formula,
+    body[data-compat-profile] .quote,
+    body[data-compat-profile] .steps,
+    body[data-compat-profile] .timeline {
+      position: relative;
+      z-index: 1;
+    }
+
+    #deck {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      transition: transform 680ms cubic-bezier(.77, 0, .175, 1);
+      z-index: 1;
+      will-change: transform;
+    }
+
+    .slide {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
+      padding: 5.4vh 5vw 6.4vh;
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 3vh;
+    }
+
+    .slide.accent {
+      background: var(--accent);
+      color: var(--accent-on);
+    }
+
+    .slide.dark {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .slide.grey {
+      background: var(--fill);
+    }
+
+    .chrome,
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 2vw;
+      color: currentColor;
+      font-family: var(--mono);
+      font-size: clamp(10px, .78vw, 14px);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      opacity: .62;
+    }
+
+    .foot {
+      align-items: end;
+      padding-top: 2vh;
+      border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    }
+
+    .stage {
+      min-height: 0;
+      display: grid;
+      gap: 3vh;
+      align-content: center;
+    }
+
+    .top-stage {
+      align-content: start;
+    }
+
+    .bottom-stage {
+      align-content: end;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .kicker {
+      font-family: var(--mono);
+      font-size: clamp(10px, .8vw, 14px);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .accent .kicker,
+    .dark .kicker {
+      color: currentColor;
+      opacity: .72;
+    }
+
+    .hero-title {
+      font-size: clamp(70px, 10vw, 164px);
+      line-height: .92;
+      letter-spacing: -0.045em;
+      font-weight: 250;
+    }
+
+    .hero-title strong,
+    .headline strong,
+    .statement strong {
+      font-weight: 650;
+      color: var(--accent);
+    }
+
+    .accent .hero-title strong,
+    .accent .headline strong,
+    .dark .headline strong,
+    .dark .statement strong {
+      color: currentColor;
+      font-style: italic;
+    }
+
+    .headline {
+      font-size: clamp(46px, 5.7vw, 96px);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      font-weight: 260;
+      max-width: 15ch;
+    }
+
+    .statement {
+      font-size: clamp(52px, 7vw, 116px);
+      line-height: .98;
+      letter-spacing: -0.04em;
+      font-weight: 250;
+      max-width: 16ch;
+    }
+
+    .lead {
+      font-size: clamp(21px, 1.65vw, 32px);
+      line-height: 1.42;
+      letter-spacing: -0.01em;
+      max-width: 54ch;
+      color: color-mix(in srgb, currentColor 86%, transparent);
+    }
+
+    .body {
+      font-size: clamp(16px, 1.05vw, 22px);
+      line-height: 1.6;
+      color: color-mix(in srgb, currentColor 74%, transparent);
+    }
+
+    .mono {
+      font-family: var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3vw;
+      align-items: stretch;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2vw;
+      align-items: stretch;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5vw;
+      align-items: stretch;
+    }
+
+    .grid-6 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 1.6vw;
+      align-items: stretch;
+    }
+
+    .card {
+      min-height: 0;
+      padding: clamp(20px, 2vw, 34px);
+      background: #fff;
+      border: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 2vh;
+    }
+
+    .card.fill {
+      background: var(--fill);
+      border: 0;
+    }
+
+    .card.ink {
+      background: var(--ink);
+      color: var(--paper);
+      border: 0;
+    }
+
+    .card.accent-card {
+      background: var(--accent);
+      color: var(--accent-on);
+      border: 0;
+    }
+
+    .card.warn {
+      background: var(--warn);
+      color: var(--ink);
+      border: 0;
+    }
+
+    .card h3 {
+      font-size: clamp(23px, 2vw, 42px);
+      line-height: 1.14;
+      letter-spacing: -0.02em;
+      font-weight: 560;
+    }
+
+    .card p,
+    .card li {
+      font-size: clamp(15px, 1.05vw, 20px);
+      line-height: 1.5;
+      color: color-mix(in srgb, currentColor 74%, transparent);
+    }
+
+    .card .tag,
+    .tag {
+      display: inline-block;
+      width: max-content;
+      padding: 7px 10px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--mono);
+      font-size: clamp(9px, .7vw, 12px);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .accent-card .tag,
+    .ink .tag,
+    .accent .tag,
+    .dark .tag {
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .tag.blue {
+      background: var(--accent);
+      color: var(--accent-on);
+    }
+
+    .tag.red {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .tag.green {
+      background: var(--safe);
+      color: #fff;
+    }
+
+    .giant {
+      font-size: clamp(110px, 18vw, 300px);
+      line-height: .78;
+      letter-spacing: -0.06em;
+      font-weight: 780;
+      color: var(--accent);
+      font-feature-settings: "tnum";
+    }
+
+    .formula {
+      padding: 4vh 4vw;
+      background: var(--warn);
+      color: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: clamp(34px, 4.1vw, 72px);
+      line-height: 1.18;
+      font-weight: 720;
+      letter-spacing: -0.025em;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 1.4vh;
+    }
+
+    .bar {
+      display: grid;
+      grid-template-columns: 14ch 1fr 8ch;
+      gap: 1.2vw;
+      align-items: center;
+      font-size: clamp(15px, 1.05vw, 20px);
+    }
+
+    .track {
+      height: 18px;
+      background: var(--line);
+      position: relative;
+    }
+
+    .fill-bar {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: var(--accent);
+      width: var(--w);
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1.05fr 1.3fr 1.4fr 1.35fr;
+      border-top: 1px solid var(--line-strong);
+      border-left: 1px solid var(--line-strong);
+      background: #fff;
+    }
+
+    .matrix > div {
+      padding: clamp(13px, 1.2vw, 22px);
+      border-right: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+      min-height: 10vh;
+      font-size: clamp(14px, .95vw, 18px);
+      line-height: 1.42;
+    }
+
+    .matrix .head {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: clamp(10px, .72vw, 13px);
+      min-height: auto;
+    }
+
+    .steps {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: clamp(68px, 5.5vw, 96px) 1fr;
+      gap: 2vw;
+      padding: 2.1vh 0;
+      border-bottom: 1px solid var(--line);
+      align-items: start;
+    }
+
+    .step .no {
+      font-family: var(--sans);
+      font-size: clamp(40px, 4.4vw, 80px);
+      line-height: .9;
+      font-weight: 220;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+    }
+
+    .step h3 {
+      margin-bottom: .7vh;
+      font-size: clamp(22px, 1.75vw, 36px);
+      line-height: 1.15;
+    }
+
+    .step p {
+      font-size: clamp(15px, 1.05vw, 20px);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-items: start;
+      gap: 0;
+      border-top: 2px solid var(--ink);
+      padding-top: 2.6vh;
+    }
+
+    .tl {
+      min-height: 29vh;
+      padding: 0 1.2vw;
+      border-left: 1px solid var(--line-strong);
+    }
+
+    .tl:first-child {
+      border-left: 0;
+      padding-left: 0;
+    }
+
+    .tl .day {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: .12em;
+      margin-bottom: 1.3vh;
+    }
+
+    .tl h3 {
+      font-size: clamp(19px, 1.45vw, 28px);
+      line-height: 1.16;
+      margin-bottom: 1.1vh;
+    }
+
+    .tl p {
+      font-size: clamp(13px, .9vw, 17px);
+      line-height: 1.44;
+      color: var(--muted);
+    }
+
+    .quote {
+      padding-left: 2.2vw;
+      border-left: 10px solid var(--accent);
+      font-size: clamp(38px, 4.8vw, 88px);
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      font-weight: 680;
+      max-width: 17ch;
+    }
+
+    .audit {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2vh 2vw;
+    }
+
+    .audit-item {
+      display: grid;
+      grid-template-columns: 24px 1fr 52px;
+      gap: 16px;
+      align-items: center;
+      padding: 1.4vh 0;
+      border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+      font-size: clamp(14px, .95vw, 18px);
+      line-height: 1.35;
+    }
+
+    .box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid currentColor;
+    }
+
+    .score {
+      font-family: var(--mono);
+      opacity: .62;
+      text-align: right;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 5.2fr 6.8fr;
+      gap: 4vw;
+      align-items: center;
+    }
+
+    .rule-line {
+      width: 100%;
+      height: 1px;
+      background: color-mix(in srgb, currentColor 28%, transparent);
+    }
+
+    #nav {
+      position: fixed;
+      left: 50%;
+      bottom: 2.1vh;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: flex;
+      gap: 9px;
+    }
+
+    #nav button {
+      width: 7px;
+      height: 7px;
+      border: 0;
+      padding: 0;
+      background: rgba(10, 10, 10, .24);
+      cursor: pointer;
+      transition: width 220ms ease, background 220ms ease;
+    }
+
+    body.on-dark #nav button {
+      background: rgba(255, 255, 255, .35);
+    }
+
+    #nav button.active {
+      width: 24px;
+      background: var(--accent);
+    }
+
+    body.on-dark #nav button.active {
+      background: var(--accent-on);
+    }
+
+    #hint {
+      position: fixed;
+      right: 2.4vw;
+      bottom: 2vh;
+      z-index: 6;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    body.on-dark #hint {
+      color: rgba(255, 255, 255, .58);
+    }
+
+    [data-animate] .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition:
+        opacity 520ms cubic-bezier(.2, 0, .38, .9),
+        transform 520ms cubic-bezier(.2, 0, .38, .9);
+    }
+
+    [data-animate].active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: calc(var(--i, 0) * 90ms);
+    }
+
+    body[data-compat-profile] [data-animate] .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    body[data-compat-profile] #nav,
+    body[data-compat-profile] #hint {
+      display: none !important;
+    }
+
+    body[data-color-mode="dark"] .slide:not(.dark):not(.accent) {
+      background: var(--deck-paper-dark);
+      color: var(--deck-ink-dark);
+    }
+
+    body[data-color-mode="dark"] .slide.grey {
+      background: var(--deck-fill-dark);
+      color: var(--deck-ink-dark);
+    }
+
+    body[data-color-mode="dark"] .slide:not(.dark):not(.accent)::before,
+    body[data-color-mode="dark"] .slide.grey::before {
+      background-image:
+        linear-gradient(rgba(127, 162, 255, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(127, 162, 255, 0.07) 1px, transparent 1px);
+    }
+
+    body[data-color-mode="dark"] .lead,
+    body[data-color-mode="dark"] .body,
+    body[data-color-mode="dark"] .card p,
+    body[data-color-mode="dark"] .card li,
+    body[data-color-mode="dark"] .step p,
+    body[data-color-mode="dark"] .tl p,
+    body[data-color-mode="dark"] .score,
+    body[data-color-mode="dark"] #hint {
+      color: var(--deck-muted-dark);
+    }
+
+    body[data-color-mode="dark"] .card {
+      background: var(--deck-card-dark);
+      border-color: var(--deck-line-dark);
+      color: var(--deck-ink-dark);
+    }
+
+    body[data-color-mode="dark"] .card.fill {
+      background: var(--deck-card-alt-dark);
+    }
+
+    body[data-color-mode="dark"] .card.warn {
+      background: var(--deck-warn-dark);
+      color: var(--deck-warn-text-dark);
+    }
+
+    body[data-color-mode="dark"] .card.warn p,
+    body[data-color-mode="dark"] .card.warn li {
+      color: color-mix(in srgb, var(--deck-warn-text-dark) 82%, transparent);
+    }
+
+    body[data-color-mode="dark"] .matrix {
+      background: var(--deck-card-dark);
+      border-top-color: var(--deck-line-strong-dark);
+      border-left-color: var(--deck-line-strong-dark);
+    }
+
+    body[data-color-mode="dark"] .matrix > div {
+      border-right-color: var(--deck-line-strong-dark);
+      border-bottom-color: var(--deck-line-strong-dark);
+    }
+
+    body[data-color-mode="dark"] .matrix .head {
+      background: var(--deck-ink-dark);
+      color: #111512;
+    }
+
+    body[data-color-mode="dark"] .steps {
+      border-top-color: var(--deck-line-strong-dark);
+    }
+
+    body[data-color-mode="dark"] .step {
+      border-bottom-color: var(--deck-line-dark);
+    }
+
+    body[data-color-mode="dark"] .timeline {
+      border-top-color: var(--deck-ink-dark);
+    }
+
+    body[data-color-mode="dark"] .tl {
+      border-left-color: var(--deck-line-strong-dark);
+    }
+
+    body[data-color-mode="dark"] .track {
+      background: #343934;
+    }
+
+    body[data-color-mode="dark"] .quote {
+      color: var(--deck-ink-dark);
+    }
+
+    @media (max-width: 900px) {
+      .slide { padding: 4vh 5vw 7vh; }
+      .grid-2,
+      .grid-3,
+      .grid-4,
+      .grid-6,
+      .split {
+        grid-template-columns: 1fr;
+      }
+      .grid-6 { grid-template-rows: none; }
+      .matrix { grid-template-columns: 1fr 1fr; }
+      .timeline { grid-template-columns: 1fr; gap: 1vh; }
+      .tl { min-height: auto; border-left: 0; border-top: 1px solid var(--line); padding: 1.4vh 0; }
+    }
+  </style>
+  <style data-agentdeck-local-overrides>
+    .ad-toolbar-group {
+      background: color-mix(in srgb, var(--ad-paper) 94%, transparent);
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 14px 36px rgba(18, 23, 20, 0.12);
+    }
+
+    body[data-color-mode=dark] .ad-toolbar-group {
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .ad-stage {
+      inset: 28px 36px 96px;
+    }
+
+    @media (max-width: 1100px) {
+      .ad-stage {
+        inset: 28px 24px 88px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="swiss" data-color-mode="light" data-deck-mode="audience" data-compat-profile="external-html">
+  <div class="agentdeck-app">
+    <div class="ad-dock-zone" data-dock-zone data-html2canvas-ignore></div>
+    <header class="ad-dock" data-html2canvas-ignore>
+      <div class="ad-toolbar-group ad-toolbar-group--nav" aria-label="Slide navigation">
+        <button type="button" data-action="restart" aria-label="Restart deck" title="Restart"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v6h6"></path></svg></button>
+        <button type="button" data-action="prev" aria-label="Previous slide" title="Previous slide">‹</button>
+        <button type="button" data-action="play" aria-label="Start autoplay" title="Autoplay"><span data-play-icon="play"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"></path></svg></span><span data-play-icon="pause" hidden><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14"></path><path d="M16 5v14"></path></svg></span></button>
+        <button type="button" data-action="interval" class="ad-interval-button" aria-label="Change autoplay interval" title="Autoplay interval"><span data-interval-label>8s</span></button>
+        <span class="ad-counter"><span data-current>1</span> / 14</span>
+        <button type="button" data-action="next" aria-label="Next slide" title="Next slide">›</button>
+      </div>
+      <div class="ad-toolbar-group" aria-label="Theme">
+        <span class="ad-toolbar-icon" aria-hidden="true"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8"></path><path d="M12 16v4"></path></svg></span>
+        <div class="ad-segmented">
+          <button type="button" data-action="theme" data-theme-value="light" class="is-active" aria-label="Use light theme" title="Light"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg><span>Light</span></button>
+          <button type="button" data-action="theme" data-theme-value="dark" aria-label="Use dark theme" title="Dark"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6.7 6.7 0 0 0 9 9 8 8 0 1 1-9-9Z"></path></svg><span>Dark</span></button>
+        </div>
+      </div>
+      <div class="ad-toolbar-group">
+        <button type="button" data-action="compare" class="ad-icon-only" aria-label="Toggle compare view" title="Compare View"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1.5"></rect><rect x="14" y="5" width="7" height="14" rx="1.5"></rect><path d="M12 5v14"></path></svg></button>
+        <button type="button" data-action="overview" class="ad-icon-only" aria-label="Open overview" title="Overview"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg></button>
+        <button type="button" data-action="blackout" class="ad-icon-only" aria-label="Toggle blank screen" title="Blank screen"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a6 6 0 0 1 4.8 9.6c-.85 1.1-1.8 2.1-2.3 3.4h-5c-.5-1.3-1.45-2.3-2.3-3.4A6 6 0 0 1 12 2Z"></path><path d="m4 4 16 16"></path></svg></button>
+        <button type="button" data-action="spotlight" class="ad-icon-only" aria-label="Toggle spotlight" title="Spotlight"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3"></path><path d="M12 19v3"></path><path d="M2 12h3"></path><path d="M19 12h3"></path><path d="m4.9 4.9 2.1 2.1"></path><path d="m17 17 2.1 2.1"></path><path d="m19.1 4.9-2.1 2.1"></path><path d="m7 17-2.1 2.1"></path></svg></button>
+      </div>
+      <div class="ad-toolbar-group">
+        <button type="button" data-action="dock-autohide" class="ad-icon-only" aria-label="Auto-hide toolbar" title="Auto-hide toolbar" aria-pressed="false"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path><path d="M8 20h8"></path><path d="M12 16v4"></path><path d="m8 10 4 3 4-3"></path></svg></button>
+        <button type="button" data-action="fullscreen" class="ad-icon-only" aria-label="Enter fullscreen" title="Fullscreen"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M16 3h3a2 2 0 0 1 2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M8 21H5a2 2 0 0 1-2-2v-3"></path></svg></button>
+        <button type="button" data-action="print" class="ad-icon-only" aria-label="Print or save PDF" title="Print / PDF"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></button>
+      </div>
+    </header>
+    <div class="ad-progress" data-html2canvas-ignore><span data-progress-bar></span></div>
+    <main class="ad-stage" aria-live="polite">
+      <div class="ad-scaled-shell" data-shell>
+        <div class="ad-scaled" data-scaled>
+          <section class="ad-slide layout-html-import" data-export-page data-slide-index="0" data-agentdeck-layout="html-import" aria-label="打工人 AI 求生手册" >
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide dark" data-layout="S01" data-animate>
+      <header class="chrome">
+        <span>NO ADS · NO QR · NO FALSE HOPE</span>
+        <span>01 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="kicker reveal" style="--i:0">Field Manual · 2026</div>
+        <h1 class="hero-title reveal" style="--i:1">打工人<br>AI 求生手册</h1>
+        <p class="lead reveal" style="--i:2; max-width: 34ch;">一套给工位用的横版版本：少点鸡血，多点自救。别再把自己活成 AI 的临时外包。</p>
+      </div>
+      <footer class="foot">
+        <span>横版 PPT 版</span>
+        <span>← → / Space</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="1" data-agentdeck-layout="html-import" aria-label="AI 不先替代职位， 它先替代你的 低价动作 。" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S03" data-animate>
+      <header class="chrome">
+        <span>OPENING THESIS</span>
+        <span>02 / 14</span>
+      </header>
+      <div class="stage">
+        <p class="kicker reveal" style="--i:0">一句话先打醒</p>
+        <h2 class="statement reveal" style="--i:1">AI 不先替代职位，<br>它先替代你的<strong>低价动作</strong>。</h2>
+        <p class="lead reveal" style="--i:2;">岗位名是简历上的包装。真正被老板拿去算账的，是你每天到底在做哪些动作。</p>
+      </div>
+      <footer class="foot">
+        <span>Action, not title</span>
+        <span>02</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="2" data-agentdeck-layout="html-import" aria-label="从“好用”变成“值钱”" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S19" data-animate>
+      <header class="chrome">
+        <span>AGENDA</span>
+        <span>03 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">今天只讲 6 件事</div>
+          <h2 class="headline">从“好用”变成“值钱”</h2>
+        </div>
+        <div class="grid-3">
+          <article class="card reveal" style="--i:1">
+            <span class="tag blue">01</span>
+            <h3>风险</h3>
+            <p>哪些动作正在被 AI 降价。</p>
+          </article>
+          <article class="card reveal" style="--i:2">
+            <span class="tag blue">02</span>
+            <h3>工位</h3>
+            <p>会议、周报、PPT、表格怎么拆给 AI。</p>
+          </article>
+          <article class="card reveal" style="--i:3">
+            <span class="tag blue">03</span>
+            <h3>杠杆</h3>
+            <p>别吹会用 AI，先算净省几小时。</p>
+          </article>
+          <article class="card reveal" style="--i:4">
+            <span class="tag blue">04</span>
+            <h3>反噬</h3>
+            <p>效率没有边界，只会变成更多活。</p>
+          </article>
+          <article class="card reveal" style="--i:5">
+            <span class="tag blue">05</span>
+            <h3>副业</h3>
+            <p>陌生人不掏钱，就别幻想 PMF。</p>
+          </article>
+          <article class="card reveal" style="--i:6">
+            <span class="tag blue">06</span>
+            <h3>护城河</h3>
+            <p>工具会过期，判断和信任会复利。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Six modules</span>
+        <span>03</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="3" data-agentdeck-layout="html-import" aria-label="岗位风险怎么判断" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S02" data-animate>
+      <header class="chrome">
+        <span>RISK FORMULA</span>
+        <span>04 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">不是玄学，是结构</div>
+          <h2 class="headline">岗位风险怎么判断</h2>
+        </div>
+        <div class="formula reveal" style="--i:1">重复度 × 规则化 × 可文档化 × 低容错 × 低信任成本</div>
+        <div class="grid-3">
+          <article class="card fill reveal" style="--i:2">
+            <span class="tag red">High Risk</span>
+            <h3>AI 三秒能做</h3>
+            <p>复制、改格式、查资料、模板化邮件、会议纪要、日报周报。</p>
+          </article>
+          <article class="card fill reveal" style="--i:3">
+            <span class="tag blue">Middle</span>
+            <h3>AI 初稿，人审核</h3>
+            <p>客户方案、PPT 骨架、数据解释、竞品分析、合同要点。</p>
+          </article>
+          <article class="card fill reveal" style="--i:4">
+            <span class="tag green">Safe for now</span>
+            <h3>人必须负责</h3>
+            <p>判断、承诺、谈判、取舍、信任维护、关键时刻背锅。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Risk = action structure</span>
+        <span>04</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="4" data-agentdeck-layout="html-import" aria-label="忙不是护身符，很多忙只是流程噪音" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S15" data-animate>
+      <header class="chrome">
+        <span>ACTION MATRIX</span>
+        <span>05 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">别再用“我很忙”骗自己</div>
+          <h2 class="headline">忙不是护身符，很多忙只是流程噪音</h2>
+        </div>
+        <div class="matrix reveal" style="--i:1">
+          <div class="head">动作</div>
+          <div class="head">AI 怎么吃</div>
+          <div class="head">人要留下什么</div>
+          <div class="head">毒舌翻译</div>
+          <div>周报 / 日报</div>
+          <div>自动汇总进度，提炼异常。</div>
+          <div>哪些风险要提前摊牌。</div>
+          <div>流水账再工整，也只是办公墓志铭。</div>
+          <div>会议纪要</div>
+          <div>录音转写，行动项抽取。</div>
+          <div>谁在甩锅，谁只是嘴上负责。</div>
+          <div>只会记“某某表示”，你就是人肉录音笔。</div>
+          <div>PPT 初稿</div>
+          <div>结构、标题、图表说明、版本差异。</div>
+          <div>叙事、政治安全、老板能不能拿去讲。</div>
+          <div>熬夜对齐，不是高级，是把命交给参考线。</div>
+          <div>客户跟进</div>
+          <div>整理历史沟通，生成话术。</div>
+          <div>信任、节奏、场面判断。</div>
+          <div>AI 能写话术，不能让客户愿意回你。</div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Manual work audit</span>
+        <span>05</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="5" data-agentdeck-layout="html-import" aria-label="把 AI 放回工位，不要供在神坛" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S14" data-animate>
+      <header class="chrome">
+        <span>OFFICE WORKFLOW</span>
+        <span>06 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="split">
+          <div class="reveal" style="--i:0">
+            <div class="kicker">上班前 15 分钟</div>
+            <h2 class="headline">把 AI 放回工位，不要供在神坛</h2>
+            <p class="lead" style="margin-top: 3vh;">你不是缺工具，你是缺工作流。工具换来换去，病因没动。</p>
+          </div>
+          <div class="steps reveal" style="--i:1">
+            <div class="step">
+              <div class="no">01</div>
+              <div>
+                <h3>AI 直接做</h3>
+                <p>资料搜集、摘要、格式转换、初稿、表格清洗、会议纪要。</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="no">02</div>
+              <div>
+                <h3>AI 先做，我再审</h3>
+                <p>客户邮件、方案结构、数据解释、PPT 脚本、合同要点。</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="no">03</div>
+              <div>
+                <h3>必须我做</h3>
+                <p>判断、承诺、谈判、取舍、背锅、关系维护。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>AI is workflow, not toy</span>
+        <span>06</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="6" data-agentdeck-layout="html-import" aria-label="6 个工位场景" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S16" data-animate>
+      <header class="chrome">
+        <span>WORKPLACE SCENARIOS</span>
+        <span>07 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">明天就能用</div>
+          <h2 class="headline">6 个工位场景</h2>
+        </div>
+        <div class="grid-6">
+          <article class="card fill reveal" style="--i:1">
+            <span class="tag">Meeting</span>
+            <h3>会议</h3>
+            <p>AI 提问题、出行动项。你负责判断谁真愿意负责。</p>
+          </article>
+          <article class="card fill reveal" style="--i:2">
+            <span class="tag">Report</span>
+            <h3>周报</h3>
+            <p>从流水账变成证据链。别把周报写成忏悔书。</p>
+          </article>
+          <article class="card fill reveal" style="--i:3">
+            <span class="tag">PPT</span>
+            <h3>PPT</h3>
+            <p>AI 做骨架。你做人话、利益关系和现场问题。</p>
+          </article>
+          <article class="card fill reveal" style="--i:4">
+            <span class="tag">Data</span>
+            <h3>表格</h3>
+            <p>AI 找异常。你问为什么，以及谁会不舒服。</p>
+          </article>
+          <article class="card fill reveal" style="--i:5">
+            <span class="tag">Boss</span>
+            <h3>临时需求</h3>
+            <p>先问用途。不给用途就开干，容易做出办公祭品。</p>
+          </article>
+          <article class="card ink reveal" style="--i:6">
+            <span class="tag">Toxic</span>
+            <h3>跨部门</h3>
+            <p>AI 写稿，人去谈条件。发更多消息不叫推进。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Desk-native AI</span>
+        <span>07</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="7" data-agentdeck-layout="html-import" aria-label="AI 杠杆率" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S06" data-animate>
+      <header class="chrome">
+        <span>LEVERAGE RATE</span>
+        <span>08 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="grid-2">
+          <div class="reveal" style="--i:0">
+            <div class="kicker">别吹会用 AI，先算账</div>
+            <h2 class="headline">AI 杠杆率</h2>
+            <p class="lead" style="margin-top: 3vh;">只算可验收产出。AI 写了 10 版垃圾，不能算 10 倍效率，只能算你制造了 10 袋垃圾。</p>
+          </div>
+          <div class="card warn reveal" style="--i:1; justify-content:center;">
+            <h3 style="font-size: clamp(36px, 4.3vw, 78px);">净省小时 ÷ 指挥审核小时</h3>
+            <p style="font-size: clamp(20px, 1.35vw, 28px); color: var(--ink);">初级目标：每周净省 5 小时。不是玩了 5 小时 AI，是它真的替你扛走了 5 小时。</p>
+          </div>
+        </div>
+        <div class="bar-list reveal" style="--i:2">
+          <div class="bar"><span>0 倍</span><span class="track"><i class="fill-bar" style="--w:8%"></i></span><span>玩具</span></div>
+          <div class="bar"><span>1-2 倍</span><span class="track"><i class="fill-bar" style="--w:32%"></i></span><span>会问</span></div>
+          <div class="bar"><span>3-5 倍</span><span class="track"><i class="fill-bar" style="--w:68%"></i></span><span>进流</span></div>
+          <div class="bar"><span>5 倍+</span><span class="track"><i class="fill-bar" style="--w:100%"></i></span><span>值钱</span></div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Leverage, not hustle</span>
+        <span>08</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="8" data-agentdeck-layout="html-import" aria-label="效率没有边界和议价，只会变成新的 劳动强度 。" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide dark" data-layout="S10" data-animate>
+      <header class="chrome">
+        <span>EFFICIENCY TRAP</span>
+        <span>09 / 14</span>
+      </header>
+      <div class="stage">
+        <p class="kicker reveal" style="--i:0">最容易忽略的坑</p>
+        <h2 class="statement reveal" style="--i:1">效率没有边界和议价，只会变成新的<strong>劳动强度</strong>。</h2>
+        <div class="grid-2">
+          <article class="card reveal" style="--i:2; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);">
+            <span class="tag red">Wrong</span>
+            <h3>逢人就炫“十分钟搞定”</h3>
+            <p>老板听到的不是你聪明，是你还可以再接三倍活。</p>
+          </article>
+          <article class="card reveal" style="--i:3; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);">
+            <span class="tag green">Right</span>
+            <h3>把速度包装成交付系统</h3>
+            <p>快版、稳版、深版，各有代价。别免费交出所有余量。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Faster is not freer</span>
+        <span>09</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="9" data-agentdeck-layout="html-import" aria-label="陌生人不掏钱，就别幻想 PMF" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S08" data-animate>
+      <header class="chrome">
+        <span>SIDE HUSTLE VALIDATION</span>
+        <span>10 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="grid-2">
+          <div class="reveal" style="--i:0">
+            <div class="kicker">副业别自嗨</div>
+            <h2 class="headline">陌生人不掏钱，就别幻想 PMF</h2>
+            <p class="lead" style="margin-top: 3vh;">朋友说“挺好”不算验证。朋友圈点赞不算需求。亲戚鼓励更不算市场。那叫礼貌。</p>
+          </div>
+          <div class="steps reveal" style="--i:1">
+            <div class="step">
+              <div class="no">10</div>
+              <div><h3>聊过 10 个陌生潜客</h3><p>不是朋友，不是同事，是愿意说真话的人。</p></div>
+            </div>
+            <div class="step">
+              <div class="no">3</div>
+              <div><h3>至少 3 个真实付费</h3><p>9.9 元也算。付费动作比夸奖诚实得多。</p></div>
+            </div>
+            <div class="step">
+              <div class="no">1</div>
+              <div><h3>一句话讲清价值</h3><p>谁痛、痛在哪、你怎么解、为什么现在就要。</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Real payment beats praise</span>
+        <span>10</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="10" data-agentdeck-layout="html-import" aria-label="别把下班后那点残血献给商业幻想" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S11" data-animate>
+      <header class="chrome">
+        <span>7-DAY SPRINT</span>
+        <span>11 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">7 天验证实验</div>
+          <h2 class="headline">别把下班后那点残血献给商业幻想</h2>
+        </div>
+        <div class="timeline reveal" style="--i:1">
+          <div class="tl"><div class="day">DAY 1</div><h3>写价值主张</h3><p>列 30 个陌生潜客。先定位，不装修。</p></div>
+          <div class="tl"><div class="day">DAY 2</div><h3>访谈</h3><p>只问真实经历，不推销，不要诱导。</p></div>
+          <div class="tl"><div class="day">DAY 3</div><h3>提炼原话</h3><p>看用户怎么骂现状，别急着讲方案。</p></div>
+          <div class="tl"><div class="day">DAY 4</div><h3>极简交付</h3><p>丑但能用，能收钱。别再装修。</p></div>
+          <div class="tl"><div class="day">DAY 5</div><h3>收费</h3><p>陌生人付费或押金，不打感情牌。</p></div>
+          <div class="tl"><div class="day">DAY 6</div><h3>处理异议</h3><p>价格、信任、交付、替代方案。</p></div>
+          <div class="tl"><div class="day">DAY 7</div><h3>继续或停止</h3><p>没证据就撤。撤退不是失败，是省命。</p></div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Validation sprint</span>
+        <span>11</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="11" data-agentdeck-layout="html-import" aria-label="AI 抢不走的东西，要从今天开始攒" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S05" data-animate>
+      <header class="chrome">
+        <span>MOAT</span>
+        <span>12 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">工具红利会过期</div>
+          <h2 class="headline">AI 抢不走的东西，要从今天开始攒</h2>
+        </div>
+        <div class="grid-4">
+          <article class="card reveal" style="--i:1">
+            <span class="tag green">Asset 01</span>
+            <h3>信任资产</h3>
+            <p>客户愿意接你电话，同事愿意帮你补位，老板愿意让你先试。</p>
+          </article>
+          <article class="card reveal" style="--i:2">
+            <span class="tag green">Asset 02</span>
+            <h3>场景判断</h3>
+            <p>知道什么时候推、什么时候停、什么时候必须摊牌。</p>
+          </article>
+          <article class="card reveal" style="--i:3">
+            <span class="tag green">Asset 03</span>
+            <h3>领域品味</h3>
+            <p>一眼看出方案哪里假、数据哪里怪、客户为什么不会买。</p>
+          </article>
+          <article class="card ink reveal" style="--i:4">
+            <span class="tag">Asset 04</span>
+            <h3>可复用系统</h3>
+            <p>模板、清单、案例库、自动化。每次从零开始叫上刑。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Moat compounds</span>
+        <span>12</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="12" data-agentdeck-layout="html-import" aria-label="从“好用”练成“值钱”" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S18" data-animate>
+      <header class="chrome">
+        <span>90-DAY PLAN</span>
+        <span>13 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">90 天练习</div>
+          <h2 class="headline">从“好用”练成“值钱”</h2>
+        </div>
+        <div class="grid-3">
+          <article class="card fill reveal" style="--i:1">
+            <span class="tag blue">Days 1-30</span>
+            <h3>清点动作</h3>
+            <p>记录时间流向，找 5 个最耗时重复动作，让 AI 接管其中 2 个。</p>
+          </article>
+          <article class="card warn reveal" style="--i:2">
+            <span class="tag">Days 31-60</span>
+            <h3>固化系统</h3>
+            <p>把高频任务写成模板。重要输出都过反方审查。</p>
+          </article>
+          <article class="card accent-card reveal" style="--i:3">
+            <span class="tag">Days 61-90</span>
+            <h3>抬高身价</h3>
+            <p>主动负责需要判断的任务，把系统变成影响力和作品集。</p>
+          </article>
+        </div>
+        <p class="quote reveal" style="--i:4">同样的破事，下次不再破同样的你。</p>
+      </div>
+      <footer class="foot">
+        <span>Practice system</span>
+        <span>13</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+<section class="ad-slide layout-html-import" data-export-page data-slide-index="13" data-agentdeck-layout="html-import" aria-label="别等裁员名单教你做人" hidden>
+      <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide dark" data-layout="S20" data-animate>
+      <header class="chrome">
+        <span>MONTHLY AUDIT</span>
+        <span>14 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">每月最后一天</div>
+          <h2 class="headline">别等裁员名单教你做人</h2>
+        </div>
+        <div class="audit reveal" style="--i:1">
+          <div class="audit-item"><i class="box"></i><span>AI 本月替我净省至少 20 小时。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我找出 3 个可被 AI 接管的高频动作。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我沉淀 2 个可复用模板或流程清单。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我有 1 个 6 周后仍有价值的输出。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我让 AI 攻击过自己的方案。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我维护了至少 3 个关键关系。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我能说出 2 个 AI 给不了的价值。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我主动停止了 1 件低价值忙碌。</span><b class="score">1</b></div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Less panic, more audit</span>
+        <span>END</span>
+      </footer>
+    </section></div></div></div>
+    </section>
+        </div>
+      </div>
+    </main>
+    <div class="ad-overview" data-overlay="overview" data-html2canvas-ignore hidden>
+      <div class="ad-overview-head">
+        <div class="ad-overview-title">
+          <strong>打工人 AI 求生手册</strong>
+          <p>Click a thumbnail to jump · 点击缩略图跳转</p>
+        </div>
+      </div>
+      <div class="ad-overview-grid"><button type="button" class="ad-overview-card is-current" data-goto="0" data-overview-index="0" aria-label="Go to slide 1: 打工人 AI 求生手册">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide accent" data-layout="S01" data-animate>
+      <header class="chrome">
+        <span>NO ADS · NO QR · NO FALSE HOPE</span>
+        <span>01 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="kicker reveal" style="--i:0">Field Manual · 2026</div>
+        <h1 class="hero-title reveal" style="--i:1">打工人<br>AI 求生手册</h1>
+        <p class="lead reveal" style="--i:2; max-width: 34ch;">一套给工位用的横版版本：少点鸡血，多点自救。别再把自己活成 AI 的临时外包。</p>
+      </div>
+      <footer class="foot">
+        <span>横版 PPT 版</span>
+        <span>← → / Space</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="1" data-overview-index="1" aria-label="Go to slide 2: AI 不先替代职位， 它先替代你的 低价动作 。">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S03" data-animate>
+      <header class="chrome">
+        <span>OPENING THESIS</span>
+        <span>02 / 14</span>
+      </header>
+      <div class="stage">
+        <p class="kicker reveal" style="--i:0">一句话先打醒</p>
+        <h2 class="statement reveal" style="--i:1">AI 不先替代职位，<br>它先替代你的<strong>低价动作</strong>。</h2>
+        <p class="lead reveal" style="--i:2;">岗位名是简历上的包装。真正被老板拿去算账的，是你每天到底在做哪些动作。</p>
+      </div>
+      <footer class="foot">
+        <span>Action, not title</span>
+        <span>02</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="2" data-overview-index="2" aria-label="Go to slide 3: 从“好用”变成“值钱”">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S19" data-animate>
+      <header class="chrome">
+        <span>AGENDA</span>
+        <span>03 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">今天只讲 6 件事</div>
+          <h2 class="headline">从“好用”变成“值钱”</h2>
+        </div>
+        <div class="grid-3">
+          <article class="card reveal" style="--i:1">
+            <span class="tag blue">01</span>
+            <h3>风险</h3>
+            <p>哪些动作正在被 AI 降价。</p>
+          </article>
+          <article class="card reveal" style="--i:2">
+            <span class="tag blue">02</span>
+            <h3>工位</h3>
+            <p>会议、周报、PPT、表格怎么拆给 AI。</p>
+          </article>
+          <article class="card reveal" style="--i:3">
+            <span class="tag blue">03</span>
+            <h3>杠杆</h3>
+            <p>别吹会用 AI，先算净省几小时。</p>
+          </article>
+          <article class="card reveal" style="--i:4">
+            <span class="tag blue">04</span>
+            <h3>反噬</h3>
+            <p>效率没有边界，只会变成更多活。</p>
+          </article>
+          <article class="card reveal" style="--i:5">
+            <span class="tag blue">05</span>
+            <h3>副业</h3>
+            <p>陌生人不掏钱，就别幻想 PMF。</p>
+          </article>
+          <article class="card reveal" style="--i:6">
+            <span class="tag blue">06</span>
+            <h3>护城河</h3>
+            <p>工具会过期，判断和信任会复利。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Six modules</span>
+        <span>03</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="3" data-overview-index="3" aria-label="Go to slide 4: 岗位风险怎么判断">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S02" data-animate>
+      <header class="chrome">
+        <span>RISK FORMULA</span>
+        <span>04 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">不是玄学，是结构</div>
+          <h2 class="headline">岗位风险怎么判断</h2>
+        </div>
+        <div class="formula reveal" style="--i:1">重复度 × 规则化 × 可文档化 × 低容错 × 低信任成本</div>
+        <div class="grid-3">
+          <article class="card fill reveal" style="--i:2">
+            <span class="tag red">High Risk</span>
+            <h3>AI 三秒能做</h3>
+            <p>复制、改格式、查资料、模板化邮件、会议纪要、日报周报。</p>
+          </article>
+          <article class="card fill reveal" style="--i:3">
+            <span class="tag blue">Middle</span>
+            <h3>AI 初稿，人审核</h3>
+            <p>客户方案、PPT 骨架、数据解释、竞品分析、合同要点。</p>
+          </article>
+          <article class="card fill reveal" style="--i:4">
+            <span class="tag green">Safe for now</span>
+            <h3>人必须负责</h3>
+            <p>判断、承诺、谈判、取舍、信任维护、关键时刻背锅。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Risk = action structure</span>
+        <span>04</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="4" data-overview-index="4" aria-label="Go to slide 5: 忙不是护身符，很多忙只是流程噪音">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S15" data-animate>
+      <header class="chrome">
+        <span>ACTION MATRIX</span>
+        <span>05 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">别再用“我很忙”骗自己</div>
+          <h2 class="headline">忙不是护身符，很多忙只是流程噪音</h2>
+        </div>
+        <div class="matrix reveal" style="--i:1">
+          <div class="head">动作</div>
+          <div class="head">AI 怎么吃</div>
+          <div class="head">人要留下什么</div>
+          <div class="head">毒舌翻译</div>
+          <div>周报 / 日报</div>
+          <div>自动汇总进度，提炼异常。</div>
+          <div>哪些风险要提前摊牌。</div>
+          <div>流水账再工整，也只是办公墓志铭。</div>
+          <div>会议纪要</div>
+          <div>录音转写，行动项抽取。</div>
+          <div>谁在甩锅，谁只是嘴上负责。</div>
+          <div>只会记“某某表示”，你就是人肉录音笔。</div>
+          <div>PPT 初稿</div>
+          <div>结构、标题、图表说明、版本差异。</div>
+          <div>叙事、政治安全、老板能不能拿去讲。</div>
+          <div>熬夜对齐，不是高级，是把命交给参考线。</div>
+          <div>客户跟进</div>
+          <div>整理历史沟通，生成话术。</div>
+          <div>信任、节奏、场面判断。</div>
+          <div>AI 能写话术，不能让客户愿意回你。</div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Manual work audit</span>
+        <span>05</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="5" data-overview-index="5" aria-label="Go to slide 6: 把 AI 放回工位，不要供在神坛">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S14" data-animate>
+      <header class="chrome">
+        <span>OFFICE WORKFLOW</span>
+        <span>06 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="split">
+          <div class="reveal" style="--i:0">
+            <div class="kicker">上班前 15 分钟</div>
+            <h2 class="headline">把 AI 放回工位，不要供在神坛</h2>
+            <p class="lead" style="margin-top: 3vh;">你不是缺工具，你是缺工作流。工具换来换去，病因没动。</p>
+          </div>
+          <div class="steps reveal" style="--i:1">
+            <div class="step">
+              <div class="no">01</div>
+              <div>
+                <h3>AI 直接做</h3>
+                <p>资料搜集、摘要、格式转换、初稿、表格清洗、会议纪要。</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="no">02</div>
+              <div>
+                <h3>AI 先做，我再审</h3>
+                <p>客户邮件、方案结构、数据解释、PPT 脚本、合同要点。</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="no">03</div>
+              <div>
+                <h3>必须我做</h3>
+                <p>判断、承诺、谈判、取舍、背锅、关系维护。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>AI is workflow, not toy</span>
+        <span>06</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="6" data-overview-index="6" aria-label="Go to slide 7: 6 个工位场景">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S16" data-animate>
+      <header class="chrome">
+        <span>WORKPLACE SCENARIOS</span>
+        <span>07 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">明天就能用</div>
+          <h2 class="headline">6 个工位场景</h2>
+        </div>
+        <div class="grid-6">
+          <article class="card fill reveal" style="--i:1">
+            <span class="tag">Meeting</span>
+            <h3>会议</h3>
+            <p>AI 提问题、出行动项。你负责判断谁真愿意负责。</p>
+          </article>
+          <article class="card fill reveal" style="--i:2">
+            <span class="tag">Report</span>
+            <h3>周报</h3>
+            <p>从流水账变成证据链。别把周报写成忏悔书。</p>
+          </article>
+          <article class="card fill reveal" style="--i:3">
+            <span class="tag">PPT</span>
+            <h3>PPT</h3>
+            <p>AI 做骨架。你做人话、利益关系和现场问题。</p>
+          </article>
+          <article class="card fill reveal" style="--i:4">
+            <span class="tag">Data</span>
+            <h3>表格</h3>
+            <p>AI 找异常。你问为什么，以及谁会不舒服。</p>
+          </article>
+          <article class="card fill reveal" style="--i:5">
+            <span class="tag">Boss</span>
+            <h3>临时需求</h3>
+            <p>先问用途。不给用途就开干，容易做出办公祭品。</p>
+          </article>
+          <article class="card ink reveal" style="--i:6">
+            <span class="tag">Toxic</span>
+            <h3>跨部门</h3>
+            <p>AI 写稿，人去谈条件。发更多消息不叫推进。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Desk-native AI</span>
+        <span>07</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="7" data-overview-index="7" aria-label="Go to slide 8: AI 杠杆率">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S06" data-animate>
+      <header class="chrome">
+        <span>LEVERAGE RATE</span>
+        <span>08 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="grid-2">
+          <div class="reveal" style="--i:0">
+            <div class="kicker">别吹会用 AI，先算账</div>
+            <h2 class="headline">AI 杠杆率</h2>
+            <p class="lead" style="margin-top: 3vh;">只算可验收产出。AI 写了 10 版垃圾，不能算 10 倍效率，只能算你制造了 10 袋垃圾。</p>
+          </div>
+          <div class="card warn reveal" style="--i:1; justify-content:center;">
+            <h3 style="font-size: clamp(36px, 4.3vw, 78px);">净省小时 ÷ 指挥审核小时</h3>
+            <p style="font-size: clamp(20px, 1.35vw, 28px); color: var(--ink);">初级目标：每周净省 5 小时。不是玩了 5 小时 AI，是它真的替你扛走了 5 小时。</p>
+          </div>
+        </div>
+        <div class="bar-list reveal" style="--i:2">
+          <div class="bar"><span>0 倍</span><span class="track"><i class="fill-bar" style="--w:8%"></i></span><span>玩具</span></div>
+          <div class="bar"><span>1-2 倍</span><span class="track"><i class="fill-bar" style="--w:32%"></i></span><span>会问</span></div>
+          <div class="bar"><span>3-5 倍</span><span class="track"><i class="fill-bar" style="--w:68%"></i></span><span>进流</span></div>
+          <div class="bar"><span>5 倍+</span><span class="track"><i class="fill-bar" style="--w:100%"></i></span><span>值钱</span></div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Leverage, not hustle</span>
+        <span>08</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="8" data-overview-index="8" aria-label="Go to slide 9: 效率没有边界和议价，只会变成新的 劳动强度 。">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide dark" data-layout="S10" data-animate>
+      <header class="chrome">
+        <span>EFFICIENCY TRAP</span>
+        <span>09 / 14</span>
+      </header>
+      <div class="stage">
+        <p class="kicker reveal" style="--i:0">最容易忽略的坑</p>
+        <h2 class="statement reveal" style="--i:1">效率没有边界和议价，只会变成新的<strong>劳动强度</strong>。</h2>
+        <div class="grid-2">
+          <article class="card reveal" style="--i:2; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);">
+            <span class="tag red">Wrong</span>
+            <h3>逢人就炫“十分钟搞定”</h3>
+            <p>老板听到的不是你聪明，是你还可以再接三倍活。</p>
+          </article>
+          <article class="card reveal" style="--i:3; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);">
+            <span class="tag green">Right</span>
+            <h3>把速度包装成交付系统</h3>
+            <p>快版、稳版、深版，各有代价。别免费交出所有余量。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Faster is not freer</span>
+        <span>09</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="9" data-overview-index="9" aria-label="Go to slide 10: 陌生人不掏钱，就别幻想 PMF">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S08" data-animate>
+      <header class="chrome">
+        <span>SIDE HUSTLE VALIDATION</span>
+        <span>10 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="grid-2">
+          <div class="reveal" style="--i:0">
+            <div class="kicker">副业别自嗨</div>
+            <h2 class="headline">陌生人不掏钱，就别幻想 PMF</h2>
+            <p class="lead" style="margin-top: 3vh;">朋友说“挺好”不算验证。朋友圈点赞不算需求。亲戚鼓励更不算市场。那叫礼貌。</p>
+          </div>
+          <div class="steps reveal" style="--i:1">
+            <div class="step">
+              <div class="no">10</div>
+              <div><h3>聊过 10 个陌生潜客</h3><p>不是朋友，不是同事，是愿意说真话的人。</p></div>
+            </div>
+            <div class="step">
+              <div class="no">3</div>
+              <div><h3>至少 3 个真实付费</h3><p>9.9 元也算。付费动作比夸奖诚实得多。</p></div>
+            </div>
+            <div class="step">
+              <div class="no">1</div>
+              <div><h3>一句话讲清价值</h3><p>谁痛、痛在哪、你怎么解、为什么现在就要。</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Real payment beats praise</span>
+        <span>10</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="10" data-overview-index="10" aria-label="Go to slide 11: 别把下班后那点残血献给商业幻想">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S11" data-animate>
+      <header class="chrome">
+        <span>7-DAY SPRINT</span>
+        <span>11 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">7 天验证实验</div>
+          <h2 class="headline">别把下班后那点残血献给商业幻想</h2>
+        </div>
+        <div class="timeline reveal" style="--i:1">
+          <div class="tl"><div class="day">DAY 1</div><h3>写价值主张</h3><p>列 30 个陌生潜客。先定位，不装修。</p></div>
+          <div class="tl"><div class="day">DAY 2</div><h3>访谈</h3><p>只问真实经历，不推销，不要诱导。</p></div>
+          <div class="tl"><div class="day">DAY 3</div><h3>提炼原话</h3><p>看用户怎么骂现状，别急着讲方案。</p></div>
+          <div class="tl"><div class="day">DAY 4</div><h3>极简交付</h3><p>丑但能用，能收钱。别再装修。</p></div>
+          <div class="tl"><div class="day">DAY 5</div><h3>收费</h3><p>陌生人付费或押金，不打感情牌。</p></div>
+          <div class="tl"><div class="day">DAY 6</div><h3>处理异议</h3><p>价格、信任、交付、替代方案。</p></div>
+          <div class="tl"><div class="day">DAY 7</div><h3>继续或停止</h3><p>没证据就撤。撤退不是失败，是省命。</p></div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Validation sprint</span>
+        <span>11</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="11" data-overview-index="11" aria-label="Go to slide 12: AI 抢不走的东西，要从今天开始攒">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide grey" data-layout="S05" data-animate>
+      <header class="chrome">
+        <span>MOAT</span>
+        <span>12 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">工具红利会过期</div>
+          <h2 class="headline">AI 抢不走的东西，要从今天开始攒</h2>
+        </div>
+        <div class="grid-4">
+          <article class="card reveal" style="--i:1">
+            <span class="tag green">Asset 01</span>
+            <h3>信任资产</h3>
+            <p>客户愿意接你电话，同事愿意帮你补位，老板愿意让你先试。</p>
+          </article>
+          <article class="card reveal" style="--i:2">
+            <span class="tag green">Asset 02</span>
+            <h3>场景判断</h3>
+            <p>知道什么时候推、什么时候停、什么时候必须摊牌。</p>
+          </article>
+          <article class="card reveal" style="--i:3">
+            <span class="tag green">Asset 03</span>
+            <h3>领域品味</h3>
+            <p>一眼看出方案哪里假、数据哪里怪、客户为什么不会买。</p>
+          </article>
+          <article class="card ink reveal" style="--i:4">
+            <span class="tag">Asset 04</span>
+            <h3>可复用系统</h3>
+            <p>模板、清单、案例库、自动化。每次从零开始叫上刑。</p>
+          </article>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Moat compounds</span>
+        <span>12</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="12" data-overview-index="12" aria-label="Go to slide 13: 从“好用”练成“值钱”">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide" data-layout="S18" data-animate>
+      <header class="chrome">
+        <span>90-DAY PLAN</span>
+        <span>13 / 14</span>
+      </header>
+      <div class="stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">90 天练习</div>
+          <h2 class="headline">从“好用”练成“值钱”</h2>
+        </div>
+        <div class="grid-3">
+          <article class="card fill reveal" style="--i:1">
+            <span class="tag blue">Days 1-30</span>
+            <h3>清点动作</h3>
+            <p>记录时间流向，找 5 个最耗时重复动作，让 AI 接管其中 2 个。</p>
+          </article>
+          <article class="card warn reveal" style="--i:2">
+            <span class="tag">Days 31-60</span>
+            <h3>固化系统</h3>
+            <p>把高频任务写成模板。重要输出都过反方审查。</p>
+          </article>
+          <article class="card accent-card reveal" style="--i:3">
+            <span class="tag">Days 61-90</span>
+            <h3>抬高身价</h3>
+            <p>主动负责需要判断的任务，把系统变成影响力和作品集。</p>
+          </article>
+        </div>
+        <p class="quote reveal" style="--i:4">同样的破事，下次不再破同样的你。</p>
+      </div>
+      <footer class="foot">
+        <span>Practice system</span>
+        <span>13</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button>
+<button type="button" class="ad-overview-card" data-goto="13" data-overview-index="13" aria-label="Go to slide 14: 别等裁员名单教你做人">
+      <div class="ad-overview-viewport">
+        <section class="ad-slide ad-overview-slide layout-html-import" data-agentdeck-layout="html-import">
+          <div class="ad-content"><div class="ad-blocks"><div class="ad-html-block"><section class="slide dark" data-layout="S20" data-animate>
+      <header class="chrome">
+        <span>MONTHLY AUDIT</span>
+        <span>14 / 14</span>
+      </header>
+      <div class="stage top-stage">
+        <div class="reveal" style="--i:0">
+          <div class="kicker">每月最后一天</div>
+          <h2 class="headline">别等裁员名单教你做人</h2>
+        </div>
+        <div class="audit reveal" style="--i:1">
+          <div class="audit-item"><i class="box"></i><span>AI 本月替我净省至少 20 小时。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我找出 3 个可被 AI 接管的高频动作。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我沉淀 2 个可复用模板或流程清单。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我有 1 个 6 周后仍有价值的输出。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我让 AI 攻击过自己的方案。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我维护了至少 3 个关键关系。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我能说出 2 个 AI 给不了的价值。</span><b class="score">1</b></div>
+          <div class="audit-item"><i class="box"></i><span>我主动停止了 1 件低价值忙碌。</span><b class="score">1</b></div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>Less panic, more audit</span>
+        <span>END</span>
+      </footer>
+    </section></div></div></div>
+        </section>
+      </div>
+    </button></div>
+      <button type="button" class="ad-overview-close" data-action="overview-close" aria-label="Close overview" title="Close overview"><svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg></button>
+    </div>
+    <div class="ad-compare" data-overlay="compare" data-html2canvas-ignore hidden>
+      <div class="ad-compare-viewport" data-compare-next></div>
+    </div>
+    <div class="ad-print-help" data-overlay="print-help" data-html2canvas-ignore hidden>
+      <div class="ad-print-help-card">
+        <strong>Print / PDF · 打印 / PDF</strong>
+        <p>Browser PDF depends on the print dialog, not just the deck.<br>浏览器导出 PDF 取决于打印设置，不只是页面本身。</p>
+        <ul>
+          <li>Turn on Background graphics · 打开背景图形</li>
+          <li>Turn off Headers and footers · 关闭页眉和页脚</li>
+          <li>Keep margins at None or Default zero-margin mode · 使用无边距或零边距模式</li>
+        </ul>
+        <p class="ad-print-help-note">For wrapped files, use browser print or re-run wrap with a higher DPI, such as <code>agentdeck wrap input.pdf --dpi 220</code>.<br>封装已有文件时，可用浏览器打印，或重新 wrap 并提高 DPI。</p>
+        <div class="ad-print-help-actions">
+          <button type="button" data-action="print-close">Close / 关闭</button>
+          <button type="button" data-action="print-confirm">Continue / 继续</button>
+        </div>
+      </div>
+    </div>
+    <div class="ad-blackout" data-overlay="blackout" data-action="blackout" data-html2canvas-ignore hidden>
+      <strong>Blank screen</strong>
+      <span>Click anywhere, press B, or press Esc to return</span>
+    </div>
+    <div class="ad-spotlight" data-overlay="spotlight" data-html2canvas-ignore hidden></div>
+    <aside class="ad-presenter-panel" data-panel="presenter" data-html2canvas-ignore>
+      <section>
+        <p class="ad-panel-label">Presenter</p>
+        <strong data-timer>00:00</strong>
+      </section>
+      <section>
+        <p class="ad-panel-label">Notes</p>
+        <article data-note="0" >No speaker note for this slide.</article><article data-note="1" hidden>No speaker note for this slide.</article><article data-note="2" hidden>No speaker note for this slide.</article><article data-note="3" hidden>No speaker note for this slide.</article><article data-note="4" hidden>No speaker note for this slide.</article><article data-note="5" hidden>No speaker note for this slide.</article><article data-note="6" hidden>No speaker note for this slide.</article><article data-note="7" hidden>No speaker note for this slide.</article><article data-note="8" hidden>No speaker note for this slide.</article><article data-note="9" hidden>No speaker note for this slide.</article><article data-note="10" hidden>No speaker note for this slide.</article><article data-note="11" hidden>No speaker note for this slide.</article><article data-note="12" hidden>No speaker note for this slide.</article><article data-note="13" hidden>No speaker note for this slide.</article>
+      </section>
+      <section>
+        <p class="ad-panel-label">Next</p>
+        <div data-next-title>AI 不先替代职位， 它先替代你的 低价动作 。</div>
+      </section>
+    </aside>
+    <aside class="ad-creator-panel" data-panel="creator" data-html2canvas-ignore>
+      <section>
+        <p class="ad-panel-label">Deck Studio</p>
+        <strong>14 slides</strong>
+        <p>14 missing note(s)</p>
+        <div class="ad-stat-grid">
+          <div><span>Layouts</span><b>1</b></div>
+          <div><span>Notes</span><b>0</b></div>
+          <div><span>Dense</span><b>0</b></div>
+        </div>
+      </section>
+      <section>
+        <p class="ad-panel-label">Presentation Tools</p>
+        <div class="ad-shortcut-grid">
+          <div><kbd>O</kbd><span>Overview</span></div>
+          <div><kbd>B</kbd><span>Black screen</span></div>
+          <div><kbd>L</kbd><span>Spotlight</span></div>
+          <div><kbd>F</kbd><span>Fullscreen</span></div>
+        </div>
+      </section>
+      <section>
+        <p class="ad-panel-label">Quality Checks</p>
+        <ul class="ad-check-list">
+          <li class="is-covered">No dense text slides</li>
+          <li class="">Speaker notes coverage</li>
+          <li class="is-covered">Image slots ready</li>
+          <li class="">Layout variety</li>
+        </ul>
+      </section>
+      <section>
+        <p class="ad-panel-label">Outline</p>
+        <ol class="ad-outline-list">
+          <li><button type="button" data-goto="0"><span>01</span>打工人 AI 求生手册</button></li><li><button type="button" data-goto="1"><span>02</span>AI 不先替代职位， 它先替代你的 低价动作 。</button></li><li><button type="button" data-goto="2"><span>03</span>从“好用”变成“值钱”</button></li><li><button type="button" data-goto="3"><span>04</span>岗位风险怎么判断</button></li><li><button type="button" data-goto="4"><span>05</span>忙不是护身符，很多忙只是流程噪音</button></li><li><button type="button" data-goto="5"><span>06</span>把 AI 放回工位，不要供在神坛</button></li><li><button type="button" data-goto="6"><span>07</span>6 个工位场景</button></li><li><button type="button" data-goto="7"><span>08</span>AI 杠杆率</button></li><li><button type="button" data-goto="8"><span>09</span>效率没有边界和议价，只会变成新的 劳动强度 。</button></li><li><button type="button" data-goto="9"><span>10</span>陌生人不掏钱，就别幻想 PMF</button></li><li><button type="button" data-goto="10"><span>11</span>别把下班后那点残血献给商业幻想</button></li><li><button type="button" data-goto="11"><span>12</span>AI 抢不走的东西，要从今天开始攒</button></li><li><button type="button" data-goto="12"><span>13</span>从“好用”练成“值钱”</button></li><li><button type="button" data-goto="13"><span>14</span>别等裁员名单教你做人</button></li>
+        </ol>
+      </section>
+      <section>
+        <p class="ad-panel-label">Export Pack</p>
+        <div class="ad-chip-row"><span>html</span><span>pdf</span><span>png</span></div>
+        <code class="ad-command">agentdeck export deck.md --pdf --png --long-image --grid9</code>
+      </section>
+    </aside>
+  </div>
+  
+  <script>
+(() => {
+  const width = 1920;
+  const height = 1080;
+  const stage = document.querySelector('.ad-stage');
+  const dock = document.querySelector('.ad-dock');
+  const dockZone = document.querySelector('[data-dock-zone]');
+  const shell = document.querySelector('[data-shell]');
+  const scaled = document.querySelector('[data-scaled]');
+  const slides = [...document.querySelectorAll('.ad-scaled > .ad-slide')];
+  const overviewCards = [...document.querySelectorAll('[data-overview-index]')];
+  const current = document.querySelector('[data-current]');
+  const prevButton = document.querySelector('[data-action="prev"]');
+  const nextButton = document.querySelector('[data-action="next"]');
+  const playButton = document.querySelector('[data-action="play"]');
+  const intervalButton = document.querySelector('[data-action="interval"]');
+  const intervalLabel = document.querySelector('[data-interval-label]');
+  const nextTitle = document.querySelector('[data-next-title]');
+  const timer = document.querySelector('[data-timer]');
+  const progressBar = document.querySelector('[data-progress-bar]');
+  const overview = document.querySelector('[data-overlay="overview"]');
+  const compare = document.querySelector('[data-overlay="compare"]');
+  const compareNext = document.querySelector('[data-compare-next]');
+  const printHelp = document.querySelector('[data-overlay="print-help"]');
+  const blackout = document.querySelector('[data-overlay="blackout"]');
+  const spotlight = document.querySelector('[data-overlay="spotlight"]');
+  const startedAt = Date.now();
+  let dockTimer = 0;
+  let dockHideTimer = 0;
+  let dockAutohide = false;
+  let index = 0;
+  let wheelAt = 0;
+  let autoplayIntervalMs = 8000;
+  let autoplayTimer = 0;
+  const dockRevealPx = 32;
+  function isFullscreen() {
+    return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+  function shouldAutoHideDock() {
+    return dockAutohide || isFullscreen();
+  }
+  function revealDock() {
+    document.body.classList.add('is-dock-active');
+    document.body.classList.remove('is-dock-hidden');
+    clearTimeout(dockTimer);
+    dockTimer = setTimeout(() => document.body.classList.remove('is-dock-active'), 3000);
+  }
+  function activateDock() {
+    revealDock();
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 1600 : 2000);
+  }
+  function scheduleDockHide(delay = 2000, force = false) {
+    clearTimeout(dockHideTimer);
+    if (!shouldAutoHideDock()) return;
+    dockHideTimer = setTimeout(() => {
+      if (force || (!dock?.matches(':hover') && !dock?.contains(document.activeElement))) {
+        document.body.classList.add('is-dock-hidden');
+        document.body.classList.remove('is-dock-active');
+      }
+    }, delay);
+  }
+  function hideDockIfPointerLeft(event) {
+    if (!shouldAutoHideDock()) return;
+    if (document.body.classList.contains('is-dock-hidden')) return;
+    if (event.clientY >= window.innerHeight - dockRevealPx) return;
+    if (dock?.contains(event.target)) return;
+    scheduleDockHide(0, true);
+  }
+  function setDockAutohide(next) {
+    dockAutohide = next;
+    document.body.classList.toggle('is-dock-autohide', next);
+    document.body.classList.remove('is-dock-hidden');
+    document.querySelectorAll('[data-action="dock-autohide"]').forEach((button) => {
+      button.classList.toggle('is-active', next);
+      button.setAttribute('aria-pressed', next ? 'true' : 'false');
+      button.setAttribute('title', next ? 'Toolbar auto-hide on' : 'Auto-hide toolbar');
+      button.setAttribute('aria-label', next ? 'Disable toolbar auto-hide' : 'Auto-hide toolbar');
+    });
+    clearTimeout(dockHideTimer);
+    if (next) scheduleDockHide(0, true);
+    else if (isFullscreen()) scheduleDockHide(1600, true);
+    else revealDock();
+  }
+  function syncFullscreenToolbar() {
+    const fullscreen = isFullscreen();
+    document.body.classList.toggle('is-fullscreen-toolbar-hidden', fullscreen);
+    clearTimeout(dockHideTimer);
+    if (fullscreen) {
+      scheduleDockHide(450, true);
+    } else {
+      document.body.classList.remove('is-dock-hidden');
+      activateDock();
+    }
+  }
+  function tickTimer() {
+    if (!timer) return;
+    const seconds = Math.floor((Date.now() - startedAt) / 1000);
+    const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const ss = String(seconds % 60).padStart(2, '0');
+    timer.textContent = mm + ':' + ss;
+  }
+  function setActionActive(action, active) {
+    document.querySelectorAll('[data-action="' + action + '"]').forEach((button) => {
+      button.classList.toggle('is-active', active);
+    });
+  }
+  function toggleOverview(force) {
+    if (!overview) return;
+    const next = force ?? overview.hidden;
+    overview.hidden = !next;
+    document.body.classList.toggle('is-overview-open', next);
+    setActionActive('overview', next);
+  }
+  function toggleCompare(force) {
+    if (!compare) return;
+    const next = force ?? compare.hidden;
+    compare.hidden = !next;
+    document.body.classList.toggle('is-compare-open', next);
+    setActionActive('compare', next);
+    if (next) syncCompareView();
+  }
+  function setAutoplayActive(next) {
+    if (next) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = setInterval(() => {
+        show(index + 1);
+      }, autoplayIntervalMs);
+    } else {
+      clearInterval(autoplayTimer);
+      autoplayTimer = 0;
+    }
+    setActionActive('play', next);
+    if (playButton) {
+      playButton.setAttribute('aria-label', next ? 'Pause autoplay' : 'Start autoplay');
+      playButton.setAttribute('title', next ? 'Pause autoplay' : 'Autoplay');
+      playButton.querySelectorAll('[data-play-icon]').forEach((icon) => {
+        icon.hidden = icon.getAttribute('data-play-icon') !== (next ? 'pause' : 'play');
+      });
+    }
+  }
+  function setAutoplayInterval(ms) {
+    autoplayIntervalMs = ms;
+    if (intervalLabel) intervalLabel.textContent = String(ms / 1000) + 's';
+    if (intervalButton) intervalButton.title = 'Autoplay interval ' + String(ms / 1000) + 's';
+    if (autoplayTimer) setAutoplayActive(true);
+  }
+  function cycleAutoplayInterval() {
+    const options = [5000, 8000, 12000, 20000];
+    const currentIndex = options.indexOf(autoplayIntervalMs);
+    const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % options.length;
+    setAutoplayInterval(options[nextIndex]);
+  }
+  function toggleAutoplay() {
+    setAutoplayActive(!autoplayTimer);
+  }
+  function toggleBlackout(force) {
+    if (!blackout) return;
+    const next = force ?? blackout.hidden;
+    blackout.hidden = !next;
+    setActionActive('blackout', next);
+  }
+  function toggleSpotlight(force) {
+    if (!spotlight) return;
+    const next = force ?? spotlight.hidden;
+    spotlight.hidden = !next;
+    document.body.classList.toggle('is-spotlight-on', next);
+    setActionActive('spotlight', next);
+  }
+  function hidePresentationOverlays() {
+    toggleOverview(false);
+    toggleCompare(false);
+    if (printHelp) printHelp.hidden = true;
+    toggleBlackout(false);
+    toggleSpotlight(false);
+  }
+  function updateNavButtons() {
+    if (prevButton) prevButton.disabled = index === 0;
+    if (nextButton) nextButton.disabled = index === slides.length - 1 && !autoplayTimer;
+  }
+  function syncComparePane(target, slideIndex, label) {
+    if (!target) return;
+    target.replaceChildren();
+    if (slideIndex < 0 || slideIndex >= slides.length) {
+      const empty = document.createElement('div');
+      empty.className = 'ad-compare-empty';
+      empty.textContent = label;
+      target.append(empty);
+      return;
+    }
+    const source = slides[slideIndex];
+    const clone = source.cloneNode(true);
+    clone.hidden = false;
+    clone.classList.add('ad-compare-slide');
+    clone.style.transform = 'scale(' + (target.clientWidth / 1920) + ')';
+    target.append(clone);
+  }
+  function syncCompareView() {
+    if (!compare || compare.hidden) return;
+    const nextIndex = index === slides.length - 1 ? (autoplayTimer ? 0 : -1) : index + 1;
+    syncComparePane(compareNext, nextIndex, nextIndex === -1 ? 'End of deck' : 'Next');
+  }
+  function scale() {
+    if (!stage || !scaled || !shell) return;
+    const rect = stage.getBoundingClientRect();
+    const value = Math.min(rect.width / width, rect.height / height);
+    shell.style.width = (width * value) + 'px';
+    shell.style.height = (height * value) + 'px';
+    scaled.style.transform = 'scale(' + value + ')';
+    scaled.style.width = width + 'px';
+    scaled.style.height = height + 'px';
+  }
+  function show(next) {
+    if (autoplayTimer) {
+      index = ((next % slides.length) + slides.length) % slides.length;
+    } else {
+      index = Math.max(0, Math.min(slides.length - 1, next));
+    }
+    slides.forEach((slide, slideIndex) => { slide.hidden = slideIndex !== index; });
+    overviewCards.forEach((card) => {
+      card.classList.toggle('is-current', Number(card.getAttribute('data-overview-index')) === index);
+    });
+    document.querySelectorAll('[data-note]').forEach((note) => { note.hidden = Number(note.getAttribute('data-note')) !== index; });
+    if (current) current.textContent = String(index + 1);
+    if (progressBar) progressBar.style.width = (((index + 1) / slides.length) * 100) + '%';
+    if (nextTitle) {
+      const nextIndex = index === slides.length - 1 ? (autoplayTimer ? 0 : -1) : index + 1;
+      nextTitle.textContent = nextIndex === -1 ? 'End' : slides[nextIndex]?.querySelector('h1')?.textContent || 'End';
+    }
+    updateNavButtons();
+    syncCompareView();
+    location.hash = '#/' + (index + 1);
+  }
+  function hashIndex() {
+    const value = Number((location.hash.match(/#\/(\d+)/) || [])[1]);
+    return Number.isFinite(value) && value > 0 ? value - 1 : 0;
+  }
+  document.addEventListener('click', async (event) => {
+    const target = event.target.closest('[data-action],[data-goto]');
+    if (!target) return;
+    activateDock();
+    const action = target.getAttribute('data-action');
+    if (target.hasAttribute('data-goto')) {
+      show(Number(target.getAttribute('data-goto')));
+      toggleOverview(false);
+    }
+    if (action === 'prev') show(index - 1);
+    if (action === 'next') show(index + 1);
+    if (action === 'restart') {
+      show(0);
+    }
+    if (action === 'play') toggleAutoplay();
+    if (action === 'interval') cycleAutoplayInterval();
+    if (action === 'overview') toggleOverview();
+    if (action === 'overview-close') toggleOverview(false);
+    if (action === 'compare') toggleCompare();
+    if (action === 'dock-autohide') setDockAutohide(!dockAutohide);
+    if (action === 'print') {
+      if (printHelp) printHelp.hidden = false;
+    }
+    if (action === 'print-close') {
+      if (printHelp) printHelp.hidden = true;
+    }
+    if (action === 'print-confirm') {
+      if (printHelp) printHelp.hidden = true;
+      window.print();
+    }
+    if (action === 'blackout') toggleBlackout();
+    if (action === 'spotlight') toggleSpotlight();
+    if (action === 'theme') {
+      const mode = target.getAttribute('data-theme-value') || 'light';
+      document.body.dataset.colorMode = mode === 'dark' ? 'dark' : 'light';
+      try { localStorage.setItem('agentdeck:colorMode', document.body.dataset.colorMode); } catch {}
+      document.querySelectorAll('[data-action="theme"]').forEach((button) => {
+        button.classList.toggle('is-active', button.getAttribute('data-theme-value') === mode);
+      });
+    }
+    if (action === 'fullscreen') {
+      if (isFullscreen()) await document.exitFullscreen?.();
+      else await document.documentElement.requestFullscreen?.();
+      syncFullscreenToolbar();
+    }
+  });
+  document.addEventListener('fullscreenchange', syncFullscreenToolbar);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenToolbar);
+  window.addEventListener('hashchange', () => show(hashIndex()));
+  document.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+    if (event.key === 'Escape') {
+      hidePresentationOverlays();
+      return;
+    }
+    if (key === 'o') toggleOverview();
+    if (key === 'c') toggleCompare();
+    if (key === 'p') toggleAutoplay();
+    if (key === 'b') toggleBlackout();
+    if (key === 'l') toggleSpotlight();
+    if (key === 'f') document.querySelector('[data-action="fullscreen"]')?.click();
+    if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') show(index + 1);
+    if (event.key === 'ArrowLeft' || event.key === 'PageUp') show(index - 1);
+    if (event.key === 'Home') show(0);
+    if (event.key === 'End') show(slides.length - 1);
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 700 : 1200, true);
+  });
+  document.addEventListener('wheel', (event) => {
+    const now = Date.now();
+    if (now - wheelAt < 550 || Math.abs(event.deltaY) < 24) return;
+    wheelAt = now;
+    show(index + (event.deltaY > 0 ? 1 : -1));
+    if (shouldAutoHideDock()) scheduleDockHide(isFullscreen() ? 700 : 1200, true);
+  }, { passive: true });
+  let touchStart = null;
+  document.addEventListener('touchstart', (event) => { touchStart = event.changedTouches[0]?.clientX ?? null; }, { passive: true });
+  document.addEventListener('touchend', (event) => {
+    if (touchStart === null) return;
+    const delta = (event.changedTouches[0]?.clientX ?? touchStart) - touchStart;
+    if (Math.abs(delta) > 50) show(index + (delta < 0 ? 1 : -1));
+    touchStart = null;
+  }, { passive: true });
+  dock?.addEventListener('pointerenter', () => {
+    clearTimeout(dockHideTimer);
+    activateDock();
+  });
+  dock?.addEventListener('pointerleave', () => scheduleDockHide(0, true));
+  dock?.addEventListener('focusin', () => {
+    clearTimeout(dockHideTimer);
+    activateDock();
+  });
+  dock?.addEventListener('focusout', () => scheduleDockHide());
+  dockZone?.addEventListener('pointermove', (event) => {
+    if (!shouldAutoHideDock()) return;
+    if (!document.body.classList.contains('is-dock-hidden')) return;
+    if (event.clientY < window.innerHeight - dockRevealPx) return;
+    clearTimeout(dockHideTimer);
+    revealDock();
+    scheduleDockHide(isFullscreen() ? 1200 : 1600, true);
+  });
+  window.addEventListener('resize', scale);
+  window.addEventListener('resize', syncCompareView);
+  document.addEventListener('mousemove', (event) => {
+    hideDockIfPointerLeft(event);
+    if (spotlight && !spotlight.hidden) {
+      document.documentElement.style.setProperty('--ad-spot-x', event.clientX + 'px');
+      document.documentElement.style.setProperty('--ad-spot-y', event.clientY + 'px');
+    }
+  }, { passive: true });
+  try {
+    const savedMode = localStorage.getItem('agentdeck:colorMode');
+    if (savedMode === 'light' || savedMode === 'dark') {
+      document.body.dataset.colorMode = savedMode;
+      document.querySelectorAll('[data-action="theme"]').forEach((button) => {
+        button.classList.toggle('is-active', button.getAttribute('data-theme-value') === savedMode);
+      });
+    }
+  } catch {}
+  setInterval(tickTimer, 1000);
+  setAutoplayInterval(autoplayIntervalMs);
+  scale();
+  tickTimer();
+  activateDock();
+  show(hashIndex());
+})();
+</script>
+</body>
+</html>

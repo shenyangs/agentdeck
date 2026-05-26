@@ -8,6 +8,10 @@ AgentDeck 是一个演示文件的 **单 HTML 播放与交付层**。
 
 **把 HTML、PDF、PPT 或 Markdown 演示内容，原样封装成一个可播放、可分享、可导出的增强型单文件 HTML。**
 
+## 在线预览
+
+[打开 AgentDeck demo](https://shenyangs.github.io/agentdeck/demo/)：一个已经封装好的 HTML 演示页，包含播放、Overview、Blank、Spotlight、Light / Dark 等演示控制。
+
 ## 项目截图
 
 | Light 模式 | Dark 模式 |
