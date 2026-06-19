@@ -36,14 +36,21 @@ AgentDeck is for agents that need to deliver a reliable single HTML presentation
    agentdeck verify dist/index.html --json --out dist/verify-report.json
    ```
 
-4. Read reports before deciding whether to retry:
+4. For risky PDF/Office conversions or large decks, create a contact sheet:
+
+   ```bash
+   agentdeck verify dist/index.html --contact-sheet dist/contact-sheet.png --out dist/verify-report.json
+   ```
+
+5. Read reports before deciding whether to retry:
 
    - `probe-report.json`
    - `dist/asset-report.json`
    - `dist/compat-report.json` for HTML inputs
    - `dist/verify-report.json`
+   - `dist/contact-sheet.png` when generated
 
-5. Stop when verification passes.
+6. Stop when verification passes.
 
 ## Retry Rules
 

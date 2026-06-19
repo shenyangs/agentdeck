@@ -1,6 +1,9 @@
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseDeckMarkdown } from "@agentdeck/schema";
-import { renderStandaloneHtml } from "./static.js";
+import { renderStandaloneHtml, writeStandaloneHtmlFile } from "./static.js";
 
 describe("renderStandaloneHtml", () => {
   it("renders a self-contained deck shell", () => {
@@ -88,5 +91,37 @@ compatibility: external-html
     expect(html).toContain("data-agentdeck-source-styles");
     expect(html).toContain("layout-html-import");
     expect(html).toContain("External deck");
+  });
+
+  it("can stream a single HTML file with embedded asset records", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "agentdeck-runtime-stream-"));
+    const outputPath = join(dir, "index.html");
+    const deck = parseDeckMarkdown(`---
+title: Streamed
+theme: swiss
+compatibility: rendered-file
+---`);
+    deck.slides = [
+      {
+        id: "page-1",
+        title: "Page 1",
+        layout: "html-import",
+        blocks: [{ type: "html", html: '<img class="ad-imported-page" data-agentdeck-asset="page-001" alt="Page 1">' }],
+        raw: "",
+      },
+    ];
+
+    await writeStandaloneHtmlFile(deck, outputPath, {
+      embeddedAssets: [{ id: "page-001", mime: "image/png", payload: "ZmFrZQ==" }],
+      includeSourceJson: false,
+      profile: "rendered-file",
+    });
+
+    const html = readFileSync(outputPath, "utf8");
+    expect(html).toContain('data-agentdeck-asset="page-001"');
+    expect(html).toContain('type="application/octet-stream"');
+    expect(html).toContain("data-agentdeck-asset-runtime");
+    expect(html).toContain("asset.mime + ';base64,'");
+    expect((html.match(/ZmFrZQ==/g) ?? []).length).toBe(1);
   });
 });

@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import type { DeckDocument } from "@agentdeck/schema";
+import type { StandaloneEmbeddedAsset } from "@agentdeck/runtime";
 import { loadPlaywright } from "../process/playwright.js";
 import type { FitMode, ImageFormat, ImageOutputOptions, PackMode, RenderedPage } from "../types.js";
 import { dataUrlBytes, imageFormatFromMime } from "../utils/images.js";
@@ -26,7 +27,7 @@ export function renderedFileDeck(title: string, sourcePath: string, pages: Array
       id: `page-${page.index}`,
       title: `Page ${page.index}`,
       layout: "html-import",
-      blocks: [{ type: "html" as const, html: `<img class="ad-imported-page" src="${page.src}" alt="Page ${page.index}">`, source: sourcePath }],
+      blocks: [{ type: "html" as const, html: `<img class="ad-imported-page" ${renderedPageImageAttributes(page.src, `Page ${page.index}`)}>`, source: sourcePath }],
       raw: "",
     })),
   };
@@ -55,6 +56,40 @@ export function writeRenderedPageAssets(pages: RenderedPage[], outDir: string, p
       fileName,
     };
   });
+}
+
+export function prepareRenderedSingleHtmlAssets(pages: RenderedPage[]): { pages: RenderedPage[]; embeddedAssets: StandaloneEmbeddedAsset[] } {
+  return {
+    pages: pages.map((page) => ({
+      ...page,
+      src: `agentdeck-asset:${renderedPageAssetId(page.index)}`,
+      fileName: undefined,
+    })),
+    embeddedAssets: pages.map((page) => ({
+      id: renderedPageAssetId(page.index),
+      mime: page.mime,
+      dataUrl: page.src,
+    })),
+  };
+}
+
+export function renderedPageAssetId(index: number): string {
+  return `page-${String(index).padStart(3, "0")}`;
+}
+
+function renderedPageImageAttributes(src: string, alt: string): string {
+  if (src.startsWith("agentdeck-asset:")) {
+    return `data-agentdeck-asset="${escapeHtmlAttr(src.slice("agentdeck-asset:".length))}" alt="${escapeHtmlAttr(alt)}"`;
+  }
+  return `src="${escapeHtmlAttr(src)}" alt="${escapeHtmlAttr(alt)}"`;
+}
+
+function escapeHtmlAttr(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 export function writeDataUrlFile(dataUrl: string, filePath: string): void {

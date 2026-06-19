@@ -1,7 +1,7 @@
 import { mkdirSync, statSync, writeFileSync } from "node:fs";
 import { join, parse, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { renderStandaloneHtml } from "@agentdeck/runtime";
+import { renderStandaloneHtml, writeStandaloneHtmlFile } from "@agentdeck/runtime";
 import {
   analyzeHtmlCompatibility,
   chooseHtmlCaptureStrategy,
@@ -13,7 +13,7 @@ import {
   writeHtmlCompatibilityReport,
 } from "../converters/html.js";
 import { imageOutputOptions, stringFlag } from "../flags.js";
-import { applyImageOutputOptions, renderedFileDeck, writeRenderedPageAssets } from "../output/rendered-file.js";
+import { applyImageOutputOptions, prepareRenderedSingleHtmlAssets, renderedFileDeck, writeRenderedPageAssets } from "../output/rendered-file.js";
 import { loadPlaywright } from "../process/playwright.js";
 import {
   AGENTDECK_VERSION,
@@ -131,18 +131,25 @@ body.agentdeck-raster-capture .presenter-controls{display:none!important}`,
   }
 
   pages = await applyImageOutputOptions(pages, imageOptions);
-  const deckPages = writeRenderedPageAssets(pages, outDir, imageOptions.pack);
+  const singleHtmlAssets = imageOptions.pack === "single-html" ? prepareRenderedSingleHtmlAssets(pages) : undefined;
+  const deckPages = singleHtmlAssets?.pages ?? writeRenderedPageAssets(pages, outDir, imageOptions.pack);
   const totalBytes = pages.reduce((sum, page) => sum + page.bytes, 0);
   const deck = renderedFileDeck(title, htmlPath, deckPages, "html-raster", imageOptions.fit);
   mkdirSync(outDir, { recursive: true });
-  const outputHtml = renderStandaloneHtml(deck, {
-    includeSourceJson: false,
-    mode: "audience",
-    profile: "rendered-file",
-  });
   const outputPath = join(outDir, "index.html");
   const assetReportPath = join(outDir, "asset-report.json");
-  writeFileSync(outputPath, outputHtml, "utf8");
+  const renderOptions = {
+    embeddedAssets: singleHtmlAssets?.embeddedAssets,
+    includeSourceJson: false,
+    mode: "audience" as const,
+    profile: "rendered-file",
+  };
+  if (singleHtmlAssets) {
+    await writeStandaloneHtmlFile(deck, outputPath, renderOptions);
+  } else {
+    const outputHtml = renderStandaloneHtml(deck, renderOptions);
+    writeFileSync(outputPath, outputHtml, "utf8");
+  }
   const htmlBytes = statSync(outputPath).size;
   const sizeWarnings = sizeBudgetWarnings(totalBytes, imageOptions);
   const warnings = [

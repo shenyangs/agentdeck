@@ -171,9 +171,17 @@ Verify after wrapping:
 agentdeck verify dist/index.html
 agentdeck verify dist/index.html --json
 agentdeck verify dist/index.html --out verify-report.json
+agentdeck verify dist/index.html --contact-sheet
 ```
 
 `verify` opens the single HTML in Chromium and checks slide count, tiny/blank pages, image loading, hash navigation, overview jump, next-slide preview, and bottom dock overlap. It prints `PASS / WARN / FAIL` and writes `verify-report.json`.
+
+For large PDF or Office conversions, add `--contact-sheet` to generate a `contact-sheet.png` thumbnail grid. The verify report also records per-slide signals for possible blank, clipped, or low-resolution pages. Optional controls:
+
+```bash
+agentdeck verify dist/index.html --contact-sheet dist/contact-sheet.png
+agentdeck verify dist/index.html --contact-sheet --contact-sheet-cols 6 --contact-sheet-width 180
+```
 
 `agentdeck wrap` runs a lightweight verification pass by default and writes `dist/verify-report.json`. Use `--no-verify` for batch conversion.
 
@@ -279,6 +287,7 @@ agentdeck wrap deck.html --out dist --html-strategy raster
 agentdeck wrap-html deck.html --out dist
 agentdeck probe deck.pptx
 agentdeck verify dist/index.html
+agentdeck verify dist/index.html --contact-sheet
 agentdeck doctor --json
 agentdeck init my-deck --theme swiss
 agentdeck template init my-deck/templates/acme --base-theme swiss

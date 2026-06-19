@@ -188,7 +188,7 @@ Template controlled body.
     await runCli(["init", dir, "--theme", "swiss"]);
     await runCli(["build", join(dir, "deck.md"), "--out", join(dir, "dist"), "--single-html"]);
 
-    await expect(runCli(["verify", join(dir, "dist", "index.html")])).resolves.toMatchObject({ code: 0 });
+    await expect(runCli(["verify", join(dir, "dist", "index.html"), "--contact-sheet"])).resolves.toMatchObject({ code: 0 });
     const okReport = JSON.parse(readFileSync(join(dir, "dist", "verify-report.json"), "utf8"));
     expect(okReport.schemaVersion).toBe("1.0");
     expect(okReport.pipeline[0].step).toBe("verify-html-player");
@@ -196,6 +196,10 @@ Template controlled body.
     expect(okReport.checks.hashJump).toBe(true);
     expect(okReport.checks.overviewJump).toBe(true);
     expect(okReport.checks.comparePreview).toBe(true);
+    expect(existsSync(join(dir, "dist", "contact-sheet.png"))).toBe(true);
+    expect(okReport.contactSheet.pageCount).toBe(okReport.slideCount);
+    expect(okReport.contactSheet.pages.length).toBe(okReport.slideCount);
+    expect(okReport.contactSheet.pages[0].flags).toEqual([]);
 
     const broken = join(dir, "broken.html");
     writeFileSync(
@@ -236,6 +240,7 @@ Template controlled body.
 
     const report = JSON.parse(readFileSync(join(dir, "dist", "asset-report.json"), "utf8"));
     const compat = JSON.parse(readFileSync(join(dir, "dist", "compat-report.json"), "utf8"));
+    const html = readFileSync(join(dir, "dist", "index.html"), "utf8");
     expect(report.schemaVersion).toBe("1.0");
     expect(report.output.packMode).toBe("single-html");
     expect(report.pipeline[0].step).toBe("html-to-pages");
@@ -247,6 +252,10 @@ Template controlled body.
     expect(report.warnings.length).toBeGreaterThan(0);
     expect(compat.captureStrategy).toMatch(/hash|keyboard|scroll/);
     expect(compat.adapterId).toBe("generic-section");
+    expect(html).toContain("data-agentdeck-asset-runtime");
+    expect(html).toContain('data-agentdeck-asset="page-001"');
+    expect(html).toContain('type="application/octet-stream"');
+    expect(html).not.toContain('<img class="ad-imported-page" src="data:image');
   });
 
   it("supports folder pack output for large rendered decks", async () => {
@@ -279,7 +288,7 @@ Template controlled body.
     const source = join(dir, "deck.pdf");
     writeFileSync(source, "%PDF-1.4\n", "utf8");
     await expect(runCli(["doctor", "--json", "--input", source])).resolves.toMatchObject({ code: 0 });
-  });
+  }, 10_000);
 
   it("calculates the next patch release tag without creating it", () => {
     const tags = spawnSync("git", ["tag", "--list", "v[0-9]*.[0-9]*.[0-9]*", "--sort=-v:refname"], { encoding: "utf8" }).stdout

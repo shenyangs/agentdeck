@@ -1,3 +1,5 @@
+import { once } from "node:events";
+import { createWriteStream } from "node:fs";
 import {
   type DeckDocument,
   type DeckMode,
@@ -9,19 +11,43 @@ import { baseCss, runtimeJs } from "./static-assets.js";
 
 export interface StandaloneRenderOptions {
   assetResolver?: (src: string) => string;
+  embeddedAssets?: StandaloneEmbeddedAsset[];
   includeSourceJson?: boolean;
   mode?: DeckMode;
   profile?: string;
   themeTokens?: Partial<ThemeTokens>;
 }
 
+export interface StandaloneEmbeddedAsset {
+  id: string;
+  mime: string;
+  dataUrl?: string;
+  payload?: string;
+}
+
 export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRenderOptions = {}): string {
+  return [...renderStandaloneHtmlChunks(deck, options)].join("");
+}
+
+export async function writeStandaloneHtmlFile(deck: DeckDocument, outputPath: string, options: StandaloneRenderOptions = {}): Promise<void> {
+  const stream = createWriteStream(outputPath, { encoding: "utf8" });
+  try {
+    for (const chunk of renderStandaloneHtmlChunks(deck, options)) {
+      if (!stream.write(chunk)) await once(stream, "drain");
+    }
+    stream.end();
+    await once(stream, "finish");
+  } catch (error) {
+    stream.destroy();
+    throw error;
+  }
+}
+
+export function* renderStandaloneHtmlChunks(deck: DeckDocument, options: StandaloneRenderOptions = {}): Generator<string> {
   const theme = resolveTheme(deck.meta.theme, options.themeTokens);
   const mode = options.mode ?? deck.meta.mode ?? "audience";
   const profile = options.profile ?? deck.meta.compatibility ?? "agentdeck";
   const stats = deckStats(deck);
-  const slides = deck.slides.map((slide, index) => renderSlide(deck, slide, index, deck.slides.length, options)).join("\n");
-  const overviewSlides = deck.slides.map((slide, index) => renderOverviewSlide(deck, slide, index, options)).join("\n");
   const deckJson = options.includeSourceJson === false ? "" : `<script type="application/json" id="agentdeck-source">${escapeHtml(JSON.stringify(deck))}</script>`;
   const printHelpNote = profile === "agentdeck"
     ? "For pixel-perfect export, prefer CLI: <code>agentdeck export deck.md --pdf</code><br>如果要更稳定的高保真导出，优先使用 CLI。"
@@ -30,7 +56,7 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
     ? `<style data-agentdeck-source-styles>${escapeStyleContent(deck.meta.sourceStyles)}</style>`
     : "";
 
-  return `<!doctype html>
+  yield `<!doctype html>
 <html lang="${escapeAttr(deck.meta.lang)}">
 <head>
   <meta charset="utf-8">
@@ -90,8 +116,11 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
     <main class="ad-stage" aria-live="polite">
       <div class="ad-scaled-shell" data-shell>
         <div class="ad-scaled" data-scaled>
-          ${slides}
-        </div>
+`;
+  for (const [index, slide] of deck.slides.entries()) {
+    yield `          ${renderSlide(deck, slide, index, deck.slides.length, options)}\n`;
+  }
+  yield `        </div>
       </div>
     </main>
     <div class="ad-overview" data-overlay="overview" data-html2canvas-ignore hidden>
@@ -101,7 +130,12 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
           <p>Click a thumbnail to jump · 点击缩略图跳转</p>
         </div>
       </div>
-      <div class="ad-overview-grid">${overviewSlides}</div>
+      <div class="ad-overview-grid">`;
+  for (const [index, slide] of deck.slides.entries()) {
+    yield renderOverviewSlide(deck, slide, index, options);
+    yield "\n";
+  }
+  yield `</div>
       <button type="button" class="ad-overview-close" data-action="overview-close" aria-label="Close overview" title="Close overview">${icon("grid")}</button>
     </div>
     <div class="ad-compare" data-overlay="compare" data-html2canvas-ignore hidden>
@@ -185,9 +219,58 @@ export function renderStandaloneHtml(deck: DeckDocument, options: StandaloneRend
     </aside>
   </div>
   ${deckJson}
-  <script>${runtimeJs}</script>
+`;
+  if (options.embeddedAssets?.length) {
+    yield* renderEmbeddedAssets(options.embeddedAssets);
+  }
+  yield `  <script>${runtimeJs}</script>
 </body>
 </html>`;
+}
+
+function* renderEmbeddedAssets(assets: StandaloneEmbeddedAsset[]): Generator<string> {
+  for (const asset of assets) {
+    yield `<script type="application/octet-stream" data-agentdeck-asset="${escapeAttr(asset.id)}" data-mime="${escapeAttr(asset.mime)}">`;
+    yield embeddedAssetPayload(asset);
+    yield "</script>\n";
+  }
+  yield `<script data-agentdeck-asset-runtime>
+(() => {
+  const assets = new Map();
+  document.querySelectorAll('script[data-agentdeck-asset]').forEach((script) => {
+    const id = script.getAttribute('data-agentdeck-asset');
+    if (!id) return;
+    assets.set(id, {
+      mime: script.getAttribute('data-mime') || 'application/octet-stream',
+      payload: (script.textContent || '').trim(),
+    });
+    script.remove();
+  });
+  const urls = new Map();
+  function assetUrl(id) {
+    if (urls.has(id)) return urls.get(id);
+    const asset = assets.get(id);
+    if (!asset) return '';
+    const url = 'data:' + asset.mime + ';base64,' + asset.payload;
+    urls.set(id, url);
+    return url;
+  }
+  document.querySelectorAll('img[data-agentdeck-asset]').forEach((image) => {
+    const id = image.getAttribute('data-agentdeck-asset');
+    const url = id ? assetUrl(id) : '';
+    if (url) image.setAttribute('src', url);
+  });
+  assets.clear();
+})();
+</script>
+`;
+}
+
+function embeddedAssetPayload(asset: StandaloneEmbeddedAsset): string {
+  if (typeof asset.payload === "string") return asset.payload.trim();
+  if (typeof asset.dataUrl !== "string") return "";
+  const comma = asset.dataUrl.indexOf(",");
+  return comma === -1 ? asset.dataUrl.trim() : asset.dataUrl.slice(comma + 1).trim();
 }
 
 function deckText(deck: DeckDocument): string {

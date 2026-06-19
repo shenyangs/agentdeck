@@ -1,11 +1,11 @@
 import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, parse, resolve } from "node:path";
-import { renderStandaloneHtml } from "@agentdeck/runtime";
+import { renderStandaloneHtml, writeStandaloneHtmlFile } from "@agentdeck/runtime";
 import { renderPdfToPngPages } from "../converters/pdf.js";
 import { scanInputCompatibility } from "../converters/risk-scanner.js";
 import { imageOutputOptions, stringFlag, timeoutMsFlag } from "../flags.js";
-import { applyImageOutputOptions, renderedFileDeck, writeRenderedPageAssets } from "../output/rendered-file.js";
+import { applyImageOutputOptions, prepareRenderedSingleHtmlAssets, renderedFileDeck, writeRenderedPageAssets } from "../output/rendered-file.js";
 import {
   AGENTDECK_VERSION,
   REPORT_SCHEMA_VERSION,
@@ -39,18 +39,25 @@ export async function commandWrapRenderedFile(
       maxPages: imageOptions.maxPages,
     });
     const pages = await applyImageOutputOptions(rendered.pages, imageOptions);
-    const deckPages = writeRenderedPageAssets(pages, outDir, imageOptions.pack);
+    const singleHtmlAssets = imageOptions.pack === "single-html" ? prepareRenderedSingleHtmlAssets(pages) : undefined;
+    const deckPages = singleHtmlAssets?.pages ?? writeRenderedPageAssets(pages, outDir, imageOptions.pack);
     const totalBytes = pages.reduce((sum, page) => sum + page.bytes, 0);
     const deck = renderedFileDeck(title, originalSourcePath, deckPages, "rendered-file", imageOptions.fit);
     mkdirSync(outDir, { recursive: true });
-    const outputHtml = renderStandaloneHtml(deck, {
-      includeSourceJson: false,
-      mode: "audience",
-      profile: "rendered-file",
-    });
     const outputPath = join(outDir, "index.html");
     const assetReportPath = join(outDir, "asset-report.json");
-    writeFileSync(outputPath, outputHtml, "utf8");
+    const renderOptions = {
+      embeddedAssets: singleHtmlAssets?.embeddedAssets,
+      includeSourceJson: false,
+      mode: "audience" as const,
+      profile: "rendered-file",
+    };
+    if (singleHtmlAssets) {
+      await writeStandaloneHtmlFile(deck, outputPath, renderOptions);
+    } else {
+      const outputHtml = renderStandaloneHtml(deck, renderOptions);
+      writeFileSync(outputPath, outputHtml, "utf8");
+    }
     const htmlBytes = statSync(outputPath).size;
     const compatibilityScan = scanInputCompatibility(originalSourcePath);
     const sizeWarnings = sizeBudgetWarnings(totalBytes, imageOptions);

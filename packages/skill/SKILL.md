@@ -16,9 +16,10 @@ It does not help users choose PPT skills, imitate template systems, or redesign 
 2. If the user provides a Markdown deck, run `agentdeck lint deck.md`, then `agentdeck build deck.md --single-html --out dist`.
 3. Read `dist/asset-report.json` and, for HTML input, `dist/compat-report.json`.
 4. Run `agentdeck verify dist/index.html --json --out dist/verify-report.json`.
-5. Review `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, toolbar auto-hide, and print/PDF.
-6. If pages are tiny, blank, clipped, duplicated, or the page count is wrong, use the reports to retry the higher-fidelity route before asking the user.
-7. If Office/PDF conversion fails, report the converter issue and the source file path. Do not rewrite the deck as a workaround unless the user asks.
+5. For multi-page PDF/Office outputs or any risky conversion, run `agentdeck verify dist/index.html --contact-sheet dist/contact-sheet.png --out dist/verify-report.json`.
+6. Review `dist/index.html`: navigation, overview, next-slide preview, autoplay, blank screen, spotlight, fullscreen, toolbar auto-hide, and print/PDF. If a contact sheet exists, inspect it for page order, blank slides, clipping, and low-resolution pages.
+7. If pages are tiny, blank, clipped, duplicated, or the page count is wrong, use the reports to retry the higher-fidelity route before asking the user.
+8. If Office/PDF conversion fails, report the converter issue and the source file path. Do not rewrite the deck as a workaround unless the user asks.
 
 ## CLI Preflight
 
@@ -62,6 +63,7 @@ agentdeck wrap deck.html --out dist --html-strategy raster # debug/override only
 agentdeck wrap-html deck.html --out dist
 agentdeck probe deck.pptx
 agentdeck verify dist/index.html --json --out dist/verify-report.json
+agentdeck verify dist/index.html --contact-sheet dist/contact-sheet.png --out dist/verify-report.json
 agentdeck init my-deck --theme swiss
 agentdeck template init my-deck/templates/acme --base-theme swiss
 agentdeck lint my-deck/deck.md

@@ -173,9 +173,17 @@ agentdeck probe input.html --json --out probe-report.json
 agentdeck verify dist/index.html
 agentdeck verify dist/index.html --json
 agentdeck verify dist/index.html --out verify-report.json
+agentdeck verify dist/index.html --contact-sheet
 ```
 
 `verify` 会用浏览器打开单 HTML，检查页数、空白/过小页面、图片加载、hash 跳页、overview 跳页、下一页预览和底部 dock 遮挡。终端会给出 `PASS / WARN / FAIL`，并写入 `verify-report.json`。
+
+当需要快速人工扫一遍大文件、PDF 或 Office 转换结果时，可以加 `--contact-sheet`。它会生成 `contact-sheet.png` 缩略总览图，并把每页的疑似空白、裁切、低分辨率信号写入 `verify-report.json`。可选参数：
+
+```bash
+agentdeck verify dist/index.html --contact-sheet dist/contact-sheet.png
+agentdeck verify dist/index.html --contact-sheet --contact-sheet-cols 6 --contact-sheet-width 180
+```
 
 `agentdeck wrap` 默认会在输出后运行一轮轻量验收，并写入 `dist/verify-report.json`。如果只是做批量转换，可以加 `--no-verify`。
 
@@ -281,6 +289,7 @@ agentdeck wrap deck.html --out dist --html-strategy raster
 agentdeck wrap-html deck.html --out dist
 agentdeck probe deck.pptx
 agentdeck verify dist/index.html
+agentdeck verify dist/index.html --contact-sheet
 agentdeck doctor --json
 agentdeck init my-deck --theme swiss
 agentdeck template init my-deck/templates/acme --base-theme swiss

@@ -192,6 +192,25 @@ export interface VerifyIssue {
   message: string;
 }
 
+export interface VerifySlideReview {
+  index: number;
+  screenshotWidth: number;
+  screenshotHeight: number;
+  visibleRatio: number;
+  stageCoverageRatio: number;
+  imageScaleRatio?: number;
+  blankScore: number;
+  flags: Array<"blank" | "clipped" | "low-resolution">;
+}
+
+export interface VerifyContactSheet {
+  path: string;
+  pageCount: number;
+  columns: number;
+  thumbnailWidth: number;
+  pages: VerifySlideReview[];
+}
+
 export interface VerifyReport {
   schemaVersion: string;
   agentdeckVersion: string;
@@ -216,6 +235,7 @@ export interface VerifyReport {
     dockClear: boolean;
   };
   issues: VerifyIssue[];
+  contactSheet?: VerifyContactSheet;
 }
 
 export interface ReportSource {

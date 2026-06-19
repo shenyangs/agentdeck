@@ -19,7 +19,7 @@ Usage:
   agentdeck export [deck.md] [--pdf] [--png] [--long-image] [--grid9] [--social-pack] [--out dist]
   agentdeck template init <dir> [--base-theme editorial|swiss|launch|course] [--force]
   agentdeck probe <input> [--json] [--out probe-report.json]
-  agentdeck verify <dist/index.html> [--out verify-report.json]
+  agentdeck verify <dist/index.html> [--out verify-report.json] [--contact-sheet [contact-sheet.png]] [--contact-sheet-cols 4] [--contact-sheet-width 240]
   agentdeck wrap <deck.html|deck.pdf|deck.ppt|deck.pptx|deck.doc|deck.docx|deck.xls|deck.xlsx|deck.key> [--out dist] [--title "Deck title"] [--dpi 180] [--fit contain|width|height|cover] [--image-format png|jpeg|webp] [--quality 82] [--max-width 1600] [--max-pages 100] [--max-output-mb 50] [--size-budget 50mb] [--pack single-html|folder] [--thumbnail-dpi 40] [--html-strategy auto|dom|raster] [--allow-network] [--no-verify] [--json] [--timeout-ms 120000] [--office-backend auto|libreoffice|keynote|quicklook-preview|windows-powerpoint|windows-word|windows-excel]
   agentdeck wrap-html <index.html> [--out dist] [--title "Deck title"] [--html-strategy auto|dom|raster] [--fit contain|width|height|cover] [--image-format png|jpeg|webp] [--quality 82] [--max-width 1600] [--max-pages 100] [--max-output-mb 50] [--size-budget 50mb] [--pack single-html|folder] [--thumbnail-dpi 40] [--allow-network] [--no-verify] [--json]
   agentdeck lint [deck.md]
